@@ -128,4 +128,30 @@ ex ) When I thought I was dividing a line into 24 parts,
 1.2 xs={12} -> on mobile screens,
 one column takes up 12/24 of the line. 
 
-* gutter: 
+* gutter: In web design and layout systems, especially when using grid-based layouts or frameworks like Bootstrap or CSS Grid, the gutter refers to the space between columns or grid items. It's the horizontal and/or vertical spacing between elements within a layout grid. The gutter helps maintain consistent spacing, alignment, and readability between content elements.
+
+
+--------------
+## Day 6
+
+* Login Form
+--> Using dummy data [state]
+
+- useState: useState is a React Hook that allows functional components in React to manage state within themselves. It's a fundamental Hook used for maintaining and updating state in React functional components.
+
+- When to Use useState: State Management: Use useState when you need to introduce state into a functional component. It helps keep track of values that might change over time.
+  Component Re-rendering: It triggers re-renders of the component whenever the state value changes, updating the UI accordingly.
+  Local State: useState is perfect for managing local component state, separate from global state managed by tools like Redux.
+
+```JavaScript
+import React, { useState } from 'react';
+
+const [isLoggedIn, setIsLoggedIn] = useState(false); //dummy data
+
+{isLoggedIn ? <UserProfile /> : <LoginForm/>}
+```
+*** Assignment --> Change login form using library 
+
+
+
+
