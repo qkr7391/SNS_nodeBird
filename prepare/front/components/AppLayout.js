@@ -1,18 +1,24 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
+import { Menu } from 'antd'
 const AppLayout = ({children}) =>{
     return(
         <div>
-            <div>
-                <Link legacyBehavior href="/"><a>Home</a></Link>
-                <Link legacyBehavior href="/profile"><a>Profile</a></Link>
-                <Link legacyBehavior href="/signup"><a>Sign up</a></Link>
+            <Menu mode="horizontal">
 
-            </div>
+            <Menu.Item>
+                <Link legacyBehavior href="/"><a>Home</a></Link>
+            </Menu.Item>
+            <Menu.Item>
+                <Link legacyBehavior href="/profile"><a>Profile</a></Link>
+            </Menu.Item>
+            <Menu.Item>
+                <Link legacyBehavior href="/signup"><a>Sign up</a></Link>
+            </Menu.Item>
+            </Menu>
             {children}
         </div>
-
     );
 }
 
