@@ -16,8 +16,6 @@ making SNS by using React, Next.js, node.js
 * eslint
   - Eslint is EcmaScript(JavaScript) + Lint (Mark for error code)
   - A tool that shows you when errors occur in your JavaScript syntax
-
-
 * React Router
   - Routing is the ability to load different pages from different paths in a URL.
   - One of the oldest and most used routing-related libraries in React. 
@@ -86,7 +84,7 @@ But you need to do it to a common file for all your fetters. -> _app.js
 
 * _app.js vs AppLayout.js
 > The parts that are common to all pages go into _app.js, and the parts that are common to specific components go into AppLayout.js, which wraps around the individual components.
-
+---
 * Next provides a 'HEAD' component. 
 ```JavaScript
 import Head from 'next/head';
@@ -95,3 +93,39 @@ import Head from 'next/head';
       <title> NodeBird </title>
     </Head>
 ```
+
+-------------------
+## Day 5
+
+* CSS frameworks make heavy use of grid systems.
+
+- Responsive: This is when a page is initially a mobile page, but as the screen increases in width, things like components are rearranged and changed to fit a tablet size, and when the screen increases further, it changes to fit a desktop size.
+
+- Adaptive: Adaptive refers to developing separately for mobile, desktop, tablet, etc. 
+
+---
+
+* 'antd' supports two components to make it responsive: horizontal and vertical lines.
+```JavaScript
+import { Menu, Input, Row, Col } from 'antd' 
+```
+----
+
+* Mobile Design: xs
+* Tablet PC Design: sm
+* Desktop Design: md(mini Desktop)
+* lg/xl ...
+
+```JavaScript
+<Row>
+    <Col xs={24} md={6} />
+    <Col xs={24} md={12} />
+    <Col xs={24} md={6} />
+</Row>
+```
+ex ) When I thought I was dividing a line into 24 parts,
+1.1 xs={24} -> On a mobile screen, one column takes up the whole thing.
+1.2 xs={12} -> on mobile screens,
+one column takes up 12/24 of the line. 
+
+* gutter: 
