@@ -1,0 +1,14 @@
+{
+  "name": "sns-nodebird",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next"
+  },
+  "author": "Saemi Park",
+  "license": "ISC",
+  "dependencies": {
+    "next": "^13.5.6"
+  }
+}
