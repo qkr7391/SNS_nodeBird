@@ -1,0 +1,63 @@
+# SNS
+
+making SNS by using React, Next.js, node.js
+
+-------------------
+
+## Day 1
+
+* Basic setting (node/npm/next)
+* pages 
+    - index.js: Home page
+    - profile.js: Profile page
+    - signup.js: Sign up page
+* components [Next.js do not use React Router]
+    - AppLayout.js: layout form
+* eslint
+  - Eslint is EcmaScript(JavaScript) + Lint (Mark for error code)
+  - A tool that shows you when errors occur in your JavaScript syntax
+
+
+* React Router
+  - Routing is the ability to load different pages from different paths in a URL.
+  - One of the oldest and most used routing-related libraries in React. 
+  - Set up a component-based routing system.
+* Next.js
+  - Framework for React projects (features to set up your React project)
+  - Routing system, optimization, multilingual system support, server-side rendering, etc. 
+  - Routing system works based on file paths (React router alternative)
+
+-------------------
+
+## Day 2
+
+* Bundling: the process of following imported files and merging them into a single file, or "bundle".
+  -> This bundle can be embedded in a web page to load the entire app at once.
+  -> As the app grows, so does the bundle.
+  (Especially if you include large third-party libraries, you want to avoid the problem of a large app causing long load times)
+  ->To avoid getting stuck in a large bundle, it's a good idea to "code-split" your bundle.
+
+* Code splitting: a feature supported by bundlers like Webpack and Browerify (factor-bundle) that allows you to create multiple bundles that can be dynamically loaded at runtime.
+  -> Users can 'lazy-load' only what they need at the moment.
+  -> Improve the performance of your app.
+  -> Doesn't reduce the overall amount of code in the app, but avoids loading code that the user doesn't need.
+  -> Users only get the code they need on the initial page load.
+
+* import(): Dynamic Syntax
+  -> The best way to introduce code splitting into your application
+
+* Rendering: The process by which documents written by developers, such as HTML, CSS, and JavaScript, are output by the browser.
+
+* Server-side rendering: how the server renders the page after pre-configuring everything that will be shown to the user.
+
+-> The initial page that the user sees is rendered quickly
+-> Stronger for search engine optimization (SEO) because it shows a screen rather than a blank page
+
+* Client-side rendering: how to initially render the entire page (blank page) on the server and render it in the client (browser) whenever the user requests it.
+
+-> Relatively fast to navigate from page to page since it is done within the browser
+-> Fast because it only replaces the necessary content and data.
+-> There is no difference between when the user sees it and when it is served to the user (TTV and TTI have a short gap)
+
+
+------------------
