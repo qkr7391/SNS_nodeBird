@@ -64,4 +64,19 @@ making SNS by using React, Next.js, node.js
 
 ## Day 3
 
-antd & style-component
+- antd & style-component
+- _app.js & Head
+
+Next has a webpack by default.
+
+* Webpack: Webpack is a module bundler that merges and compresses many resources used by a web application into a single file.
+
+* CSS files can't be imported, only JavaScript.
+* When the webpack sees the CSS, it replaces the style tags and embeds them in the HTML, and it also processes and embeds images.
+
+```JavaScript
+import 'antd/dist/antd.css'
+```
+
+--> Webpack does the work for you because you imported it
+But you need to do it to a common file for all your fetters. -> _app.js
