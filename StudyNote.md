@@ -80,3 +80,18 @@ import 'antd/dist/antd.css'
 
 --> Webpack does the work for you because you imported it
 But you need to do it to a common file for all your fetters. -> _app.js
+
+------------------
+## Day 4
+
+* _app.js vs AppLayout.js
+> The parts that are common to all pages go into _app.js, and the parts that are common to specific components go into AppLayout.js, which wraps around the individual components.
+
+* Next provides a 'HEAD' component. 
+```JavaScript
+import Head from 'next/head';
+    <Head>
+      <meta charSet="utf-8" />
+      <title> NodeBird </title>
+    </Head>
+```
