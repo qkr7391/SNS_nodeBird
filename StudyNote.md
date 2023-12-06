@@ -199,7 +199,55 @@ const style = useMemo (() => ({marginTop : 10}), []);
   ...
 </ButtonWrapper>
 ```
+--------------
 
+## Day 8
+
+* Login with dummy data
+
+```JavaScript
+const LoginForm = ({setIsLoggedIn}) => {
+    
+const onSubmitForm = useCallback((e) => {
+    console.log(id, password);
+    setIsLoggedIn(true);
+    },[id, password]);
+}
+return (
+        <Form onFinish={onSubmitForm}>
+        ...
+```
+- antd -> onFinish already has preventDefault() applied.
+
+```JavaScript
+const AppLayout = ({children}) =>{
+  const [isLoggedIn, setIsLoggedIn] = useState(false); //dummy data
+...
+  <Row gutter={8}>
+    <Col xs={24} md={6}>
+      {isLoggedIn ? <UserProfile /> : <LoginForm setIsLoggedIn={setIsLoggedIn()}/>}
+    </Col>
+...
+```
+
+```JavaScript
+const onSubmitForm = useCallback((e) => {
+  console.log(id, password);
+  setIsLoggedIn(true);
+},[id, password]);
+```
+- AppLayout.js [setIsLoggedIn] pass to LoginForm as 'true'.
+- Determine the value of isLoggedIn, and if logged in, go to the user profile, otherwise go to the login form.
+- onSubmitForm gets the value of setIsLoggedIn from the login form and changes setLoggedIn to true when the login button is pressed.
+- The new setLoggedIn value will be used to log in.
+
+
+```JavaScript
+ const onLogOut = useCallback(()=>{
+  setIsLoggedIn(false);
+},[]);
+```
+- Write onLogOut to work when the logout button is pressed in the user profile, replacing seInLoggedIn with false.
 
 
 
