@@ -123,7 +123,7 @@ import { Menu, Input, Row, Col } from 'antd'
     <Col xs={24} md={6} />
 </Row>
 ```
-ex ) When I thought I was dividing a line into 24 parts,
+ex. When I thought I was dividing a line into 24 parts,
 1.1 xs={24} -> On a mobile screen, one column takes up the whole thing.
 1.2 xs={12} -> on mobile screens,
 one column takes up 12/24 of the line. 
@@ -151,6 +151,54 @@ const [isLoggedIn, setIsLoggedIn] = useState(false); //dummy data
 {isLoggedIn ? <UserProfile /> : <LoginForm/>}
 ```
 *** Assignment --> Change login form using library 
+
+----------------
+
+## Day 7
+
+1. Rerendering: Rerendering in React refers to the process of updating the DOM to reflect changes in your application's state or props. It's a fundamental part of React's component lifecycle. When state or props change, React will automatically trigger a rerender, updating the UI to reflect those changes.
+2. Caching:  Caching is the process of storing frequently accessed or computationally expensive data in a temporary storage area, known as a cache, to speed up subsequent access and retrieval.
+3. Object Caching: Object caching refers to the process of storing frequently accessed or expensive-to-create objects in a cache, which allows faster retrieval and reuse of these objects rather than recreating them from scratch.
+4. Functional Component:
+   - Simple Functions Composing UI: React components that are written as functions instead of classes.
+   - Stateless: Typically, they don’t hold state and simply return UI based on the provided props.
+   - Readability and Testability: They offer simplicity, high readability, and easier testing for components.
+5. Hooks:
+   - Functionalities for State and React Features in Functional Components: They enable state management and the use of React features in functional components, which was previously limited to class components.
+   - useState, useEffect, etc.: Hooks like useState, useEffect, useContext, useReducer, and others provide functionalities for managing state, handling side effects, using context, managing reducers, and more.
+
+
+
+[DO NOT SET OBJECT IN STYLE]
+
+```JavaScript
+<div style={{marginTop: 10}}>
+```
+
+> WHY? Each time the login form is re-rendered, a whole bunch of functions are executed, each time creating a new object, and since the objects are all unique, any comparison between them will result in a false positive, so it keeps re-rendering even though nothing has changed. 
+
+> WHAT SHOULD DO? Using 'styled-components' or 'useMemo'
+
+* styled-components:
+```JavaScript
+import styled from 'styled-components';
+const ButtonWrapper = styled.div`margin-top: 10px;`
+        ...
+<ButtonWrapper>
+       ... 
+</ButtonWrapper>
+
+```
+
+* useMemo: 
+```JavaScript
+import React, {useMemo} from 'react';
+const style = useMemo (() => ({marginTop : 10}), []);
+...
+<ButtonWrapper style={style}>
+  ...
+</ButtonWrapper>
+```
 
 
 

@@ -1,6 +1,13 @@
 import React, {useCallback, useState} from 'react';
 import Link from 'next/link';
 import {Form, Input, Button} from 'antd';
+import styled from 'styled-components';
+
+
+const ButtonWrapper = styled.div`
+margin-top: 10px;
+`
+
 
 const LoginForm = () => {
     const [id, setId] = useState('');
@@ -38,22 +45,24 @@ const LoginForm = () => {
                        value={password}
                        onChange={onChangePassword}
                        required/>
+
             </div>
-            <div>
-                <label htmlFor="uesr-passwordCheck"> PASSWORD CHECK </label>
-                <br />
-                <Input name="user-passwordCheck"
-                       type="passwordCheck"
-                       value={passwordCheck}
-                       onChange={onChangePasswordCheck}
-                       required/>
-            </div>
-            <div>
+
+            {/*<div>*/}
+            {/*    <label htmlFor="uesr-passwordCheck"> PASSWORD CHECK </label>*/}
+            {/*    <br />*/}
+            {/*    <Input name="user-passwordCheck"*/}
+            {/*           type="passwordCheck"*/}
+            {/*           value={passwordCheck}*/}
+            {/*           onChange={onChangePasswordCheck}*/}
+            {/*           required/>*/}
+            {/*</div>*/}
+            <ButtonWrapper>
                 <Button type="primary"
                         htmlType="submit"
                         loading={false}> Login </Button>
-                <Link href="/signup"><a><Button>Signup</Button></a></Link>
-            </div>
+                <Link legacyBehavior href="/signup"><a><Button>Signup</Button></a></Link>
+            </ButtonWrapper>
         </Form>
     );
 }
