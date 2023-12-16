@@ -265,3 +265,58 @@ const onSubmitForm = useCallback((e) => {
 ## Day 9
 
 - Making Profile page: Building and optimizing a basic form [profile.js, NicknameEditForm.js, FollowList.js]
+
+* Form Style
+
+```JavaScript
+const NicknameEditForm = () => {
+	const style = useMemo(() => ({
+		marginBottom: "20px",
+		border: "1px solid #d9d9d9",
+		padding: "20px",
+	}));
+	return (
+		<Form style={style}>
+			<Input.Search addonBefore="Nickname" enterButton="edit" />
+		</Form>
+	);
+};
+```
+
+- List Style
+
+```JavaScript
+const FollowList = ({ header, data }) => {
+	return (
+		<List
+			style={{ marginBotton: 20 }}
+			grid={{ gutter: 4, xs: 2, md: 3 }}
+			size="small"
+			header={<div>{header}</div>}
+			loadMore={
+				<div style={{ textAlign: "center", margin: "10px 0" }}>
+					<Button>more</Button>
+				</div>
+			}
+			bordered
+			dataSource={data}
+			renderItem={(item) => (
+				<List.Item style={{ marginTop: 20 }}>
+					<Card actions={[<StopOutlined key="stop" />]}>
+						<Card.Meta description={item.nickname} />
+					</Card>
+				</List.Item>
+			)}
+		/>
+	);
+};
+
+FollowList.propsTypes = {
+	header: PropTypes.string.isRequired,
+	data: PropTypes.array.isRequired,
+};
+```
+
+---
+
+## Day 10
