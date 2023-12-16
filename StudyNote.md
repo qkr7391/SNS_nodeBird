@@ -320,3 +320,88 @@ FollowList.propsTypes = {
 ---
 
 ## Day 10
+
+- Making singup Page
+- Using form
+
+\*\* 'onFinish' event is often used in forms within React, particularly when working with form submissions or validations.
+
+\*\* When use 'onFinish' event, don't need to use event.preventDefault() explicitly when handling form submissions because React handles form submissions differently by default, using its synthetic events
+
+- Forms seen a lot in <Form>
+
+```JavaScript
+const [id, setId] = useState('');
+const onChangeId = useCallback((e) => {
+  setId(e.target.value);
+},[]);
+```
+
+- Hooks can't be used inside loops, conditionals, or functions.
+- They can be used inside components.
+- Exception - Custom Hooks
+  --> It's possible to create custom hooks to avoid getting stuck with code that repeats itself over and over again.
+  [front - hooks - 'userinput.js']
+
+```JavaScript
+import { useState, useCallback } from "react";
+
+export default (initialValue = null) => {
+	const [value, setvalue] = useState(initialValue);
+	const handler = useCallback((e) => {
+		setValue(e.target.value);
+	}, []);
+	retur[value, handler];
+};
+
+```
+
+- Using customized hooks can reduce duplicate code
+
+```JavaScript
+const [id, setId] = useState("");
+const onChangeId = useCallback((e) => {
+  setId(e.target.value);
+}, []);
+```
+
+--->
+
+```JavaScript
+const [id, onChangeId] = useInput("");
+```
+
+- PasswordCheck, term is not follow same format, so need to make separate form for them.
+
+```JavaScript
+const [passwordCheck, setPasswordCheck] = useState("");
+const [passwordError, setPasswordError] = useState(false);
+const onChangePasswordCheck = useCallback(
+  (e) => {
+    setPasswordCheck(e.target.value);
+    setPasswordError(e.target.value !== password);
+  },
+  [password]
+);
+
+const [term, setTerm] = useState("");
+const [termError, setTermError] = useState(false);
+const onChangeTerm = useCallback((e) => {
+  setTerm(e.target.checked);
+  setTermError(false);
+}, []);
+```
+
+- onSubmit need to check the password and term
+
+```JavaScript
+const onSubmit = useCallback(() => {
+  if (password !== passwordCheck) {
+    return setPasswordError(true);
+  }
+  if (!term) {
+    return setTermError(true);
+  }
+  console.log(id, nickname, password);
+}, [password, passwordCheck, term]);
+```
