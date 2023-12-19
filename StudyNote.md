@@ -405,3 +405,22 @@ const onSubmit = useCallback(() => {
   console.log(id, nickname, password);
 }, [password, passwordCheck, term]);
 ```
+
+---
+
+## Day 11
+
+- Redux install
+
+* store / configureStroe.js
+* npm i next-redux-wrapper --> a library that integrates Redux with Next.js, simplifying the process of using Redux in Next.js applications
+
+* const configureStore = () => {};: This line initializes a configureStore function. This function would typically hold your Redux store configuration logic, including creating the Redux store, applying middleware, combining reducers, and setting up the initial state.
+
+* const wrapper = createWrapper(configureStore, { debug: process.env.NODE_ENV === "development" });: Here, createWrapper is invoked with two arguments:
+
+--> The first argument is configureStore, which is a function that will be responsible for creating the Redux store. Inside this function, you would configure your Redux store using libraries like redux, redux-thunk, etc.
+
+--> The second argument is an options object. In this case, it includes a debug property that is set to true (process.env.NODE_ENV === "development"). This enables debugging features in development mode, allowing for better inspection of the Redux store state, actions, and changes.
+
+- The next-redux-wrapper simplifies the setup of Redux in a Next.js application by providing a mechanism to configure the Redux store and integrate it with the Next.js app. This configured wrapper can then be used within Next.js pages or components to access the Redux store using the provided context or server-side rendering features.
