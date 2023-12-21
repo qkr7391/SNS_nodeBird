@@ -12,6 +12,8 @@ const initialState = {
     }
 }
 
+
+//action creator
 export const loginAction = (data) => {
     return{
         type: 'LOG_IN',
@@ -19,6 +21,7 @@ export const loginAction = (data) => {
     }
 }
 
+//action creator
 export const logoutAction = () => {
     return{
         type: 'LOG_OUT',
