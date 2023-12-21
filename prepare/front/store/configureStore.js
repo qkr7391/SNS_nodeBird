@@ -1,8 +1,10 @@
-import { createWrapper } from "next-redux-wrapper";
-import { createStroe } from "redux";
+import { createWrapper } from 'next-redux-wrapper';
+import { createStore } from 'redux';
+import reducer from '../reducers'
 
 const configureStore = () => {
-	const store = createStroe(reducer, enhancer);
+	const store = createStore(reducer);
+
 	return store;
 };
 

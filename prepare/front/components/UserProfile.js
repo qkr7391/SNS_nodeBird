@@ -1,6 +1,9 @@
 import React, { useCallback } from 'react';
 import { Card, Avatar, Button } from 'antd';
 import styled from 'styled-components';
+import {useDispatch} from "react-redux";
+
+import {logoutAction} from '../reducers'
 
 const ButtonWrapper = styled.div`
  margin-top: 20px;
@@ -11,10 +14,12 @@ const CardWrapper = styled(Card)`
   margin-left: 40px;
 `
 
-const UserProfile = ({ setIsLoggedIn }) => {
+const UserProfile = () => {
+    const dispatch = useDispatch();
 
     const onLogOut = useCallback(()=>{
-        setIsLoggedIn(false);
+        // setIsLoggedIn(false);
+        dispatch(logoutAction());
     },[]);
 
     return (
