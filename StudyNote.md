@@ -567,3 +567,67 @@ Later, when the client-side JavaScript is loaded, the page performs any addition
 
 
 * In Redux, we record history and can do a lot with it, so it's important to keep things "immutable".
+
+---
+
+## Day 14 
+
+- Split reducer
+
+```javascript
+// Reducer => it receives the previous state and action, returning a new state based on them
+const rootReducer = (state = initialState, action) => { // Corrected the syntax
+    switch (action.type) {
+        case 'LOG_IN':
+            return {
+                ...state,
+                user:{
+                    ...state.user,
+                    isLoggedIn: true,
+                    user:action.data,
+                }
+            };
+        case 'LOG_OUT':
+            return {
+                ...state,
+                user:{
+                    ...state.user,
+                    isLoggedIn: false,
+                    user:null,
+                }
+            };
+        default:
+            return state; // Return the default state if the action type doesn't match
+    }
+};
+```
+
+* We're going to have a lot of different types, and we're going to have a lot of cases for each type, which is going to make the code in the reducer bigger and longer, so we need to break it up properly.
+
+1. Create a user.js and post.js file inside your reducer folder. [each file is for the values in the state I currently have].
+
+2. Split the code for each in index.js.
+
+3. combine the split code using combineReducers.
+```javascript
+const rootReducer = combineReducers({ // Corrected the syntax
+  user,
+  post,
+})
+```
+* Add Index Reducer for HYDRATE (for SSR)
+```javascript
+  index: (state = {}, action) => {
+    switch (action.type) {
+      case HYDRATE:
+        return { ...state, ...action.payload};
+
+            // Return the default state if the action type doesn't match
+      default:
+        return state;
+    }
+  }
+```
+
+** It's easy to keep code simple by distributing and breaking up longer pieces of code into roles, and it's easy to combine them using combineReducers.
+
