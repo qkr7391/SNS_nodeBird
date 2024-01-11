@@ -539,3 +539,31 @@ const UserProfile = () => {
 ---
 ## Day 13
 
+- Middleware and redux dev tools
+
+'HYDRATE'
+
+In the context of Redux, the term 'HYDRATE' is commonly associated with the Next.js framework and its integration with Redux. The 'HYDRATE' action is a convention used in Next.js to hydrate the client-side state with the server-side state during server-side rendering (SSR).
+
+Here's how it typically works:
+
+Server-Side Rendering (SSR):
+
+During server-side rendering, the server fetches the initial data for a page and renders the HTML with that data. Next.js allows you to dispatch a special action called 'HYDRATE' as part of your Redux store state during server-side rendering.
+Client-Side Hydration:
+
+When the client receives the HTML from the server, including the 'HYDRATE' action in the Redux store state, Next.js on the client side uses this information to hydrate the client-side Redux store. This means it initializes the client-side state with the server-rendered state to avoid unnecessary data fetching and to maintain consistency between the server-rendered and client-rendered content.
+
+Server-side rendering (SSR) is a way for web applications to generate the HTML for a page on the server and send it to the client during the initial load of the page. Traditional web applications use JavaScript on the client side to render pages dynamically, but SSR helps optimize performance by constructing pages on the server on initial load.
+
+* Client-Side Rendering (CSR) works in the following flow:
+When a user accesses a web page, a blank HTML page is loaded.
+A JavaScript file is then downloaded and executed, which dynamically renders the page on the client side and displays it on the screen.
+
+* SSR has the following flow: 
+When a user accesses a web page, initial data is fetched from the server, and an HTML page is constructed and sent.
+The HTML that reaches the client is rendered and displayed by the browser.
+Later, when the client-side JavaScript is loaded, the page performs any additional required behavior.
+
+
+* In Redux, we record history and can do a lot with it, so it's important to keep things "immutable".

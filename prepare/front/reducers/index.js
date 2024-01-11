@@ -1,4 +1,4 @@
-// import { HYDRATE } from 'next-redux-wrapper';
+import { HYDRATE } from 'next-redux-wrapper';
 
 const initialState = {
     user:{
@@ -30,8 +30,8 @@ export const logoutAction = () => {
 // Reducer => it receives the previous state and action, returning a new state based on them
 const rootReducer = (state = initialState, action) => { // Corrected the syntax
     switch (action.type) {
-        // case HYDRATE:
-        //     return { ...state, ...action.payload};
+        case HYDRATE:
+            return { ...state, ...action.payload};
         case 'LOG_IN':
             return {
                 ...state,
