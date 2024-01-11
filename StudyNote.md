@@ -425,3 +425,114 @@ const onSubmit = useCallback(() => {
 
 - The next-redux-wrapper simplifies the setup of Redux in a Next.js application by providing a mechanism to configure the Redux store and integrate it with the Next.js app. This configured wrapper can then be used within Next.js pages or components to access the Redux store using the provided context or server-side rendering features.
 
+
+---
+## Day 12
+
+- Implementing redux in practice
+
+Redux is one of the most effective libraries for state management in JavaScript apps.
+
+Store:
+A store is where you store the state of your application.
+In Redux, an application must have one store.
+Stores are created using the createStore function, which takes a reducer as an argument.
+
+Action:
+An action is an object that indicates what change in state is required.
+Actions must have a type attribute, and other attributes contain additional information about the action.
+
+Dispatch:
+Dispatching means delivering the action to the store.
+When you pass an action using the store's dispatch method, the reducer is called to update the state.
+
+Reducer:
+A reducer is a pure function that takes the current state and the passed action and returns a new state.
+The reducer determines how to update the state based on the type of action.
+Multiple reducers can be combined to create a root reducer.
+
+State:
+State represents the current state of your application.
+In Redux, state is managed immutably and is updated by reducers.
+
+The basic behavior flow in Redux is as follows
+
+1. A user fires an action.
+2. The action is passed to the reducer via the store's dispatch.
+3. The reducer generates and returns a new state based on the current state and the action.
+4. The store is updated with the new state, and the UI is updated accordingly.
+
+
+[reducers/index.js]
+
+```javascript
+// initialState setup
+const initialState = {
+    user:{
+    isLoggedIn: false,
+    user: null,
+    signUpData: {},
+    loginData:{},
+    },
+    post:{
+        mainPost: [],
+    }
+}
+```
+
+```javascript
+//action creator
+export const loginAction = (data) => {
+    return{
+        type: 'LOG_IN',
+        data,
+    }
+}
+
+//action creator
+export const logoutAction = () => {
+    return{
+        type: 'LOG_OUT',
+    }
+}
+```
+```javascript
+// Reducer => it receives the previous state and action, returning a new state based on them
+const rootReducer = (state = initialState, action) => { // Corrected the syntax
+    switch (action.type) {
+        case 'LOG_IN':
+            return {
+                ...state,
+                user:{
+                    ...state.user,
+                    isLoggedIn: true,
+                    user:action.data,
+                }
+            };
+        case 'LOG_OUT':
+            return {
+                ...state,
+                user:{
+                    ...state.user,
+                    isLoggedIn: false,
+                    user:null,
+                }
+            };
+        default:
+            return state; // Return the default state if the action type doesn't match
+    }
+};
+```
+
+[LoginForm.js]
+```javascript
+const UserProfile = () => {
+  const dispatch = useDispatch();
+
+  const onLogOut = useCallback(()=>{
+    // setIsLoggedIn(false);
+    dispatch(logoutAction());
+  },[]);
+...
+```
+
