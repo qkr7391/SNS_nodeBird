@@ -631,3 +631,129 @@ const rootReducer = combineReducers({ // Corrected the syntax
 
 ** It's easy to keep code simple by distributing and breaking up longer pieces of code into roles, and it's easy to combine them using combineReducers.
 
+--- 
+
+## Day 15
+
+- Posting form with dummy data
+
+[reducers/post.js]
+1. Make an initialState and some dummy data for post
+```javascript
+[initialState]
+mainPosts: [
+    id:1,
+    User:{
+        id:1,
+        nickname:'dummy',
+    },
+    content: 'first post',
+    Images: [{src:'image adress1'},{src:'image adress2'}],
+    Comments: [{ User :{ nickname:'a1'}, content:'wow'},
+                {User :{ nickname:'a2'}, content:'cool'},],
+imagePaths: [],
+postAdded: false,
+```
+```javascript
+[dummyData]
+const dummyPost = {
+  id:2,
+  content: 'dummy data',
+  User: {
+    id:1,
+    nickname: 'dummydummy',
+  },
+  Images:[],
+  Comments: []
+}
+```
+
+2. make action creator
+```javascript
+//action creator
+const ADD_POST = 'ADD_POST';
+export const addPost = {
+  type: ADD_POST,
+}
+```
+
+3. Add new case for reducer
+```javascript
+[reducer]
+case ADD_POST:
+    return {
+      ...state,
+      mainPosts: [dummyPost, ...state.mainPosts],
+      postAdded: true
+    };
+```
+
+[pages/index.js]
+Place components <PostForm> and <PostCard>
+```javascript
+const Home = () =>{
+  const { isLoggedIn } = useSelector((state) => state.user);
+  const { mainPosts } = useSelector((state) => state.post);
+  //const mainPosts = userSelector((state) => state.post.mainPosts); ^same^
+
+  return(
+          <AppLayout>
+            {isLoggedIn && <PostForm />}
+            {mainPosts.map((post) => <PostCard key={post.id} post={post} />)}
+          </AppLayout>
+
+  );
+}
+```
+
+[components/PostForm.js]
+1. Create Basic <Form> with style what you designed
+2. Add functions for each buttons and input box
+```javascript
+// Redux state and dispatch setup
+const { imagePaths }= useSelector((state) => state.post);
+const dispatch = useDispatch();
+
+// State and ref setup
+const imageInput = useRef();
+const [text, setText] = useState('');
+const onChangeText = useCallback((e) => {
+  setText(e.target.value);
+}, []);
+
+// Form submission handler
+const onSubmit = useCallback(()=> {
+  // Dispatching an action (addPost) with the current text state
+  dispatch(addPost);
+  // Resetting the text state
+  setText('');
+}, []);
+
+// Image upload button click handler
+const onClickImageUpload = useCallback(()=>{
+  // Programmatically clicking the hidden file input to trigger file selection
+  imageInput.current.click();
+}, [imageInput.current])
+```
+
+* Redux Setup:
+- **useSelector** is a hook from the react-redux library that allows you to extract data from the Redux store. In this case, it extracts imagePaths from the post slice of the Redux store.
+- **useDispatch** is a hook from react-redux used to get access to the dispatch function.
+
+* State and Ref Setup:
+- **useState** is used to manage the state of the text input field.
+- **useRef** is used to create a reference to the hidden file input.
+
+* Form Submission Handler (onSubmit):
+- **Dispatches** the addPost action with the current text state and resets the text state.
+
+* Text Area for Post Text:
+- An **input** area for entering the text of the post.
+
+* Image Upload Section:
+- Hidden file input (<input type="file" multiple style={{ display: 'none' }} ref={imageInput} />) for uploading images.
+- **Image Upload** button (<Button onClick={onClickImageUpload}>Image Upload</Button>) that programmatically clicks the hidden file input when clicked.
+- **Upload** button (<Button type="primary" style={{ float: 'right' }} htmlType="submit">Upload</Button>) to submit the form.
+
+* Displaying Uploaded Images:
+- **Maps** over the imagePaths array (images uploaded) and displays each image along with a "Remove" button (not yet implemented in your code).
