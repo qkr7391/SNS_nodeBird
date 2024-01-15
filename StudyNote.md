@@ -759,3 +759,5 @@ const onClickImageUpload = useCallback(()=>{
 - **Maps** over the imagePaths array (images uploaded) and displays each image along with a "Remove" button (not yet implemented in your code).
 
 ---
+
+# Post - Post Card
