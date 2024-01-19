@@ -321,7 +321,7 @@ FollowList.propsTypes = {
 
 ## Day 10
 
-- Making singup Page
+- Making sing-up Page
 - Using form
 
 \*\* 'onFinish' event is often used in forms within React, particularly when working with form submissions or validations.
@@ -736,6 +736,8 @@ const onClickImageUpload = useCallback(()=>{
 }, [imageInput.current])
 ```
 
+## Day 16
+
 * Redux Setup:
 - **useSelector** is a hook from the react-redux library that allows you to extract data from the Redux store. In this case, it extracts imagePaths from the post slice of the Redux store.
 - **useDispatch** is a hook from react-redux used to get access to the dispatch function.
@@ -760,4 +762,38 @@ const onClickImageUpload = useCallback(()=>{
 
 ---
 
-# Post - Post Card
+## Day 17
+
+### Post - Post Card
+
+State Setup:
+liked and commentFormOpened are state variables managed by the useState hook. They track whether the post is liked and whether the comment form is opened, respectively.
+
+Toggle Functions:
+onToggleLike and onToggleComment are callback functions that toggle the state of liked and commentFormOpened when the corresponding actions (like button click, comment button click) occur.
+
+User ID Retrieval:
+id is obtained from the Redux state using the useSelector hook. It represents the user's ID.
+
+Card Component:
+The Card component from the antd library is used to display the post. It includes post images, user avatar, nickname, and content.
+The actions prop provides a set of action buttons (Retweet, Like, Comment, More).
+
+Popover for More Options:
+The Popover component from antd provides a menu with more options (Edit, Delete, Report) when the ellipsis icon is clicked.
+
+Comment Form Visibility:
+The comment form is displayed (<div>comment</div>) if commentFormOpened is true. This part can be replaced with the actual CommentForm component when implemented.
+
+PropTypes:
+PropTypes is used to define the expected shape of the post prop. It ensures that the prop is of the correct type and structure.
+
+
+
+
+
+
+
+
+
+
