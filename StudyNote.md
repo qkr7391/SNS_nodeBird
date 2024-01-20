@@ -788,6 +788,12 @@ The comment form is displayed (<div>comment</div>) if commentFormOpened is true.
 PropTypes:
 PropTypes is used to define the expected shape of the post prop. It ensures that the prop is of the correct type and structure.
 
+---
+## Day 18
+
+### Comments
+
+
 
 
 

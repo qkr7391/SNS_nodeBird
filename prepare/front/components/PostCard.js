@@ -1,10 +1,15 @@
-import React, {useCallback, useState} from 'react';
+import React, { useCallback, useState } from 'react';
 import PropTypes from "prop-types";
-import {useSelector} from 'react-redux';
-import {Card, Popover, Button, Avatar} from 'antd'
-import {EllipsisOutlined, HeartOutlined, MessageOutlined, RetweetOutlined, HeartTwoTone} from "@ant-design/icons";
+import { useSelector } from 'react-redux';
+import { Card, Popover, Button, Avatar, List} from 'antd';
+// import { Card, Popover, Button, Avatar, List, Comment } from 'antd';
+import { EllipsisOutlined, HeartOutlined, MessageOutlined, RetweetOutlined, HeartTwoTone } from "@ant-design/icons";
 
-import PostImages from "./PostImages"
+import PostImages from "./PostImages";
+import CommentForm from "./CommentForm";
+
+// ... rest of the code
+
 
 const PostCard = ({post}) => {
     // State for managing like and comment form visibility
@@ -62,7 +67,26 @@ const PostCard = ({post}) => {
             />
          </Card>
          {/* Displaying comment form if it's opened */}
-         {commentFormOpened && (<div>comment</div>)}
+         {commentFormOpened &&
+             (<div>
+                <CommentForm post={post}/>
+                 <List
+                 header={`${post.Comments.length} comments`}
+                 itemLayout="horizontal"
+                 dataSource={post.Comments}
+                 // Comment is for version 4.*
+                 renderItem={(item) => (
+                     <List.Item>
+                         {/*<li></li> -> <List.Item></List.Item>*/}
+                         <List.Item.Meta //< Comment />-> <List.Item.Meta />
+                         title={item.User.nickname} //author->title
+                         avatar={<Avatar>{item.User.nickname[0]}</Avatar>}
+                         description={item.content} //content->description
+                         />
+                     </List.Item>
+                 )}
+                 />
+             </div>)}
          {/* CommentForm component (commented out) */}
          {/*<CommentForm />*/}
          {/* Comments component (commented out) */}
