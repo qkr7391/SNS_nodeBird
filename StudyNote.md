@@ -793,6 +793,130 @@ PropTypes is used to define the expected shape of the post prop. It ensures that
 
 ### Comments
 
+[PostCard.js]
+```JavaScript
+{commentFormOpened &&
+(<div>
+  <CommentForm post={post}/>
+  <List
+          header={`${post.Comments.length} comments`}
+          itemLayout="horizontal"
+          dataSource={post.Comments}
+          // Comment is for version 4.*
+          renderItem={(item) => (
+                  <List.Item>
+                    {/*<li></li> -> <List.Item></List.Item>*/}
+                    <List.Item.Meta //< Comment />-> <List.Item.Meta />
+                            title={item.User.nickname} //author->title
+                            avatar={<Avatar>{item.User.nickname[0]}</Avatar>}
+                            description={item.content} //content->description
+                    />
+                  </List.Item>
+          )}
+  />
+</div>)}
+```
+
+This code is a conditional rendering block written in JSX, and it renders a CommentForm and a list of comments only if commentFormOpened is true.
+
+* breakdown:
+
+1. {commentFormOpened && ...}: This is a conditional rendering statement. If commentFormOpened is true, the content inside the curly braces will be rendered; otherwise, nothing will be rendered.
+
+2. <div>: Wraps the content to be conditionally rendered. It's a common practice to use a container element when you want to conditionally render multiple components.
+
+3. <CommentForm post={post} />: Renders the CommentForm component and passes the post prop to it.
+
+4. <List ...>: Renders an Ant Design List component to display comments.
+
+  4.1. header={${post.Comments.length} comments}: Displays a header with the number of comments.
+  4.2. itemLayout="horizontal": Specifies the layout of the list items.
+  4.3. dataSource={post.Comments}: Sets the data source for the list to the Comments property of the post object.
+  4.4. renderItem={(item) => ...}: Specifies how each item in the list should be rendered. In this case, it uses the List.Item and List.Item.Meta components to display information about each comment.
+        4.4.1. title={item.User.nickname}: Displays the user's nickname as the title.
+        4.4.2. avatar={<Avatar>{item.User.nickname[0]}</Avatar>}: Displays the user's nickname's first character as an avatar.
+        4.4.3. description={item.content}: Displays the content of the comment.
+
+5. </div>: Closes the container element.
+
+So, the entire block of code conditionally renders a CommentForm and a list of comments when commentFormOpened is true
+
+[CommentForm.js]
+```javascript
+import React, { useCallback } from 'react';
+import { Form, Input, Button } from 'antd';
+import useInput from '../hooks/useinput';
+import PropTypes from 'prop-types';
+import { useSelector } from 'react-redux';
+const CommentForm =({ post })=>{
+    const id = useSelector((state) => state.user.self?.id);
+    const [commentText, onChangeCommentText] = useInput("");
+    const onSubmitComment = useCallback(()=>{
+        console.log(post.id, commentText);
+    }, [commentText])
+
+    return(
+        <Form onFinish={onSubmitComment}>
+            <Form.Item style={{ position: 'relative'}}>
+                <Input.TextArea value={commentText} onChange={onChangeCommentText} rows={4} />
+                <Button style={{ position:'absolute', right: 0, bottom: -40 }}
+                    type="primary" htmlType="submit"> Twit </Button>
+            </Form.Item>
+        </Form>
+    )
+}
+
+CommentForm.propTypes = {
+    post: PropTypes.object.isRequired,
+}
+export default CommentForm;
+
+```
+
+* breakdown :
+
+1. Functional Component Definition:
+[ const CommentForm = ({ post }) => { ]
+- CommentForm: Declares a functional React component named CommentForm.
+- ({ post }): Destructures the post prop from the component's props.
+
+2. Redux Selector:
+[ const id = useSelector((state) => state.user.self?.id); ]
+- Uses the useSelector hook to get the user's ID from the Redux store. The ?. is the optional chaining operator, ensuring that accessing self.id won't throw an error if self is undefined.
+
+3. State Management with Custom Hook:
+[ const [commentText, onChangeCommentText] = useInput(""); ]
+- Uses the custom useInput hook to manage the state of the comment text. commentText holds the current value of the input, and onChangeCommentText is a memoized callback function to update that value.
+
+4. Callback Function for Form Submission:
+[ const onSubmitComment = useCallback(() => {
+console.log(post.id, commentText);
+}, [commentText]); ]
+- Uses useCallback to memoize the onSubmitComment function. This function logs the post.id and commentText to the console when the form is submitted.
+
+5. Form Component:
+[ return (
+<Form onFinish={onSubmitComment}>
+{/* ... */}
+</Form>
+); ]
+- Renders an Ant Design Form component. The onFinish prop is set to the onSubmitComment callback.
+
+6. Form Item with TextArea and Button:
+[ <Form.Item style={{ position: 'relative' }}>
+<Input.TextArea value={commentText} onChange={onChangeCommentText} rows={4} />
+<Button style={{ position: 'absolute', right: 0, bottom: -40 }} type="primary" htmlType="submit"> Twit </Button>
+</Form.Item> ]
+- Wraps the Input.TextArea and Button components within an Ant Design Form.Item.
+Input.TextArea is a multi-line input field. Its value is controlled by commentText, and changes trigger the onChangeCommentText callback.
+Button is a submit button with the label "Twit." It triggers the form submission.
+
+7. PropTypes Validation:
+[ CommentForm.propTypes = {
+post: PropTypes.object.isRequired,
+}; ]
+- Uses PropTypes to specify that the post prop must be an object and is required.
+
 
 
 

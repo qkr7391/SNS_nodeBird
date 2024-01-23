@@ -79,9 +79,9 @@ const PostCard = ({post}) => {
                      <List.Item>
                          {/*<li></li> -> <List.Item></List.Item>*/}
                          <List.Item.Meta //< Comment />-> <List.Item.Meta />
-                         title={item.User.nickname} //author->title
-                         avatar={<Avatar>{item.User.nickname[0]}</Avatar>}
-                         description={item.content} //content->description
+                             title={item.User.nickname} //author->title
+                             avatar={<Avatar>{item.User.nickname[0]}</Avatar>}
+                             description={item.content} //content->description
                          />
                      </List.Item>
                  )}
