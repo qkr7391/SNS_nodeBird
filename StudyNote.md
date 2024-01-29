@@ -917,13 +917,46 @@ post: PropTypes.object.isRequired,
 }; ]
 - Uses PropTypes to specify that the post prop must be an object and is required.
 
+---
+## Day 19
 
+### Implementing Images
 
+- Add the ability to show a single image, give the image a description via alt, and enlarge the image when clicked via the onClick event.
+- The role of role="presentation" can be used to let screen readers know if they don't need to click on the image. (Since it's an event that enlarges the image, it can help screen readers filter out blind people because they have no reason to click on it).
 
+``` javascript
+if (images.length === 1) {
+        return(
+            <>
+            <img role="presentation" src={images[0].src} alt={images[0].src} onClick={onZoom} />
+            </>
+        )
+    }
+```
 
+```javascript
+ if (images.length === 2) {
+    return(
+        <>
+            <img role="presentation" style={{width: '50%', display: 'inline-block'}} src={images[0].src} alt={images[0].src} onClick={onZoom} />
+            <img role="presentation" style={{width: '50%', display: 'inline-block'}} src={images[1].src} alt={images[1].src} onClick={onZoom} />
+        </>
+    )
+}
+return (
+    <div>
+        <img role="presentation" style={{width: '50%', display: 'inline-block'}} src={images[0].src} alt={images[0].src} onClick={onZoom} />
+        <div
+            role = "presentation"
+            style={{display:'inline-block', width: '50%', textAlign: 'center', verticalAlign: 'middle'}}
+            onClick={onZoom} >
+            <PlusOutlined />
+            {/*<br />*/}
+            {images.length - 1} more images
+        </div>
+    </div>
+)
 
-
-
-
-
+```
 
