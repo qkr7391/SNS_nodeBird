@@ -967,3 +967,85 @@ return (
 
 ```
 
+---
+
+## Day 20 - Implementing an image carousel(react-slick)
+
+1. make the image fullscreen when tapping more
+image click -> execute onZoom() -> execute showImageZoom() 
+
+[PostImages.js]
+```javascript
+const PostImages =({images})=>{
+    const [showImagesZoom, setShowImagesZoom] = useState(false);
+    const onZoom = useCallback(() => {
+        setShowImagesZoom(true);
+    },[]);
+
+    const onCloce = useCallback(()=>{
+        setShowImagesZoom(false);
+    },[])
+
+    if (images.length === 1) {
+...
+            {showImagesZoom && <ImagesZoom image={images} onClose={onClose} />}
+...
+    if (images.length === 2) {
+...
+        {showImagesZoom && <ImagesZoom image={images} onClose={onClose} />}
+...
+    return (
+...
+        {showImagesZoom && <ImagesZoom image={images} onClose={onClose} />}
+...
+```
+
+2. components/imagesZoom/index.js 
+WHY?
+ Using directories and creating an index.js within them to organize components offers several advantages and disadvantages:
+>> **Advantages:**
+**Structure**: Grouping components into directories enhances the organization of files. This clarity in structure simplifies navigation and maintenance, especially as the project scales.
+**Readability**: The directory structure improves code readability for developers. Each directory encapsulates related files, making it easier to understand the codebase's overall architecture.
+**Maintainability**: Organizing components into directories facilitates maintenance tasks. With related files grouped together, modifications become more straightforward, enhancing the codebase's maintainability.
+**Modularity**: Grouping components into directories promotes modularity. This enhances code reuse and allows for a more modular approach to managing the codebase.
+
+>> **Disadvantages**:
+**Additional Files and Folders**: Implementing directories introduces additional files and folders, potentially increasing the complexity of the project structure.
+**Relative Path Usage**: Grouping components into directories necessitates using relative paths when importing components. This requires careful management of path configurations.
+**Indirection**: Utilizing index.js to export components introduces indirection. While this aids organization, it can slightly reduce code readability due to the additional layer of abstraction.
+
+>>> In summary, organizing components into directories and using index.js offers benefits in terms of structure, readability, maintainability, and modularity. However, it also introduces additional files, requires careful path management, and adds a layer of indirection to component imports. The suitability of this approach depends on the project's size, complexity, and the preferences of the development team.
+
+
+
+3. npm i react-slick
+>> react-slick is a popular React component library for building carousel/slider components. It provides a flexible and customizable way to create carousels or sliders with various features such as infinite looping, autoplay, lazy loading, responsive design, and more.
+Here are some key features of react-slick:
+**Responsive Design**: Carousels built with react-slick can adapt to different screen sizes and devices, making them suitable for use in responsive web design.
+**Customization**: It offers a wide range of customization options for styling, navigation controls, animations, and behavior, allowing developers to tailor the carousel to fit their specific requirements.
+**Accessibility**: react-slick aims to maintain accessibility standards by providing keyboard navigation support and ensuring that screen readers can interpret the carousel content correctly.
+**Performance Optimization**: The library is designed to be efficient and performant, with features like lazy loading of images and optimized rendering for smooth user experience, even with large datasets.
+**Rich Feature Set**: It supports various features commonly found in carousels, such as autoplay, infinite looping, draggable slides, multiple transition effects, and more.
+Overall, react-slick simplifies the process of implementing a carousel/slider component in React applications, offering a robust and feature-rich solution for showcasing content in a visually engaging manner.
+```javascript
+<Slick
+    initialSlide={0}
+    afterChange={(slide) => setCurrentSlide(slide)}
+    infinite
+    arrows ={false}
+    slidesToShow={1}
+    slidesToScroll={1}
+>
+    {images.map((v)=> (
+        <ImgWrapper key={v.src}>
+            <img src={v.src} alt={v.src} />
+        </ImgWrapper>
+    ))}
+</Slick>
+
+```
+
+4. CSS - styled component
+
+
+** Slick problem occur
