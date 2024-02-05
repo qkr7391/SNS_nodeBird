@@ -1027,6 +1027,7 @@ Here are some key features of react-slick:
 **Performance Optimization**: The library is designed to be efficient and performant, with features like lazy loading of images and optimized rendering for smooth user experience, even with large datasets.
 **Rich Feature Set**: It supports various features commonly found in carousels, such as autoplay, infinite looping, draggable slides, multiple transition effects, and more.
 Overall, react-slick simplifies the process of implementing a carousel/slider component in React applications, offering a robust and feature-rich solution for showcasing content in a visually engaging manner.
+
 ```javascript
 <Slick
     initialSlide={0}
@@ -1049,3 +1050,28 @@ Overall, react-slick simplifies the process of implementing a carousel/slider co
 
 
 ** Slick problem occur
+
+---
+
+## Day 21 - Global styles and component directory structure
+
+** Slick problem -> can not see the zoom images properly.
+Slicks have a pre-determined class and styling. So you have to analyze the classes and styles and fix them one by one, but there is a way around that.
+
+
+* Global styles : The style component is local scope. Also, Slick has its own CSS that declares a name for the class and gives it its own name, which makes it hard to make it work the way I want it to. With global scopes, I can just grab the parts I need without having to disassemble and analyze the structure piece by piece.
+```javascript
+import styled, {createGlobalStyle} from 'styled-components';
+
+export const Global = createGlobalStyle`
+ .slick-slide {
+   display: inline-block;
+ }
+`
+```
+
+>> components/imagesZoom/index.js -> Structure
+ components/imagesZoom/styles.js -> CSS
+
+By keeping related files in a single directory, it's easier to manage longer code, and it's easier to modify because it's categorized by purpose.
+
