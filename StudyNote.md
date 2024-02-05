@@ -1075,3 +1075,26 @@ export const Global = createGlobalStyle`
 
 By keeping related files in a single directory, it's easier to manage longer code, and it's easier to modify because it's categorized by purpose.
 
+---
+
+## Day 22 - Hash Tag Link
+* Linking to a hashtag so that clicking on it brings up related listings
+
+https://regexr.com/ -> Regular expressions 
+>> /(#[^\s#]+)/g  -> Regular epression for checking hashtag
+
+```JavaScript
+const PostCardContent = ({ postData }) => (
+    <div>
+        {postData.split(/(#[^\s#]+)/g).map ((v) => {
+            if(v.match(/(#[^\s#]+)/)) {
+                return <Link href={`/hashtag/${v.slice(1)}`}>{v}</Link>
+            }
+
+            return v;
+        })}
+    </div>
+);
+```
+
+* Can

@@ -7,6 +7,7 @@ import { EllipsisOutlined, HeartOutlined, MessageOutlined, RetweetOutlined, Hear
 
 import PostImages from "./PostImages";
 import CommentForm from "./CommentForm";
+import PostCardContent from "./PostCardContent";
 
 // ... rest of the code
 
@@ -63,7 +64,7 @@ const PostCard = ({post}) => {
             <Card.Meta
                 avatar={<Avatar>{post.User.nickname[0]}</Avatar>} // Displaying user avatar
                 title={post.User.nickname} // Displaying user nickname
-                description={post.content} // Displaying post content
+                description={<PostCardContent postData={post.content}/> } // Displaying post content
             />
          </Card>
          {/* Displaying comment form if it's opened */}
