@@ -1097,4 +1097,32 @@ const PostCardContent = ({ postData }) => (
 );
 ```
 
-* Can
+---
+
+## Day 23 - redux-thunk
+
+redux-thunk is a middleware for Redux, a popular state management library in React applications. It enables Redux to handle asynchronous actions by allowing action creators to return functions instead of plain objects.
+In Redux, actions are typically plain JavaScript objects with a type property that describes the action and additional data if needed. However, in real-world applications, actions might need to perform asynchronous tasks such as fetching data from an API or interacting with a database. This is where redux-thunk comes in handy.
+
+With redux-thunk, action creators can return functions instead of plain objects. These functions have access to the dispatch and getState methods of the Redux store, allowing them to dispatch multiple actions, perform asynchronous operations, and access the current state of the application.
+
+```JavaScript
+export const loginAction = (data) => {
+    return (dispatch, getState) => {
+        const state = getState();
+        dispatch(loginRequestAction());
+        axios.post('api/login')
+            .then((res)=> {
+                dispatch(loginSuccessAction(res.data));
+            })
+            .then((err)=>{
+                dispatch(loginFailureAction(err));
+            })
+    }
+}
+```
+
+--> You'll need to implement 'redux-thunk' on your own, except for the feature that allows you to do multiple dispatches at once. 
+
+SO, 'saga' will be used for this project.
+
