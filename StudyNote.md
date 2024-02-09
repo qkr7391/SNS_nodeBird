@@ -1126,3 +1126,57 @@ export const loginAction = (data) => {
 
 SO, 'saga' will be used for this project.
 
+---
+## Day 24 - install 'saga' and learning 'generator'
+
+install 'saga' - [npm i redux-saga]
+
+* 'redux-saga' : redux-saga is an alternative middleware for managing side effects in Redux applications. It leverages ES6 generator functions to handle asynchronous operations and side effects such as fetching data from an API, handling timeouts, and more, in a non-blocking manner.
+1. Generator Functions: Generators are special functions in JavaScript denoted by an asterisk (*) after the function keyword. Within these generator functions, you can use the yield keyword to pause execution and return intermediate values.
+2. Sagas: In redux-saga, sagas are generator functions that listen for specific Redux actions and perform side effects based on those actions. They are defined using the function* syntax and typically use a loop to continuously listen for actions.
+3. Effect Creators: Inside sagas, you use effect creator functions provided by redux-saga to perform various side effects. These effect creators return plain JavaScript objects describing the side effect to be executed.
+4. Middleware Integration: redux-saga middleware is added to your Redux store to intercept dispatched actions and run the sagas. The middleware then executes the sagas in the background, coordinating their execution with the Redux store.
+
+
+[store/configureStore.js]
+```javascript
+import createSagaMiddleware from 'redux-saga';
+
+import rootSaga from '../sagas';
+
+const loggerMiddleware = ({dispatch, getState}) => (next) => (action) => {
+    console.log(action);
+    return next(action);
+}
+
+const configureStore = () => {
+    const sagaMiddleware = createSagaMiddleware()
+    const middlewares = [sagaMiddleware,loggerMiddleware];
+...
+    store.sagaTask = sagaMiddleware.run(rootSaga);
+...
+};
+```
+
+[sagas/index.js]
+
+```javascript
+export default function* rootSaga(){
+    
+}
+
+```
+
+>> **generator** 
+> basic generator form
+![img.png](img.png)
+> example 1 of generator
+![img_1.png](img_1.png)
+> example 2 of generator
+![img_2.png](img_2.png)
+
+1. generator stops at yield -> is a function with a breakpoint
+2. the value after yield is returned as value.
+3. You can use code that repeats infinitely, such as While(true), and run it as many times as you want.  -> When you want to express the concept of "infinity" in JavaScript, you can use generators.
+4. You can use it like an event listener. (Calling next() when an event occurs and returning a value each time)
+
