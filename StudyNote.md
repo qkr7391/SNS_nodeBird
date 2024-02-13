@@ -1180,3 +1180,114 @@ export default function* rootSaga(){
 3. You can use code that repeats infinitely, such as While(true), and run it as many times as you want.  -> When you want to express the concept of "infinity" in JavaScript, you can use generators.
 4. You can use it like an event listener. (Calling next() when an event occurs and returning a value each time)
 
+---
+
+## Day 25 - 'saga' effect
+
+```javascript
+import { all, fork, take } from 'redux-saga/effects';
+
+function* watchLogIn(){
+    yield take('LOG_IN_REQUEST', logIn);
+    // take -> Wait for an action named 'LOG_IN' to be executed
+}
+
+function* watchLogOut(){
+    yield take('LOG_OUT_REQUEST');
+    // take -> Wait for an action named 'LOG_OUT' to be executed
+}
+
+function* watchAddPost(){
+    yield take('ADD_POST_REQUEST');
+    // take -> Wait for an action named 'ADD_POST' to be executed
+}
+
+export default function* rootSaga(){
+ yield all([ 
+     // all -> take array and run all arrays at the same time
+     fork(watchLogIn),
+     fork(watchLogOut),
+     fork(watchAddPost),
+     // fork -> run function
+ ])
+}
+```
+
+* fork vs call : In Redux-Saga, both call and fork are effects used to perform asynchronous operations, but they have different behaviors and use cases:
+
+call Effect: [Synchronous function call -> wait for the request to return and put the result in result.]
+call is used to call functions or methods that return promises or are asynchronous in nature.
+When you use call, the Saga will pause until the called function resolves or completes.
+call is blocking, meaning it will wait for the result before proceeding to the next instruction.
+It's typically used for invoking pure functions, making API calls, or executing other Sagas.
+
+fork Effect: [Asynchronous function call -> send a request and execute the next thing immediately, regardless of waiting for the result]
+fork is used to spawn non-blocking tasks. It creates a new "forked" child Saga, allowing it to run independently in the background.
+When you use fork, the Saga will not wait for the forked task to complete before moving on to the next instruction.
+If the parent Saga is canceled, the forked task will also be canceled.
+It's typically used for tasks that don't need to block the Saga, such as background tasks, concurrent data fetching, or handling parallel execution.
+
+
+-> call is synchronous and blocks the Saga until the called function completes, while fork is asynchronous and creates independent tasks that run concurrently. Your choice between call and fork depends on whether you need the Saga to wait for the result of the operation or if you want it to proceed immediately without waiting.
+
+```javascript
+//call
+function* logIn(){
+    try{
+        axios.post('/api.login')
+            .then((result) => {
+                yield put({
+                    type: 'LOG_IN_SUCCESS',
+                    data: result.data
+                });
+        }))
+    } 
+    ...
+}
+
+//fork
+function* logIn(){
+    try{
+        axios.post('/api.login')
+        yield put({
+            type: 'LOG_IN_SUCCESS',
+            data: result.data
+        });
+    } 
+    ...
+}
+```
+
+
+```javascript
+// not geneerator
+function logInAPI(data){
+    // sent request to server
+    return axios.post('/api.login', data)
+}
+
+// * -> generator
+function* logIn(action){
+    // Receive the results of sending a login request to the server
+  const result =  yield call(logInAPI, action.data)
+    // put -> dispatch (dispatch 'action')
+    yield put({
+        // action part
+        type: 'LOG_IN_SUCCESS',
+        data: result.data
+    })
+    
+}
+
+// * -> generator
+function* watchLogIn(){
+    yield take('LOG_IN_REQUEST', logIn);
+}
+```
+
+* axios : Axios is a popular JavaScript library used for making HTTP requests from a browser or Node.js. It provides an easy-to-use interface for performing asynchronous operations like fetching data from a server and handling responses. Axios supports features such as request and response interception, automatic JSON data transformation, and error handling. It is commonly used in frontend and backend development for consuming APIs and interacting with web servers.
+
+* redux-saga : Asynchronous Action Creators don't run directly, they act like event listeners.
+ex) It runs a login generator function when an action named login comes in.
+
+--- 
