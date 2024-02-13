@@ -1187,16 +1187,18 @@ export default function* rootSaga(){
 ```javascript
 import { all, fork, take } from 'redux-saga/effects';
 
+// like a event listener
 function* watchLogIn(){
     yield take('LOG_IN_REQUEST', logIn);
     // take -> Wait for an action named 'LOG_IN' to be executed
-}
 
+}
+// like a event listener
 function* watchLogOut(){
     yield take('LOG_OUT_REQUEST');
     // take -> Wait for an action named 'LOG_OUT' to be executed
 }
-
+// like a event listener
 function* watchAddPost(){
     yield take('ADD_POST_REQUEST');
     // take -> Wait for an action named 'ADD_POST' to be executed
@@ -1291,3 +1293,126 @@ function* watchLogIn(){
 ex) It runs a login generator function when an action named login comes in.
 
 --- 
+
+## Day 26 - 'take', 'take series', 'throttle'
+
+* take : take effect is used to wait for a specific Redux action to be dispatched before continuing with the execution of the Saga. By default, take is a non-blocking effect, meaning it will not prevent the Saga from continuing to execute once the action it is waiting for has been dispatched. However, it will only match and capture the action once.
+
+```javascript
+import { all, fork, take } from 'redux-saga/effects';
+
+// like a event listener
+function* watchLogIn(){
+    yield take('LOG_IN_REQUEST', logIn);
+    // run only one time
+}
+// like a event listener
+function* watchLogOut(){
+    yield take('LOG_OUT_REQUEST');
+    // run only one time
+}
+// like a event listener
+function* watchAddPost(){
+    yield take('ADD_POST_REQUEST');
+    // run only one time
+}
+```
+
+
+```javascript
+function* watchLogIn(){
+    while(true){
+        yield take('LOG_IN_REQUEST', logIn);
+    }
+}
+
+function* watchLogOut(){
+    while(true){
+        yield take('LOG_OUT_REQUEST', logOut);
+    }
+}
+
+function* watchAddPost(){
+    while(true){
+        yield take('ADD_POST_REQUEST', addPost);
+    }
+}
+```
+
+or
+
+```javascript
+function* watchLogIn(){
+    yield takeEvery('LOG_IN_REQUEST', logIn);
+}
+
+function* watchLogOut(){
+    yield takeEvery('LOG_OUT_REQUEST', logOut);
+}
+
+function* watchAddPost(){
+    yield takeEvery('ADD_POST_REQUEST', addPost);
+}
+```
+
+* while take vs takeEvery : The difference is that while take works synchronously, while takeEvery works asynchronously.
+
+
+```javascript
+function* watchLogIn(){
+    yield takeLatest('LOG_IN_REQUEST', logIn);
+}
+
+function* watchLogOut(){
+    yield takeLatest('LOG_OUT_REQUEST', logOut);
+}
+
+function* watchAddPost(){
+    yield takeLatest('ADD_POST_REQUEST', addPost);
+}
+```
+* takeEvery vs takeLatest : takeEvery and takeLatest are both Redux-Saga effects used for handling asynchronous actions in response to dispatched Redux actions. They have different behaviors and use cases:
+
+takeEvery:
+takeEvery is a helper function that creates a new Saga every time the specified action type is dispatched.
+It allows concurrent handling of multiple instances of the same action type. This means if multiple instances of the specified action are dispatched simultaneously, multiple Sagas will be spawned, each handling its own instance independently.
+Useful for scenarios where you want to handle every occurrence of a particular action type, even if multiple instances of that action are dispatched concurrently.
+
+takeLatest:
+takeLatest is a helper function that creates a Saga to handle the most recent instance of the specified action type, canceling any previously forked Sagas for the same action type that are still running.
+This means that if multiple instances of the specified action type are dispatched in quick succession, only the Saga corresponding to the most recent instance will be executed, and previous Sagas for the same action type will be canceled.
+Useful for scenarios where you are only interested in handling the most recent occurrence of a particular action type, such as handling user input events where you only care about the latest input.
+
+-> takeEvery is suitable when you want to handle every occurrence of a particular action type, while takeLatest is suitable when you only care about handling the most recent occurrence of a particular action type. The choice between them depends on your specific use case and requirements.
+
+ex) When a click is made twice, a request is sent to the server twice, and a response is received twice. In this case, using takeLatest, the request cannot be canceled, but the response before the last response can be canceled.
+However, since the request is not canceled, the data is requested to the server twice and stored in duplicate, so you need to add a procedure to check for duplicates in the backend.
+
+
+```javascript
+function* watchAddPost(){
+    yield throttle('ADD_POST_REQUEST', addPost, 2000);
+}
+```
+
+* throttle : throttle is a timeout effect that allows you to only accept one request for a limited amount of time. 
+
+** Since we don't have a server at the moment, we'll utilize the 'delay' effect (which acts like a setTimeout) to give us an asynchronous effect.
+
+* throttling vs debouncing : throttling and debouncing are two techniques used in web development, particularly in handling user input events like scrolling, resizing, typing, etc. They are used to improve performance and optimize the handling of these events, especially when they occur frequently. Here's a comparison:
+
+Throttling: [scrolling]
+Throttling ensures that the function is executed at a regular interval, preventing it from being called more than once in a given time period.
+When an event occurs, the function will be executed at the start of the interval and then ignored until the interval has elapsed, even if the event continues to occur during that time.
+It limits the rate at which the function is called.
+Useful for scenarios where you want to ensure that a function is called at most once per specified interval, regardless of how many times the event occurs.
+Example: If you're listening to scroll events and throttling the handler function, it would execute at a constant rate, say every 100 milliseconds, regardless of how frequently the scroll event is triggered.
+
+Debouncing: [searching]
+Debouncing delays the execution of the function until after a certain amount of time has passed since the last occurrence of the event.
+When an event occurs, the function call is delayed by the specified time period. If the event occurs again within that time period, the previous call is canceled, and a new call is scheduled.
+It ensures that the function is only executed after the event has stopped occurring for a certain duration.
+Useful for scenarios where you want to wait until a user has stopped performing an action before taking action, such as searching after a user has stopped typing for a few milliseconds.
+Example: If you're debouncing a search input field, the search function would only execute after the user has stopped typing for a specified duration, say 300 milliseconds. If the user continues typing, the execution of the search function is postponed until there's a pause in typing.
+
+-> throttling limits the rate at which a function is called, while debouncing delays the execution of a function until after a pause in events. Both techniques are valuable for optimizing performance and managing event handling, depending on the specific requirements of your application.
