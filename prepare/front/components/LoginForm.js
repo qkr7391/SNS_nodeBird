@@ -4,9 +4,9 @@ import { Form, Input, Button } from "antd";
 import styled from "styled-components";
 
 import useInput from "../hooks/useinput";
-import {useDispatch} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-import {loginAction} from "../reducers/user";
+import { loginRequestAction } from "../reducers/user";
 
 const ButtonWrapper = styled.div`
 	margin-top: 10px;
@@ -18,6 +18,8 @@ const FormWrapper = styled(Form)`
 
 const LoginForm = () => {
 	const dispatch = useDispatch();
+	const { isLoggingIn } = useSelector((state) => state.user)
+
 	const [id, onChangeId] = useInput("aaa");
 	const [password, onChangePassword] = useInput("aaa");
 
@@ -25,7 +27,7 @@ const LoginForm = () => {
 		(e) => {
 			console.log(id, password);
 			// setIsLoggedIn(true);
-			dispatch(loginAction({id, password}));
+			dispatch(loginRequestAction({id, password}));
 		},
 		[id, password]
 	);
@@ -50,7 +52,7 @@ const LoginForm = () => {
 			</div>
 
 			<ButtonWrapper>
-				<Button type="primary" htmlType="submit" loading={false}>
+				<Button type="primary" htmlType="submit" loading={isLoggingIn}>
 					{" "}
 					Login{" "}
 				</Button>

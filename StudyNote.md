@@ -1416,3 +1416,234 @@ Useful for scenarios where you want to wait until a user has stopped performing 
 Example: If you're debouncing a search input field, the search function would only execute after the user has stopped typing for a specified duration, say 300 milliseconds. If the user continues typing, the execution of the search function is postponed until there's a pause in typing.
 
 -> throttling limits the rate at which a function is called, while debouncing delays the execution of a function until after a pause in events. Both techniques are valuable for optimizing performance and managing event handling, depending on the specific requirements of your application.
+
+---
+
+## Day 27 - split 'saga', connect with 'reducer'
+
+* disadvantage of 'redux' -> long code
+
+* Divide 'saga'
+```javascript
+[sagas/user.js]
+import { all, fork, takeLatest, delay, put, call } from 'redux-saga/effects';
+import axios from "axios";
+
+function logInAPI(data){
+    return axios.post('/api.login', data)
+}
+function* logIn(action){
+    try{
+        // const result =  yield call(logInAPI, action.data)
+        yield delay(1000);
+        yield put({
+            type: 'LOG_IN_SUCCESS',
+            // data: result.data
+        });
+    } catch(err) {
+        yield put({
+            type: 'LOG_IN_FAILURE',
+            data: err.response.data,
+        });
+    }
+}
+
+function logOutAPI(){
+    return axios.post('/api.logout')
+}
+
+function* logOut(){
+    try{
+        // const result =  yield call(logOutAPI)
+        yield delay(1000);
+        yield put({
+            type: 'LOG_OUT_SUCCESS',
+            // data: result.data
+        });
+    } catch(err) {
+        yield put({
+            type: 'LOG_OUT_FAILURE',
+            data: err.response.data,
+        });
+    }
+}
+
+function* watchLogIn(){
+    yield takeLatest('LOG_IN_REQUEST', logIn);
+}
+
+function* watchLogOut(){
+    yield takeLatest('LOG_OUT_REQUEST', logOut);
+}
+
+export default function* userSaga () {
+    yield all([
+        fork(watchLogIn),
+        fork(watchLogOut),
+    ])
+}
+
+[sagas/post.js]
+import { all, fork, take, call, put, takeLatest, delay } from 'redux-saga/effects';
+import axios from 'axios';
+function addPostAPI(data){
+    return axios.post('/api.post', data)
+}
+
+function* addPost(action){
+    try{
+        // const result =  yield call(addPostAPI, action.data)
+        yield delay(1000);
+        yield put({
+            type: 'ADD_POST_SUCCESS',
+            // data: result.data
+        });
+    } catch(err) {
+        yield put({
+            type: 'ADD_POST_FAILURE',
+            data: err.response.data,
+        });
+    }
+}
+
+function* watchAddPost(){
+    yield takeLatest('ADD_POST_REQUEST', addPost);
+}
+
+export default function* postSaga(){
+    yield all([
+        fork(watchAddPost),
+    ])
+}
+
+[sagas/index.js]
+import { all, fork} from 'redux-saga/effects';
+import postSaga from './post';
+import userSaga from './user';
+
+export default function* rootSaga(){
+    yield all([
+        fork(userSaga),
+        fork(postSaga),
+    ])
+}
+```
+
+* connect 'reducer' with component
+
+```javascript
+[reducers/user.js]
+export const initialState = {
+    isLoggingIn: false, // trying login
+    isLoggedIn: false,
+    isLoggingOut: false, // trying logout
+    self: null,
+    signUpData: {},
+    loginData:{},
+}
+//action creator
+export const loginRequestAction = (data) => {
+    return{
+        type: 'LOG_IN_REQUEST',
+        data,
+    }
+}
+
+export const loginSuccessAction = (data) => {
+    return{
+        type: 'LOG_IN_SUCCESS',
+        data,
+    }
+}
+
+export const loginFailureAction = (data) => {
+    return{
+        type: 'LOG_IN_FAILURE',
+        data,
+    }
+}
+//action creator
+export const logoutRequestAction = () => {
+    return{
+        type: 'LOG_OUT_REQUEST',
+    }
+}
+export const logoutSuccessAction = () => {
+    return{
+        type: 'LOG_OUT_SUCCESS',
+    }
+}
+
+export const logoutFailureAction = () => {
+    return{
+        type: 'LOG_OUT_FAILURE',
+    }
+}
+const reducer = (state = initialState, action) => {
+    switch (action.type){
+        case 'LOG_IN_REQUEST':
+            return {
+                ...state,
+                isLoggingIn: true,
+                self:action.data,
+            };
+        case 'LOG_IN_SUCCESS':
+            return {
+                ...state,
+                isLoggingIn: false,
+                isLoggedIn: true,
+                self:action.data,
+            };
+        case 'LOG_IN_FAILURE':
+            return {
+                ...state,
+                isLoggingIn: false,
+                isLoggedIn: false,
+            };
+        case 'LOG_OUT_REQUEST':
+            return {
+                ...state,
+                isLoggingOut: true,
+            };
+        case 'LOG_OUT_SUCCESS':
+            return {
+                ...state,
+                isLoggingOut: false,
+                isLoggedIn: false,
+                self:null,
+            };
+        case 'LOG_OUT_FAILURE':
+            return {
+                ...state,
+                isLoggingOut: false,
+                self:null,
+            };
+        default :
+            return state;
+
+    }
+};
+
+export default reducer;
+```
+
+```javascript
+[components/LoginForm.js]
+
+[components/UserProfile.js]
+
+
+```
+
+* 'login' order
+1. [LoginForm] -> try to login : input Id, Password and click the 'login' button
+2. Run 'loginRequest Action'
+3. [saga/user.js] execute 'LOG_IN_REQUEST' in function watchLogIn()
+4. execute reducer switch case 'LOG_IN_REQUEST' in [reducer/user.js] && function* logIn in [saga/user.js]
+5. 1sec later, 'LOG_IN_SUCCESS' -> dispatch, execute reducer switch case 'LOG_IN_SUCCESS' in [reducer/user.js]
+6. 'self' got data -> 'isLoggedIn' will be true
+7. changed to <UserProfile> from <LoginForm> in [AppLayout]
+
+* Request -> reducer && saga -> 1sec later -> Success -> change <LoginForm> to <UserProfile>
+
+--- 
