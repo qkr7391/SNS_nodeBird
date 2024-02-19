@@ -1647,3 +1647,11 @@ export default reducer;
 * Request -> reducer && saga -> 1sec later -> Success -> change <LoginForm> to <UserProfile>
 
 --- 
+
+## Day 28 - organizing action and state
+
+[sagas/user.js], [sagas/post.js], [reducers/user.js], [reducers/post.js]
+
+* To make your code more readable and maintainable, unify the names of code with similar properties and organize functions with repetitive structures.
+
+* To avoid typos, we declare things as variables and give each item a similar organization to give it uniformity.
