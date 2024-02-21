@@ -1655,3 +1655,24 @@ export default reducer;
 * To make your code more readable and maintainable, unify the names of code with similar properties and organize functions with repetitive structures.
 
 * To avoid typos, we declare things as variables and give each item a similar organization to give it uniformity.
+
+---
+
+## Day 29 - Apply the changed state and perform an ESLINT check
+
+1. change 'id' to 'email' -> because of MySQL error 
+2. eslint change
+```.eslintrc
+"rules": {
+    "jsx-a11y/label-has-associated-control": "off",
+    "jsx-a11y/anchor-is-valid": "off",
+    "no-console": "off",
+    "no-underscore-dangle":"off",
+    "react/forbid-prop-types": "off",
+    "react/jsx-filename-extension": "off",
+    "react/jsx-one-expression-per-line": "off",
+    "object-curly-newline": "off",
+    "linebreak-style": "off"
+  }
+```
+

@@ -3,7 +3,7 @@ import { Card, Avatar, Button } from 'antd';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from "react-redux";
 
-import { logoutRequestAction } from '../reducers/user'
+import { LOG_OUT_REQUEST } from '../reducers/user'
 
 const ButtonWrapper = styled.div`
  margin-top: 20px;
@@ -17,20 +17,22 @@ const CardWrapper = styled(Card)`
 const UserProfile = () => {
     const dispatch = useDispatch();
 
-    const { self, isLoggingOut } = useSelector((state) => state.user)
+    const { self, logOutLoading } = useSelector((state) => state.user)
 
     const onLogOut = useCallback(()=>{
         // setIsLoggedIn(false);
-        dispatch(logoutRequestAction());
+        dispatch({
+            type: LOG_OUT_REQUEST,
+        });
     },[]);
 
     return (
 
        <CardWrapper
             actions={[
-                <div key="twit">Twit<br/>0</div>,
-                <div key="followings">Followings<br/>0</div>,
-                <div key="followers">Followers<br/>0</div>
+                <div key="twit">Twit<br/>{self.Posts.length}</div>,
+                <div key="followings">Followings<br/>{self.Followings.length}</div>,
+                <div key="followers">Followers<br/>{self.Followers.length}</div>
             ]}>
 
            <Card.Meta
@@ -38,7 +40,7 @@ const UserProfile = () => {
                title={self.nickname}/>
 
            <ButtonWrapper>
-               <Button onClick={onLogOut} loading={isLoggingOut}>Log out</Button>
+               <Button onClick={onLogOut}>Log out</Button>
            </ButtonWrapper>
        </CardWrapper>
     );

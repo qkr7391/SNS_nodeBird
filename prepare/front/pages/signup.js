@@ -2,17 +2,22 @@ import React, { useState, useCallback } from "react";
 import Head from "next/head";
 import { Checkbox, Form, Input, Button } from "antd";
 import styled from "styled-components";
+import { useSelector, useDispatch } from "react-redux";
 
 import AppLayout from "../components/AppLayout";
 import useInput from "../hooks/useinput";
+import { SIGN_UP_REQUEST } from "../reducers/user";
 
 const ErrorMessage = styled.div`
 	color: red;
 `;
 
 const Signup = () => {
-	const [id, onChangeId] = useInput("");
-	console.log(id);
+	const dispatch = useDispatch();
+	const { signUpLoading } = useSelector((state)=> state.user);
+
+	const [email, onChangeEmail] = useInput("");
+	console.log(email);
 	const [nickname, onChangeNickname] = useInput("");
 	const [password, onChangePassword] = useInput("");
 
@@ -40,7 +45,11 @@ const Signup = () => {
 		if (!term) {
 			return setTermError(true);
 		}
-		console.log(id, nickname, password);
+		console.log(email, nickname, password);
+		dispatch({
+			type: SIGN_UP_REQUEST,
+			data: {email, password, nickname},
+		});
 	}, [password, passwordCheck, term]);
 
 	return (
@@ -52,9 +61,9 @@ const Signup = () => {
 				</Head>
 				<Form onFinish={onSubmit}>
 					<div>
-						<label htmlFor="user-id">ID</label>
+						<label htmlFor="user-email">Email</label>
 						<br />
-						<Input name="user-id" value={id} required onChange={onChangeId} />
+						<Input name="user-email" type="email" value={email} required onChange={onChangeEmail} />
 					</div>
 					<div>
 						<label htmlFor="user-nickname">Nickname</label>
@@ -100,7 +109,7 @@ const Signup = () => {
 						)}
 					</div>
 					<div style={{ marginTop: 10 }}>
-						<Button type="primary" htmlType="submit">
+						<Button type="primary" htmlType="submit" loading={signUpLoading}>
 							Sign up
 						</Button>
 					</div>

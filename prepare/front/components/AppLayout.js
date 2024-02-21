@@ -10,6 +10,8 @@ import { createGlobalStyle } from "styled-components";
 import UserProfile from '../components/UserProfile';
 import LoginForm from '../components/LoginForm';
 
+import { LOG_IN_SUCCESS } from "../reducers/user";
+
 // const SearchInput = styled(Input.Search)`
 //   vertical-align: middle;
 // `
@@ -30,7 +32,7 @@ const Global = createGlobalStyle`
 `
 const AppLayout = ({children}) =>{
     // const [isLoggedIn, setIsLoggedIn] = useState(false); //dummy data
-    const isLoggedIn = useSelector((state) => state.user.isLoggedIn)
+    const { self } = useSelector((state) => state.user)
 
     return(
         <div>
@@ -53,7 +55,8 @@ const AppLayout = ({children}) =>{
 
             <Row gutter={8}>
                 <Col xs={24} md={6}>
-                    {isLoggedIn ? <UserProfile/> : <LoginForm/>}
+                    { self ? <UserProfile/> : <LoginForm/>}
+                    {/*{ {LOG_IN_SUCCESS} ? <UserProfile/> : <LoginForm/>}*/}
                 </Col>
                 <Col xs={24} md={12}>
                     {children}
