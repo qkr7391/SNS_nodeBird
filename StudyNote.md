@@ -1676,3 +1676,149 @@ export default reducer;
   }
 ```
 
+---
+
+## Day 30 - Post, Reply >> writing 'Saga'
+
+1. when you post ‘123’ and click upload button, addPost in ‘PostForm.js’ get ‘123’ to data and send data to success from addPost function in ‘sagas/post.js’.
+```javaScript
+function* addPost(action){
+    try{
+        // const result =  yield call(addPostAPI, action.data)
+        yield delay(1000);
+        yield put({
+            type: ADD_POST_SUCCESS,
+            data: action.data
+        });
+```
+And it goes to [ADD_POST_SUCCESS] in ‘reducers/post.js’
+```javascript
+//function version of dummyPost
+const dummyPost =(data) => ({
+    id:2,
+    content: data,
+    User: {
+        id:1,
+        nickname: 'dummydummy',
+    },
+    Images:[],
+    Comments: []
+});
+
+case ADD_POST_SUCCESS:
+            return {
+                ...state,
+                mainPosts: [dummyPost(action.data), ...state.mainPosts],
+                addPostLoading: false,
+                addPostDone: true,
+            };
+```
+
+>> Warning: Encountered two children with the same key, `2`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+-> problem from 'dummyPost' 
+```Javascript 
+//function version of dummyPost
+const dummyPost =(data) => ({
+id:2,
+...
+``` 
+
+* FIXING >> In dummyPost, we use the id value as the key, and since we fixed a specific value of '2', all posts will have the key '2', so we can't distinguish them in the loop.
+Also, because of the nature of posts, the order of keys is constantly changing, so using keys as indexes is not a good idea.
+In this case, we can use a method that generates randomized usernames.
+-> use the 'shortid' library or the 'faker' library
+
+
+```javascript
+[redcers/post.js]
+import shortId from 'shortid';
+
+const dummyPost =(data) => ({
+    id: shortId.generate(),
+...
+})
+```
+
+2. Wrting 'Comment' in comment form and click 'twit' button, then onSubmitComment in CommentForm.js will save it to data ()
+[CommentForm.js]
+```javascript
+const onSubmitComment = useCallback(()=>{
+    dispatch({
+        type: ADD_COMMENT_REQUEST,
+        data: { content: commentText, postId: post.id, userId: id},
+    });
+}, [commentText, id])
+```
+
+* receive post as a props, and receive id from reducer, receive comment from state and dispatch all of this and put those to ‘ADD_COMMENT_REQUEST’. 
+* saga will receive that data to addComment function in ’sagas/post.js'
+```javaScript 
+function* addComment(action){
+    try{
+        // const result =  yield call(addPostAPI, action.data)
+        yield delay(1000);
+        yield put({
+            type: ADD_COMMENT_SUCCESS,
+            data: action.data,
+        });
+```
+
+* sent data to ADD_COMMENT_SUCCESS in ‘reducers/post.js’
+```javaScript
+case ADD_COMMENT_SUCCESS:
+            //receive action.data.content, postId, userId
+            return {
+                ...state,
+                addCommentLoading: false,
+                addCommentDone: true,
+            };
+```
+
+* Each time a post is added, it is appended to mainPost:[{...}] in front of it. To access the comments, you need to find them via the post ID, access the Comments within it, and add them with immutability.
+
+```javascript
+const dummyComment = (data) => ( {
+    id: shortId.generate(),
+    content: data,
+    User: {
+        id: 1,
+        nickname: 'dummyComment',
+    },
+})
+    ...
+1)
+case ADD_COMMENT_SUCCESS:
+    //receive action.data.content, postId, userId
+    const postIndex = state.mainPosts.findIndex((v)=>v.id === action.data.postId);
+    const post = state.mainPosts[postIndex];
+    const Comments = [dummyComment(action.data.content), ...post.Comments];
+    const mainPosts = [...state.mainPosts];
+    mainPosts[postIndex] = { ...post, Comments };
+   
+    return {
+        ...state,
+        mainPosts,
+        addCommentLoading: false,
+        addCommentDone: true,
+};
+
+2)
+case ADD_COMMENT_SUCCESS:
+    //receive action.data.content, postId, userId
+    const postIndex = state.mainPosts.findIndex((v)=>v.id === action.data.postId);
+    const post ={ ...state.mainPosts[postIndex] } ;
+    post.Comments = [dummyComment(action.data.content), ...post.Comments];
+    const mainPosts = [...state.mainPosts];
+    mainPosts[postIndex] = post;
+   
+    return {
+        ...state,
+        mainPosts,
+        addCommentLoading: false,
+        addCommentDone: true,
+};
+
+```
+-> The key to immutability is that only the things that change should be made new objects, and the rest of the objects should keep their references.
+The code you've written is not clean, and it raises questions. 
+

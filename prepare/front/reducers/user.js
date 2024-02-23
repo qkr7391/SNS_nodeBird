@@ -5,9 +5,12 @@ export const initialState = {
     logOutLoading: false, // trying logout
     logOutDone: false,
     logOutError: null,
-    signUpLoading: false, // trying singup
+    signUpLoading: false, // trying sing up
     signUpDone: false,
     signUpError: null,
+    changeNicknameLoading: false, // trying to change nickname
+    changeNicknameDone: false,
+    changeNicknameError: null,
     self: null,
     signUpData: {},
     loginData: {},
@@ -24,6 +27,10 @@ export const LOG_OUT_FAILURE = 'LOG_OUT_FAILURE';
 export const SIGN_UP_REQUEST = 'SIGN_UP_REQUEST';
 export const SIGN_UP_SUCCESS = 'SIGN_UP_SUCCESS';
 export const SIGN_UP_FAILURE = 'SIGN_UP_FAILURE';
+
+export const CHANGE_NICKNAME_REQUEST = 'CHANGE_NICKNAME_REQUEST';
+export const CHANGE_NICKNAME_SUCCESS = 'CHANGE_NICKNAME_SUCCESS';
+export const CHANGE_NICKNAME_FAILURE = 'CHANGE_NICKNAME_FAILURE';
 
 export const FOLLOW_REQUEST = 'FOLLOW_REQUEST';
 export const FOLLOW_SUCCESS = 'FOLLOW_SUCCESS';
@@ -122,6 +129,25 @@ const reducer = (state = initialState, action) => {
                ...state,
                signUpLoading: false,
                signUpError: action.error,
+           };
+       case CHANGE_NICKNAME_REQUEST:
+           return {
+               ...state,
+               changeNicknameLoading: true,
+               changeNicknameDone: false,
+               changeNicknameError:null,
+           };
+       case CHANGE_NICKNAME_SUCCESS:
+           return {
+               ...state,
+               changeNicknameLoading: false,
+               changeNicknameDone: true,
+           };
+       case CHANGE_NICKNAME_FAILURE:
+           return {
+               ...state,
+               changeNicknameLoading: false,
+               changeNicknameError: action.error,
            };
        default :
            return state;
