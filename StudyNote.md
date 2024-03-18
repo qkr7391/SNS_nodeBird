@@ -1822,3 +1822,120 @@ case ADD_COMMENT_SUCCESS:
 -> The key to immutability is that only the things that change should be made new objects, and the rest of the objects should keep their references.
 The code you've written is not clean, and it raises questions. 
 
+---
+## Day 31 - Delete post with 'saga'
+
+
+* Problem: Managing users and managing posts are separate in Reducer, so we need to solve the connection between them when publishing a post.
+Ex) When you post a post, the post with your ID is uploaded to the post, and the post should be uploaded to the user's data. Conversely, when a post is deleted, the post with your username is deleted from the post, and the post should be deleted from the user's data.
+
+
+[reducer/user.js & reducer/post.js]
+```javascript
+const dummyUser = (data) => ({
+    ...data,
+    Posts:[{id:1}, ...],
+    ...
+})
+```
+***Want to change the user reducer when adding/deleting posts.***
+
+
+What if I want to change the user reducer status? -> The state can only be changed via an action.  -> Create an action.
+
+```javascript
+[reducer/user.js]
+export const ADD_POST_TO_ME = 'ADD_POST_TO_ME';
+export const DELETE_POST_OF_ME= 'DELETE_POST_OF_ME'
+// ^^^ Create an action to change the state of the User reducer
+```
+
+```javascript
+[saga/post.js]
+function* addPost(action){
+    ... (success)
+        yield put({
+            type: ADD_POST_TO_ME,
+        })
+    ...
+```
+Since saga can dispatch multiple actions at the same time, if an action needs to change multiple reducers at the same time, you can call the action multiple times 
+
+```javascript
+[reducer/user.js]
+export const ADD_POST_TO_ME = 'ADD_POST_TO_ME';
+export const DELETE_POST_OF_ME= 'DELETE_POST_OF_ME'
+
+case ADD_POST_TO_ME:
+    return{
+        ...state,
+        self:{
+            ...state.self,
+            Posts: [{id: action.data}, ...state.self.Posts],
+        }
+    };
+case DELETE_POST_OF_ME:
+    return{
+        ...state,
+        self:{
+            ...state.self,
+            Posts: state.self.Posts.filter((v) => v.id !== action.data ),
+        }
+    };
+```
+
+```javascript
+[reducer/post.js]
+case DELETE_POST_REQUEST:
+    return{
+        ...state,
+        deletePostLoading: true,
+        deletePostDone: false,
+        deletePostError: null,
+    };
+case DELETE_POST_SUCCESS:
+    return {
+        ...state,
+        mainPosts: state.mainPosts.filter((v) => v.id !== action.data),
+        deletePostLoading: false,
+        deletePostDone: true,
+    };
+case DELETE_POST_FAILURE:
+    return{
+        ...state,
+        deletePostLoading: false,
+        deletePostError: action.error
+    };
+```
+
+```javascript
+[saga/post.js]
+function deletePostAPI(data){
+    return axios.delete('/api/post', data)
+}
+function* deletePost(action){
+    try{
+        // const result =  yield call(addPostAPI, action.data)
+        yield delay(1000);
+        const id = shortId.generate();
+        yield put({
+            type: DELETE_POST_SUCCESS,
+            data: action.data,
+        });
+        yield put({
+            type: DELETE_POST_OF_ME,
+            data: action.data,
+        })
+    } catch(err) {
+        console.error(err);
+        yield put({
+            type: DELETE_POST_FAILURE,
+            data: err.response.data,
+        });
+    }
+}
+function* watchDeletePost(){
+    yield takeLatest(DELETE_POST_REQUEST, deletePost);
+}
+```
+

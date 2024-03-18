@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import PropTypes from "prop-types";
-import { useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import { Card, Popover, Button, Avatar, List} from 'antd';
 // import { Card, Popover, Button, Avatar, List, Comment } from 'antd';
 import { EllipsisOutlined, HeartOutlined, MessageOutlined, RetweetOutlined, HeartTwoTone } from "@ant-design/icons";
@@ -8,11 +8,15 @@ import { EllipsisOutlined, HeartOutlined, MessageOutlined, RetweetOutlined, Hear
 import PostImages from "./PostImages";
 import CommentForm from "./CommentForm";
 import PostCardContent from "./PostCardContent";
+import {DELETE_POST_REQUEST} from "../reducers/post";
 
 // ... rest of the code
 
 
 const PostCard = ({post}) => {
+    const dispatch = useDispatch();
+    const {deletePostLoading} = useSelector((state) => state.post);
+
     // State for managing like and comment form visibility
     const [liked, setLiked] = useState(false);
     const [commentFormOpened, setCommentFormOpened] = useState(false);
@@ -26,6 +30,13 @@ const PostCard = ({post}) => {
     const onToggleComment = useCallback(()=>{
         setCommentFormOpened((prev) => !prev);
     }, []);
+
+    const onDeletePost = useCallback(() => {
+        dispatch({
+            type: DELETE_POST_REQUEST,
+            data: post.id,
+        })
+    });
 
     // Get user ID from Redux state
     //way1// const { self } = useSelector((state) => state.user.self?.id);
@@ -50,7 +61,7 @@ const PostCard = ({post}) => {
                                   (
                                       <>
                                       <Button>Edit</Button>
-                                      <Button type='danger'>Delete</Button>
+                                      <Button loading={deletePostLoading} onClick={onDeletePost}>Delete</Button>
                                       </>
                                   ) :
                                        <Button>Report</Button>}

@@ -10,21 +10,28 @@ export const initialState = {
         },
         content: 'first post #hashtag #yeah',
         Images:[{
+            id: shortId.generate(),
             src:'https://images.unsplash.com/photo-1705002455875-29da8631d626?q=80&w=2187&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
         },{
+            id: shortId.generate(),
             src:'https://images.unsplash.com/photo-1704869881379-4e88e66c0248?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw0fHx8ZW58MHx8fHx8'
         },{
+            id: shortId.generate(),
             src:'https://images.unsplash.com/photo-1704917560617-ccc4e10e5139?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxNXx8fGVufDB8fHx8fA%3D%3D'
         },
         ],
         Comments: [{
+            id: shortId.generate(),
             User:{
+                id: shortId.generate(),
                 nickname: 'a1',
             },
             content: 'wow',
         },
             {
+            id: shortId.generate(),
             User:{
+                id: shortId.generate(),
                 nickname: 'a2',
             },
             content: 'cool',
@@ -34,6 +41,9 @@ export const initialState = {
     addPostLoading: false,
     addPostDone: false,
     addPostError: null,
+    deletePostLoading: false,
+    deletePostDone: false,
+    deletePostError: null,
     addCommentLoading: false,
     addCommentDone: false,
     addCommentError: null,
@@ -42,6 +52,10 @@ export const initialState = {
 export const ADD_POST_REQUEST = 'ADD_POST_REQUEST';
 export const ADD_POST_SUCCESS = 'ADD_POST_SUCCESS';
 export const ADD_POST_FAILURE = 'ADD_POST_FAILURE';
+
+export const DELETE_POST_REQUEST = 'DELETE_POST_REQUEST';
+export const DELETE_POST_SUCCESS = 'DELETE_POST_SUCCESS';
+export const DELETE_POST_FAILURE = 'DELETE_POST_FAILURE';
 
 export const ADD_COMMENT_REQUEST = 'ADD_COMMENT_REQUEST';
 export const ADD_COMMENT_SUCCESS = 'ADD_COMMENT_SUCCESS';
@@ -75,8 +89,8 @@ export const addComment = (data) => ({
 // }
 //function version of dummyPost
 const dummyPost =(data) => ({
-    id: shortId.generate(),
-    content: data,
+    id: data.id,
+    content: data.content,
     User: {
         id:1,
         nickname: 'dummyPost',
@@ -117,6 +131,28 @@ const reducer = (state = initialState, action) => {
                 ...state,
                 addPostLoading: false,
                 addPostError: action.error
+            };
+        case DELETE_POST_REQUEST:
+            return{
+                ...state,
+                deletePostLoading: true,
+                deletePostDone: false,
+                deletePostError: null,
+            };
+
+        case DELETE_POST_SUCCESS:
+            return {
+                ...state,
+                mainPosts: state.mainPosts.filter((v) => v.id !== action.data),
+                deletePostLoading: false,
+                deletePostDone: true,
+            };
+
+        case DELETE_POST_FAILURE:
+            return{
+                ...state,
+                deletePostLoading: false,
+                deletePostError: action.error
             };
         case ADD_COMMENT_REQUEST:
         return{
