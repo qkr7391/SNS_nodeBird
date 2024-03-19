@@ -1,4 +1,4 @@
-import produce from 'immer';
+import {produce} from 'immer';
 
 
 export const initialState = {
@@ -139,7 +139,9 @@ const reducer = (state = initialState, action) => {
             default:
                 break;
         }
-    });
+    })
 };
+
+
 
 export default reducer;

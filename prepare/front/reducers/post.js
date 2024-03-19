@@ -1,5 +1,5 @@
 import shortId from 'shortid';
-import produce from 'immer';
+import {produce }from 'immer';
 
 export const initialState = {
     mainPosts: [{
@@ -146,7 +146,7 @@ const reducer = (state = initialState, action) => {
                 break;
 
             case ADD_COMMENT_SUCCESS:{
-                const post = draft.mainPosts.finc((v) => v.id === action.data.postId);
+                const post = draft.mainPosts.find((v) => v.id === action.data.postId);
                 post.Comments.unshift(dummyComment(action.data.content));
                 draft.addCommentLoading = false;
                 draft.addCommentDone = true;
