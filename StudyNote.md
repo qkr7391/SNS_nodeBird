@@ -1939,3 +1939,82 @@ function* watchDeletePost(){
 }
 ```
 
+---
+
+## Day 32 - 'immer'
+
+* What is 'immer'? 
+-> Immer is a JavaScript library used for facilitating immutable updates to state in a more convenient and readable manner. It provides a simple API for creating copies of data structures with modifications, without mutating the original data. Immer uses a technique called structural sharing to optimize memory usage when creating these modified copies.
+Immer is particularly popular in the context of React applications, where managing state immutably is crucial for predictable rendering and performance. It simplifies the process of updating nested state objects or arrays, making code more maintainable and less error-prone.
+
+-> Invariants are important to keep, but they also make it easy to get bogged down in the slightest deviation, and code is only going to get longer and longer, so it's not easy to keep adding more and more code while maintaining invariants.
+So let's utilize 'immer'.
+
+
+```javascript
+case ADD_COMMENT_SUCCESS:{
+    //receive action.data.content, postId, userId
+    const postIndex = state.mainPosts.findIndex((v)=>v.id === action.data.postId);
+    const post ={ ...state.mainPosts[postIndex] } ;
+    post.Comments = [dummyComment(action.data.content), ...post.Comments];
+    const mainPosts = [...state.mainPosts];
+    mainPosts[postIndex] = post;
+    return {
+        ...state,
+        mainPosts,
+        addCommentLoading: false,
+        addCommentDone: true,
+    };
+}
+
+***Change***
+
+case ADD_COMMENT_SUCCESS:{
+    //Here, post is declared as a variable that will represent the post to which a comment is being added. It's assigned the result of the find method called on draft.mainPosts, which presumably is an array of posts. The find method is used to search for a post where the id matches action.data.postId.
+    const post = draft.mainPosts.finc((v) => v.id === action.data.postId);
+    
+    //This line adds a new comment to the Comments array of the post found in the previous step. It uses the unshift method to add the new comment to the beginning of the array, effectively making it the newest comment.
+    post.Comments.unshift(dummyComment(action.data.content));
+    
+    //These lines update the state properties addCommentLoading and addCommentDone to reflect the status of adding the comment. Setting addCommentLoading to false indicates that the process of adding a comment has finished (either successfully or unsuccessfully), while setting addCommentDone to true indicates that the action of adding a comment has been completed successfully.
+    draft.addCommentLoading = false;
+    draft.addCommentDone = true;
+    
+    break;
+    };
+}
+```
+
+```javascript
+[reducer/user.js]
+
+case ADD_POST_TO_ME:
+    return{
+        ...state,
+        self:{
+            ...state.self,
+            Posts: [{id: action.data}, ...state.self.Posts],
+        }
+    };
+case DELETE_POST_OF_ME:
+    return{
+        ...state,
+        self:{
+            ...state.self,
+            Posts: state.self.Posts.filter((v) => v.id !== action.data ),
+        }
+    };
+
+***Change***
+
+case ADD_POST_TO_ME:
+    draft.self.Posts.unshift({id: action.data});
+    break;
+case DELETE_POST_OF_ME:
+    draft.self.Posts = draft.self.Posts.filter((v) => v.id !== action.data )
+    break;
+```
+
+
+
+
