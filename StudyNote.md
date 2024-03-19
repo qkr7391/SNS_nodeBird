@@ -2015,6 +2015,33 @@ case DELETE_POST_OF_ME:
     break;
 ```
 
+---
 
+## Day 33 - 'faker'
 
+* What is 'faker'?
+-> faker is a JavaScript library used for generating fake data in various formats and types. It is commonly used in development and testing environments to simulate realistic data for applications without needing to use real data sources.
+With faker, you can generate fake data such as names, addresses, phone numbers, emails, lorem ipsum text, and much more. This can be particularly useful for testing purposes, including unit testing, integration testing, and UI testing, as well as for populating demo or sample data in applications during development.
 
+```javascript
+[reducer/post.js]
+initialState.mainPosts = initialState.mainPosts.concat(
+    Array(20).fill().map((_, index) => ({
+        id: shortId.generate(),
+        User: {
+            id: shortId.generate(),
+            nickname: faker.internet.userName()
+        },
+        content: faker.lorem.paragraph(),
+        Images: [],
+        Comments: [{
+            id: shortId.generate(),
+            User: {
+                id: shortId.generate(),
+                nickname: faker.internet.userName()
+            },
+            content: faker.lorem.sentence(),
+        }],
+    })),
+);
+```
