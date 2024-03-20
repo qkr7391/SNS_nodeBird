@@ -2216,3 +2216,45 @@ Popular libraries like React Virtualized, react-window, and react-infinite-scrol
 In summary, virtualized lists are a powerful technique for efficiently handling large datasets in web applications, ensuring smooth performance and a seamless user experience, even with extensive lists of data.
 
 ---
+
+## Day 35 - Implement 'Following' and 'Followers'
+
+```javascript
+[PostCard.js]
+<Card
+    ...
+extra={<FollowButton post={post} />}
+>
+
+```
+
+```javascript
+[FollowButton.js]
+import React from 'react';
+import { Button } from 'antd';
+import PropTypes from "prop-types";
+
+const FollowButton = ({ post }) => {
+    return <Button>Follow</Button>
+}
+
+FollowButton.propTypes ={
+    post: PropTypes.object.isRequired,
+}
+
+export default FollowButton;
+```
+
+-> Make Follow Button on each Cards.
+
+* Show the Follow button only when logged in
+```javascript
+[PostCard.js]
+<Card
+...
+extra={id && <FollowButton post={post} />}
+```
+
+* When you press the Follow button, 
+1. the Following number will increase
+2. the Follow button changes to an Unfollow button. 

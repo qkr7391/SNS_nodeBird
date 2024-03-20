@@ -9,6 +9,7 @@ import PostImages from "./PostImages";
 import CommentForm from "./CommentForm";
 import PostCardContent from "./PostCardContent";
 import {DELETE_POST_REQUEST} from "../reducers/post";
+import FollowButton from "./FollowButton";
 
 // ... rest of the code
 
@@ -70,6 +71,7 @@ const PostCard = ({post}) => {
                  <EllipsisOutlined />
              </Popover>
          ]}
+         extra={id && <FollowButton post={post} />}
              >
              {/* Meta information for the post card */}
             <Card.Meta
