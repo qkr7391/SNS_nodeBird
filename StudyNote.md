@@ -2047,5 +2047,172 @@ initialState.mainPosts = initialState.mainPosts.concat(
 ```
 
 ---
-## Day 34 - 
+## Day 34 - Infinite scrolling
 
+
+* Call an action called loadPostRequest in pages/index.js that loads the dummy data
+```javascript
+[reducers/post.js]
+export const initialState = {
+    mainPosts: [{
+        id: 1,
+        User: {
+            id:1,
+            nickname: 'sammy'
+        },
+        content: 'first post #hashtag #yeah',
+        Images:[{
+            id: shortId.generate(),
+            src:'https://images.unsplash.com/photo-1705002455875-29da8631d626?q=80&w=2187&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+        },{
+            id: shortId.generate(),
+            src:'https://images.unsplash.com/photo-1704869881379-4e88e66c0248?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw0fHx8ZW58MHx8fHx8'
+        },{
+            id: shortId.generate(),
+            src:'https://images.unsplash.com/photo-1704917560617-ccc4e10e5139?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxNXx8fGVufDB8fHx8fA%3D%3D'
+        },
+        ],
+        Comments: [{
+            id: shortId.generate(),
+            User:{
+                id: shortId.generate(),
+                nickname: 'a1',
+            },
+            content: 'wow',
+        },
+            {
+                id: shortId.generate(),
+                User:{
+                    id: shortId.generate(),
+                    nickname: 'a2',
+                },
+                content: 'cool',
+            }]
+    }],
+    imagePaths:[],
+    addPostLoading: false,
+    addPostDone: false,
+    addPostError: null,
+    deletePostLoading: false,
+    deletePostDone: false,
+    deletePostError: null,
+    addCommentLoading: false,
+    addCommentDone: false,
+    addCommentError: null,
+}
+```
+
+```javascript
+export const initialState = {
+    mainPosts: [],
+    imagePaths:[],
+    addPostLoading: false,
+    addPostDone: false,
+    addPostError: null,
+    deletePostLoading: false,
+    deletePostDone: false,
+    deletePostError: null,
+    addCommentLoading: false,
+    addCommentDone: false,
+    addCommentError: null,
+}
+```
+***Implementing infinite scrolling with SAGA***
+
+Clear the contents of the dummy data and make a request from the server to fetch the data
+1. Clear the dummy data contents
+2. make that part a function -> Replace the part that fetches from the server with the following
+```javascript
+export const generateDummyPost = (number) => Array(20).fill().map((_, index) => ({
+    id: shortId.generate(),
+    User: {
+        id: shortId.generate(),
+        nickname: faker.internet.userName()
+    },
+    content: faker.lorem.paragraph(),
+    Images: [],
+    Comments: [{
+        id: shortId.generate(),
+        User: {
+            id: shortId.generate(),
+            nickname: faker.internet.userName()
+        },
+        content: faker.lorem.sentence(),
+    }],
+}))
+
+initialState.mainPosts = initialState.mainPosts.concat(generateDummyPost(10));
+```
+3. Make the LoadForestRequest call immediately on first screen load from pages/index.js
+```javascript
+[pages/index.js]
+const Home = () =>{
+    const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch({
+            type: LOAD_POSTS_REQUEST,
+        });
+    }, [])
+```
+Make a set of loadposts [LOAD_POSTS_xxx, loadPostsxxx ...] in reducers/posts.js and sagas/post.js
+
+4. Make it request and show new loading when scrolling reaches a certain point
+
+```javascript
+[pages/index.js]
+
+const dispatch = useDispatch();
+// const { isLoggedIn } = useSelector((state) => state.user);
+const { self } = useSelector((state) => state.user);
+const { hasMorePosts, mainPosts, loadPostsLoading } = useSelector((state) => state.post);
+//const mainPosts = userSelector((state) => state.post.mainPosts); ^same^
+
+
+useEffect(() => {
+    dispatch({
+        type: LOAD_POSTS_REQUEST,
+    });
+}, []);
+
+useEffect(()=> {
+    function onScroll(){
+        console.log(window.scrollY, document.documentElement.clientHeight, document.documentElement.scrollHeight);
+        if(window.scrollY + document.documentElement.clientHeight > document.documentElement.scrollHeight - 300){
+            if (hasMorePosts && !loadPostsLoading) {
+                dispatch({
+                    type: LOAD_POSTS_REQUEST,
+                });
+            }
+        }}
+    window.addEventListener('scroll', onScroll);
+
+    return()=>{
+        //If you don't return and clear it, it will continue to accumulate in memory.
+        window.removeEventListener('scroll', onScroll);
+    };
+}, [hasMorePosts, loadPostsLoading])
+
+```
+
+* What is 'react-virtualize' ?
+React Virtualize is a library for efficiently rendering large lists and tabular data in React applications. It helps to improve performance by only rendering the items that are currently visible on the screen, thus reducing the memory footprint and improving the perceived performance of the application.
+
+* A virtualized list is a technique used to efficiently render large lists of data in web applications by only rendering the items that are currently visible on the screen. This approach helps to optimize performance and reduce memory usage, especially when dealing with large datasets.
+
+Here's how a virtualized list works:
+
+- Dynamic Rendering: Instead of rendering all the items in the list at once, a virtualized list dynamically renders only the items that are currently visible within the viewport of the browser.
+
+- Windowing: The virtualized list maintains a "window" or a subset of the total list items that are currently in view. As the user scrolls through the list, the content within this window updates dynamically to show the relevant items.
+
+- Item Recycling: As items scroll out of view, they are removed from the DOM (Document Object Model) to conserve memory. Conversely, as new items scroll into view, they are dynamically added to the DOM. This process is often called "item recycling" or "window shifting."
+
+- Fixed-Size Containers: The virtualized list typically uses fixed-size containers for list items, which ensures consistent rendering performance regardless of the total number of items in the list.
+
+- Optimized Rendering: By rendering only the visible items, the virtualized list optimizes rendering performance and reduces the load on the browser, resulting in smoother scrolling and improved user experience, especially for large datasets.
+
+Popular libraries like React Virtualized, react-window, and react-infinite-scroll-component provide components and utilities to implement virtualized lists efficiently in React applications. These libraries offer various customization options and optimizations to suit different use cases and performance requirements.
+
+In summary, virtualized lists are a powerful technique for efficiently handling large datasets in web applications, ensuring smooth performance and a seamless user experience, even with extensive lists of data.
+
+---
