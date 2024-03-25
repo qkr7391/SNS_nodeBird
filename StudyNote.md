@@ -2258,3 +2258,64 @@ extra={id && <FollowButton post={post} />}
 * When you press the Follow button, 
 1. the Following number will increase
 2. the Follow button changes to an Unfollow button. 
+
+---
+
+## Day 36 - Running a server with node
+
+```javascript
+[back/app.js] - basic form
+const http = require('http');
+
+// Create an HTTP server
+const server = http.createServer((req, res) => {
+    console.log(req.url, req.method);
+    res.end('Hello Node');
+});
+
+// Start listening for incoming connections on port 3060
+server.listen(3065, () => {
+    console.log('Server is listening on port 3065');
+});
+
+```
+
+```javascript
+[back/app.js]
+const http = require('http');
+
+// Create an HTTP server
+const server = http.createServer((req, res) => {
+    console.log(req.url, req.method);
+    if(req.method === 'GET'){
+        if(req.url === 'api/posts'){
+            
+        }
+    } else if(req.method === 'POST'){
+        if(req.url === 'api/posts'){
+
+        }
+    } else if(req.method === 'DELETE'){
+        if(req.url === 'api/posts'){
+
+        }
+    }
+    ...
+    
+    res.write('<h1>HELLO NODE1</h1>');
+    res.write('HELLO NODE2');
+    res.write('HELLO NODE3');
+    res.write('HELLO NODE4');
+    res.end('Hello Node');
+});
+
+// Start listening for incoming connections on port 3060
+server.listen(3065, () => {
+    console.log('Server is listening on port 3065');
+});
+
+```
+
+* Continuing to use conditional statements like this will make our code longer and more complex, so we'll use express.
+
+
