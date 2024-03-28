@@ -2368,3 +2368,50 @@ app.option -> asking,
 app.head -> head
 ```
 
+---
+## Day 38 - Organizing express router
+
+The backend, often referred to as the server-side, plays a crucial role in web development. Its primary function is to handle requests from clients (such as web browsers or mobile apps), process data, interact with databases, and generate appropriate responses to send back to the clients. 
+Here are some key roles and responsibilities of the backend in web development:
+- Business Logic: The backend contains the business logic of the application, which defines how data is processed and manipulated based on specific rules and requirements.
+- Data Management: It manages the application's data, including storing, retrieving, updating, and deleting data from databases or other storage systems.
+- Authentication and Authorization: The backend handles user authentication (verifying user identities) and authorization (determining what actions users are allowed to perform).
+- Security: It ensures the security of the application by implementing measures such as data encryption, input validation, and protection against common security threats like SQL injection and cross-site scripting (XSS).
+- APIs (Application Programming Interfaces): The backend exposes APIs that allow clients to interact with the application, enabling features like data retrieval, data submission, and integration with third-party services.
+- Server Configuration and Management: It involves setting up and managing the server infrastructure, including configuring web servers, databases, and other necessary components to ensure optimal performance and scalability.
+- Performance Optimization: The backend is responsible for optimizing the performance of the application by implementing caching mechanisms, load balancing, and other techniques to reduce latency and improve responsiveness.
+- Logging and Monitoring: It logs important events and activities within the application and provides monitoring tools to track performance metrics, detect errors, and troubleshoot issues in real-time.
+Overall, the backend serves as the backbone of web applications, handling the complex processing and data management tasks required to deliver reliable and efficient services to users.
+
+```javascript
+[app.js]
+    ....
+const postRouter = require('./routes/post');
+...
+app.use('/post', postRouter);
+...
+```
+
+```javascript
+[routes/post.js]
+
+const express = require('express');
+const router = express.Router();
+
+//POST /post
+router.post('/', (req, res) => {
+    res.json({id : 1, content: 'hello1'});
+})
+
+//DELETE /post
+router.delete('/', (req, res) => {
+    res.json({id : 1});
+})
+
+module.exports = router;
+```
+
+
+
+
+
