@@ -2411,7 +2411,112 @@ router.delete('/', (req, res) => {
 module.exports = router;
 ```
 
+---
+## Day 39 - Connect MySQL with Sequelize
+
+1) install MySQL
+<Mac OS>
+1. terminal - /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+2. brew install mysql
+3. brew seervices starrt mysql -> start MySQL
+4. mysql_secure_installation -> root password setting
+5. mysql -h localhost -u root -p -< Connect to MySQL
+
+2) install Workbench
+1. brew install --cask mysqlworkbench
+2. start workbench in launchpad and open
+
+3) Create connection
+1. If there's no 'Local instance MySQL ...', click + button next to MySQL Connections
+2. Connection Name - localhost
+   Password - click Store in ...
+3. Enter password when you made during install mysql, Ok
+4. click 'localhost'
+
+4) create database
+1. mysql> CREATE SCHEMA `nodejs` DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;
+2. mysql> use nodejs
+3. mysql> CREATE TABLE nodejs.users(
+   -> id INT NOT NULL AUTO_INCREMENT,
+   -> name VARCHAR(20) NOT NULL,
+   -> age INT UNSIGNED NOT NULL,
+   -> married TINYINT NOT NULL,
+   -> comment TEXT NULL,
+   -> created_at DATETIME NOT NULL DEFAULT now(),
+   -> PRIMARY KEY(id),
+   -> UNIQUE INDEX name_UNIQUE (name ASC))                                         -> COMMENT = 'user information'                                                 -> ENGINE = InnoDB;                                                         Query OK, 0 rows affected (0.01 sec)
+4. DESC users; -> check table
+5. DROP TALE users; -> delete the table
+6. Making another table related with comment,
+mysql> CREATE TABLE nodejs.comments (
+   -> id INT NOT NULL AUTO_INCREMENT,
+   -> commenter INT NOT NULL,
+   -> comment VARCHAR(100) NOT NULL,
+   -> created_at DATETIME NOT NULL DEFAULT now(),
+   -> PRIMARY KEY(id),
+   -> INDEX commenter_idx (commenter ASC),
+   -> CONSTRAINT commenter
+   -> FOREIGN KEY (commenter)
+   -> REFERENCES nodejs.users (id)
+   -> ON DELETE CASCADE
+   -> ON UPDATE CASCADE)
+   -> COMMENT = 'Comment'
+   -> ENGINE=InnoDB;
+7. show tables; -> showing tables what I have
 
 
+5) npm i sequelize sequelize-cli mysql2
+mysql2 -> Drivers that connect nodes to mysql
+6) npx sequelize init
+```javascript
+[back/config/config.json]
+{
+    "development": {
+    "username": "root",
+        "password": "mysql password",
+        "database": "react-nodebird",
+        "host": "127.0.0.1",
+        "port" : "3306",
+        "dialect": "mysql"
+},
+    "test": {
+    "username": "root",
+        "password": null,
+        "database": "react-nodebird",
+        "host": "127.0.0.1",
+        "dialect": "mysql"
+},
+    "production": {
+    "username": "root",
+        "password": null,
+        "database": "react-nodebird",
+        "host": "127.0.0.1",
+        "dialect": "mysql"
+}
+}
 
+```
+```javascript
+[back/models/index.js]
 
+const Sequelize = require('sequelize');
+const env = process.env.NODE_ENV || 'development';
+const config = require('/../config/config.json')[env];
+const db = {};
+
+const sequelize = new Sequelize(config.database, config.username, config.password, config);
+
+Object.keys(db).forEach(modelName => {
+    if (db[modelName].associate) {
+        db[modelName].associate(db);
+    }
+});
+
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+module.exports = db;
+
+```
+
+---
