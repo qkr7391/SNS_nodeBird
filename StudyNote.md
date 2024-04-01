@@ -2433,6 +2433,10 @@ module.exports = router;
 3. Enter password when you made during install mysql, Ok
 4. click 'localhost'
 
+5. mysql -h localhost -u root -p -> connect with mysql
+6. % npx sequelize db:create
+
+
 4) create database
 1. mysql> CREATE SCHEMA `nodejs` DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;
 2. mysql> use nodejs
@@ -2463,7 +2467,6 @@ mysql> CREATE TABLE nodejs.comments (
    -> COMMENT = 'Comment'
    -> ENGINE=InnoDB;
 7. show tables; -> showing tables what I have
-
 
 5) npm i sequelize sequelize-cli mysql2
 mysql2 -> Drivers that connect nodes to mysql
@@ -2550,4 +2553,62 @@ module.exports = (sequelize, DataTypes) => {
     User.associtate = (db) => {};
     return User;
 }
+```
+
+---
+## Day 41 - Setting up a sequelize relationship
+
+In a relational database, relationships are king.
+
+Make sure you know what relationships you have
+
+1. does a user create a post? -> Yes
+2. can a user create multiple posts? -> Yes
+3. can a post have multiple authors? -> No
+
+-> There is a 1 : many relationship between users and posts.
+```javascript
+[models/user.js]
+User.associtate = (db) => {
+    db.User.hasMany(db.Post); // A single author can create multiple posts.
+};
+
+
+[models/post.js]
+Post.associtate = (db) => {
+    db.Post.belongsTo(db.User); // A post has a single author.
+};
+```
+
+---
+## Day 42 - sequelize sync + nodemon
+
+```javascript
+[app.js]
+
+const db = require('./models');
+
+db.sequelize.sync()
+    .then(()=>{
+        console.log('db connect success');
+    })
+    .catch(console.error);
+```
+
+```javascript
+[models/index.js]
+
+db.User = require('./user')(sequelize, Sequelize);
+db.Comment = require('./comment')(sequelize, Sequelize);
+db.Post = require('./post')(sequelize, Sequelize);
+db.Hashtag = require('./hashtag')(sequelize, Sequelize);
+db.Image = require('./image')(sequelize, Sequelize);
+
+```
+
+```javascript
+[package.json]
+"scripts": {
+    "dev": "nodemon app"
+},
 ```

@@ -8,7 +8,9 @@ module.exports = (sequelize, DataTypes) => {
         charset: 'utf8mb4', // can use Korean && emoji
         collate: 'utf8mb4_general_ci' // Korean, emoji save
     });
-    Hashtag.associtate = (db) => {
+    Hashtag.associate = (db) => {
+        db.Hashtag.belongsToMany(db.Post, { through: 'PostHashtag' });
+
     };
     return Hashtag;
 }

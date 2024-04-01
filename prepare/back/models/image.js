@@ -8,7 +8,8 @@ module.exports = (sequelize, DataTypes) => {
         charset: 'utf8mb4', // can use Korean && emoji
         collate: 'utf8mb4_general_ci' // Korean, emoji save
     });
-    Image.associtate = (db) => {
+    Image.associate = (db) => {
+        db.Image.belongsTo(db.Post);
     };
     return Image;
 }
