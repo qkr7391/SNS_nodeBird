@@ -2612,3 +2612,103 @@ db.Image = require('./image')(sequelize, Sequelize);
     "dev": "nodemon app"
 },
 ```
+---
+## Day 43 - Implementing Signup
+
+browser(3060) || front(next 3060) || back(express 3065) || MySQL(3306)
+
+1. request signup on the signup page [pages/signup.js - Send signup request] -> Saga
+2. execute [saga/user.js - Signup function].
+3. [back/app.js] - Create a user route
+4. [back/routes] - make user.js
+5. npm i bcrypt
+6. [back/routes/user.js]
+
+
+```javascript
+[1. pages/signup.js]
+    ...
+dispatch({
+    type: SIGN_UP_REQUEST,
+    data: {email, password, nickname},
+});
+...
+```
+
+```javascript
+[2. sagas/user.js]
+    ...
+function signUpAPI(data){
+    return axios.post('http://localhost:3065/user', data)
+}
+function* signUp(action){
+    try{
+        const result =  yield call(signUpAPI, action.data)
+        console.log(result);
+        yield put({
+            type: SIGN_UP_SUCCESS,
+            data: action.data,
+            // data: result.data
+        });
+    } catch(err) {
+        yield put({
+            type: SIGN_UP_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+...
+```
+
+```javascript
+[3. back/app.js]
+...
+//It interprets the data sent from front to post and puts the data in req.body.xxx in routes/user.js in back.
+app.use(express.json()); //json
+app.use(express.urlencoded({extended: true})); //form
+...
+app.use('/user', userRouter);
+```
+
+```javascript
+[4 & 5 & 6. back/routes/user.js]
+
+const express = require('express');
+const bcrypt = require('bcrypt');
+
+const {User} = require('../models');
+const router = express.Router();
+
+//POST /user
+router.post('/', async(req, res, next) => {
+    try{
+        //email duplicate check
+        const exUser =  await User.findOne({
+            where:{
+                email: req.body.email,
+            }
+        });
+        if(exUser){
+            return res.status(403).send('This email is already used.');
+        }
+
+        const hashedPassword = await bcrypt.hash(req.body.password, 12); //Encrypted password
+        await User.create({ //await -> for order
+            email: req.body.email,
+            nickname: req.body.nickname,
+            password: hashedPassword,
+        });
+        res.status(201).send('OK');
+    } catch(error) {
+        console.error(error);
+        next(error);
+    }
+})
+
+
+module.exports = router;
+```
+---
+
+
+
