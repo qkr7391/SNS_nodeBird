@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from "react";
+import React, {useState, useCallback, useEffect} from "react";
 import Head from "next/head";
+import Router from 'next/router';
 import { Checkbox, Form, Input, Button } from "antd";
 import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
@@ -14,7 +15,19 @@ const ErrorMessage = styled.div`
 
 const Signup = () => {
 	const dispatch = useDispatch();
-	const { signUpLoading } = useSelector((state)=> state.user);
+	const { signUpLoading, signUpDone, signUpError } = useSelector((state)=> state.user);
+
+	useEffect(() => {
+		if(signUpDone) {
+			Router.push('/');
+		}
+	}, [signUpDone]);
+
+	useEffect(() => {
+		if(signUpError){
+			alert(signUpError);
+		}
+	}, [signUpError]);
 
 	const [email, onChangeEmail] = useInput("");
 	console.log(email);

@@ -2708,7 +2708,115 @@ router.post('/', async(req, res, next) => {
 
 module.exports = router;
 ```
----
 
+---
+## Day 44 - Solving CORS problem
+
+* When you try to sign up, you will get CORS error.
+[Access to XMLHttpRequest at 'http://localhost:3065/user' from origin 'http://localhost:3060' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.]
+* What is CORS error? -> CORS stands for Cross-Origin Resource Sharing. It is a security feature implemented by web browsers to prevent web pages from making requests to a different domain or origin than the one from which the page itself was served. When a web application running in a browser attempts to make an HTTP request to a different domain, the browser blocks the request by default to prevent potential security vulnerabilities such as cross-site scripting (XSS) attacks or data theft. A CORS error occurs when the browser blocks such requests due to the same-origin policy. This error typically manifests as an error message in the browser's console indicating that the request has been blocked due to CORS policy restrictions.
+* A CORS error is when a server request is made from browser 3060 to server 3065, and the browser sends the request to another domain server, which is blocked by the browser. (If the request is made from the server to the server, a CORS error does not occur even if the domain is different)
+* Since we can't prevent all browsers from blocking, we need to come up with a workaround for CORS errors.
+
+1. proxy method -> send a request from the browser to the front server 3060, and have the front server send a request to the backend server 3065.
+
+2. set the Access control allow origin header in [routse/user.js].
+```javascript
+[routes/user.js]
+...
+await User.create({ //await -> for order
+    email: req.body.email,
+    nickname: req.body.nickname,
+    password: hashedPassword,
+});
+
+res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3060');
+res.setHeader('Access-Control-Allow-Origin', '*');
+
+res.status(201).send('OK');
+} catch(error) {
+    console.error(error);
+    next(error);
+}
+...
+```
+
+3. install cors with npm i cors and set cors in [app.js].
+
+```javascript
+[back/app.js]
+const cors = require('cors');
+...
+app.use(cors());
+...
+```
+* At this point, allowing requests from all browsers can lead to hacking and security issues, so you can also set origin to allow only requests from browsers of the website you want to visit as a safety measure.
+```javascript
+[back/app.js]
+const cors = require('cors');
+...
+app.use(cors({
+    origin: 'http://nodebird.com',
+    credentials: false,
+}));
+...
+```
+or
+```javascript
+[back/app.js]
+const cors = require('cors');
+...
+app.use(cors({
+    origin: true, // The address from where the request was sent will automatically be included
+    credentials: false,
+}));
+...
+```
+or
+```javascript
+```javascript
+[back/app.js]
+const cors = require('cors');
+...
+app.use(cors({
+    origin: '*', // Allow every browser.
+    credentials: false,
+}));
+...
+
+```
+
+Set to return to the main page after signing up
+```javascript
+[front/pages/signup.js]
+...
+import Router from 'next/router';
+...
+const { signUpLoading, signUpDone } = useSelector((state)=> state.user);
+
+useEffect(() => {
+    if(signUpDone) {
+        Router.push('/');
+    }
+}, [signUpDone]);
+
+...
+```
+
+Enable an alert when signing up, in case of errors such as duplicate emails
+[]
+```javascript
+[front/pages/signup.js]
+
+const { signUpLoading, signUpDone, signUpError } = useSelector((state)=> state.user);
+
+useEffect(() => {
+    if(signUpError){
+        alert(signUpError);
+    }
+}, [signUpError]);
+```
+* signup request changed to signup failure. -> So, [ return res.status(403).send('This email is already used.'); ] in [route/user.js] is replaced with [catch(err) {
+yield put({  type: SIGN_UP_FAILURE, " error: err.response.data, " -> this part ] to this part. -> This is where the action.error goes in, which becomes the signup error in [signup.js], and the warning window is generated.
 
 
