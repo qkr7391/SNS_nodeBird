@@ -7,12 +7,15 @@ const userRouter = require('./routes/user');
 
 const db = require('./models');
 
+const passportConfig = require('./passport');
+
+
 db.sequelize.sync()
     .then(()=>{
         console.log('db connect success');
     })
     .catch(console.error);
-
+passportConfig();
 
 app.use(cors({
     origin: '*', // Allow every browser.

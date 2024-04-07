@@ -2819,4 +2819,156 @@ useEffect(() => {
 * signup request changed to signup failure. -> So, [ return res.status(403).send('This email is already used.'); ] in [route/user.js] is replaced with [catch(err) {
 yield put({  type: SIGN_UP_FAILURE, " error: err.response.data, " -> this part ] to this part. -> This is where the action.error goes in, which becomes the signup error in [signup.js], and the warning window is generated.
 
+---
+## Day 45 - making login part by using 'passport'
 
+
+```javascript
+[routes/user.js]
+
+//POST /user/login
+router.post('/login', (req, res, next) => {
+
+})
+```
+
+```javascript
+[sagas/user.js]
+
+function logInAPI(data){
+    return axios.post('http://localhost:3065/user/login', data)
+}
+function* logIn(action){
+    try{
+        const result =  yield call(logInAPI, action.data)
+        yield put({
+            type: LOG_IN_SUCCESS,
+            data: action.data,
+            // data: result.data
+        });
+    } catch(err) {
+        yield put({
+            type: LOG_IN_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+```
+
+* How to prevent duplicate addresses
+```javascript
+[index.js]
+import axios from "axios";
+
+axios.defaults.baseURL = 'http://localhost:3065';
+
+-> reult
+function logInAPI(data){
+    return axios.post('/user/login', data)
+}
+
+function logOutAPI(){
+    return axios.post('/user/logout')
+}
+...
+
+```
+
+* Passport -> Passport is a popular authentication middleware for Node.js, commonly used with frameworks like Express. It provides a simple and modular way to authenticate users in web applications. Passport is widely used because of its flexibility, extensibility, and support for various authentication strategies.
+When implementing the login part of a website with Passport, you typically define authentication strategies, such as local authentication (using username and password), OAuth (e.g., with Google, Facebook, Twitter), or other third-party authentication methods. Passport supports a wide range of authentication strategies through its extensive ecosystem of plugins called "passport strategies."
+1. npm i passport passport-local
+2. make passport folder in back
+3. make a file that is named 'index.js'
+```javascript
+const passport = require('passport');
+const local = require('./local');
+module.exports = () => {
+    passport.serializeUser(() => {
+
+    });
+
+    passport.deserializeUser(() => {
+
+    });
+
+    local();
+}
+```
+4. make a file that is named 'local.js'
+```javascript
+const passport = require('passport');
+const { Strategy: LocalStrategy } = require('passport-local');
+const { User } = require('../models');
+const bcrypt = require('bcrypt');
+
+module.exports = () => {
+    passport.use(new LocalStrategy({
+        usernameField : 'email',
+        passwordField: 'password',
+    }, async (email, password, done) => {
+        try{
+            const user = await User.findOne({
+                where: { email }
+            });
+            if(!user){
+                return done(null, false, {reason: 'The user is not exist!'})
+            }
+
+            const result = await bcrypt.compare(password, user.password);
+            if (result) {
+                return done(null, user);
+            }
+            return done(null, false, {reason: 'The password is incorrect.'})
+        } catch (error) {
+            console.error(error);
+            return done(error);
+        }
+    }));
+}
+```
+
+5. [app.js]
+```javascript
+const passportConfig = require('./passport');
+
+
+db.sequelize.sync()
+    .then(()=>{
+        console.log('db connect success');
+    })
+    .catch(console.error);
+passportConfig();
+
+```
+
+```javascript
+[routes/user.js]
+const express = require('express');
+const bcrypt = require('bcrypt');
+const passport = require('passport');
+
+const {User} = require('../models');
+const router = express.Router();
+
+
+//POST /user/login
+router.post('/login', (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        if(err){
+            console.error(err);
+            return next(err);
+        }
+        if(info) {
+            return res.status(401).send(info.reason);
+        }
+        return req.login(user, async (loginErr) => {
+            if(loginErr){
+                console.error(loginErr);
+                return next(loginErr);
+            }
+        })
+    })(req, res, next);
+});
+```
+
+---
