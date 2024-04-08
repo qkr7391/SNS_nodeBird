@@ -2972,3 +2972,6 @@ router.post('/login', (req, res, next) => {
 ```
 
 ---
+## Day 46 - Cookies/sessions and the overall login flow
+
+

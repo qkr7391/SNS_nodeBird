@@ -14,6 +14,7 @@ router.post('/login', (req, res, next) => {
             return next(err);
         }
         if(info) {
+            console.error(info);
             return res.status(401).send(info.reason);
         }
         return req.login(user, async (loginErr) => {
@@ -21,6 +22,7 @@ router.post('/login', (req, res, next) => {
                 console.error(loginErr);
                 return next(loginErr);
             }
+            return res.status(200).json(user);
         })
     })(req, res, next);
 });
@@ -53,5 +55,8 @@ router.post('/', async(req, res, next) => {
    }
 })
 
+// router.post('/user/logout', (req, res, next) => {
+//
+// })
 
 module.exports = router;

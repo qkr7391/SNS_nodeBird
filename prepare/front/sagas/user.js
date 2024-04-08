@@ -23,13 +23,16 @@ function logInAPI(data){
 }
 function* logIn(action){
     try{
-        const result =  yield call(logInAPI, action.data)
+        // console.log('saga action data', action.data);
+        const result =  yield call(logInAPI, action.data);
+        // console.log('saga result', result);
         yield put({
             type: LOG_IN_SUCCESS,
-            data: result,
-            // data: result.data
+           // data: result,
+             data: result.data,
         });
     } catch(err) {
+            console.error(err);
         yield put({
             type: LOG_IN_FAILURE,
             error: err.response.data,

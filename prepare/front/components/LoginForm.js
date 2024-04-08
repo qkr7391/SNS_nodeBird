@@ -5,7 +5,7 @@ import styled from "styled-components";
 
 import useInput from "../hooks/useinput";
 import { useDispatch, useSelector } from "react-redux";
-import {LOG_IN_REQUEST} from "../reducers/user";
+import {LOG_IN_REQUEST, loginRequestAction} from "../reducers/user";
 
 // import { loginRequestAction } from "../reducers/user";
 
@@ -29,17 +29,15 @@ const LoginForm = () => {
 		(e) => {
 			console.log(email, password);
 			// setIsLoggedIn(true);
-			// dispatch(loginRequestAction({email, password}));
-			dispatch({
-				type: LOG_IN_REQUEST,
-				data: {
-					id: email,
-					password,
-				}
-			})
-		},
-
-		[email, password]
+			dispatch(loginRequestAction({email, password}));
+			// dispatch({
+			// 	type: LOG_IN_REQUEST,
+			// 	data: {
+			// 		id: email,
+			// 		password,
+			// 	}
+			// })
+		},[email, password]
 	);
 
 	return (
