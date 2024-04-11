@@ -2974,4 +2974,58 @@ router.post('/login', (req, res, next) => {
 ---
 ## Day 46 - Cookies/sessions and the overall login flow
 
+We get the user email and password from the login form, go to saga (user), get data, send data to the user login on 3065, and the request goes to route (user). At that point, the authenticate local part is executed. Then it goes to local.js, which starts the LocalStrategy.
+This is where we go through the if statements and split between success and failure.
+
+If successful -> Go to the routes/users file and try to log in with passpost.
+If Passport login is successful, it responds to the server front.
+
+Passport needs a 'session' to store the login data. 
+-> npm i express-session cookie-parser
+
+```javascript
+[back/app.js]
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
+
+app.use(session({
+    saveUninitialized: false,
+    resave: false,
+    secret: process.env.COOKIE_SECRET,
+}));
+app.use(cookieParser(process.env.COOKIE_SECRET));
+app.use(passport.initialize());
+app.use(passport.session());
+
+```
+* The front and back are using different domains. Therefore, the information you have is different, and if you bring your entire email (username) and password into the browser when logging in, you're vulnerable to hacking. Therefore, if you send an encrypted string (=cookie) instead of sending the entire data information, and the information is stored in the connected session, you can check the information with the connected cookie and session without directly sending the data information.
+
+* If the data gets bigger and bigger on the server, it takes up a lot of memory and can cause the server to crash. Therefore, we decided to store only cookies and IDs in passport and fetch other information from the DB.
+
+When [app.js] req.login() is executed, serializeUser() is executed in passport/index.js at the same time. 
+```javascript
+[passport/index.js]
+module.exports = () => {
+    passport.serializeUser((user, done) => {
+        done(null, user.id);
+    });
+
+    passport.deserializeUser(async( id, done ) => {
+        try{
+            const user = await User.findOne({ where: { id }});
+            done(null, user);
+        } catch (error){
+            console.error(error);
+            done(error);
+        }
+    });
+
+    local();
+}
+```
+
+
+
+
+
 
