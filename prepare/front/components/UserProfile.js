@@ -28,19 +28,12 @@ const UserProfile = () => {
 
     return (
 
-       // <CardWrapper
-       //      actions={[
-       //          <div key="twit">Twit<br/>{self.Posts.length}</div>,
-       //          <div key="followings">Followings<br/>{self.Followings.length}</div>,
-       //          <div key="followers">Followers<br/>{self.Followers.length}</div>
-       //      ]}>
-        <CardWrapper
+       <CardWrapper
             actions={[
-                <div key="twit">Twit<br/>{self.Posts ? self.Posts.length : 0}</div>,
-                <div key="followings">Followings<br/>{self.Followings ? self.Followings.length : 0}</div>,
-                <div key="followers">Followers<br/>{self.Followers ? self.Followers.length : 0}</div>
-            ]}
-        >
+                <div key="twit">Twit<br/>{self.Posts.length}</div>,
+                <div key="followings">Followings<br/>{self.Followings.length}</div>,
+                <div key="followers">Followers<br/>{self.Followers.length}</div>
+            ]}>
 
            <Card.Meta
                avatar={<Avatar>{self.nickname[0]}</Avatar>}

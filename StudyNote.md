@@ -3024,6 +3024,63 @@ module.exports = () => {
 }
 ```
 
+---
+## Day 47 - Solving login problem
+
+error 01
+```javascript
+<CardWrapper
+actions={[
+    <div key="twit">Twit<br/>{self.Posts.length}</div>,
+    <div key="followings">Followings<br/>{self.Followings.length}</div>,
+    <div key="followers">Followers<br/>{self.Followers.length}</div>
+]}>
+```
+sovle 01
+```javascript
+[routes/user.js]
+const fullUserwithoutPW = await User.findOne({
+    where: { id : user.id },
+    //attributes: ['id', 'nickname', 'email'],
+    attributes: {
+        exclude: ['password']
+    },
+    include:[{
+        model: Post,
+    }, {
+        model: User,
+        as: 'Followings',
+    }, {
+        model: User,
+        as: 'Followers',
+    }]
+})
+return res.status(200).json(fullUserwithoutPW);
+
+```
+
+Error 02
+sign up page keeps signing up when logged in
+```javascript
+[pages/signup.js]
+const { self } = useSelector((state) => state.user);
+
+useEffect(() => {
+    if(self && self.id){
+        Router.replace('/');
+    }
+}, [self && self.id]);
+```
+* Difference between 'push' and 'replace' -> The push and replace methods in React Router are used to navigate between different routes within your application. However, they have a slight difference in behavior:
+
+* push: The push method is used to navigate to a new route by adding a new entry to the browser history stack. This means that when you use push, the previous route will be preserved in the history stack, and you can navigate back to it using the browser's back button or programmatically.  It's typically used for regular navigation within the application when you want to allow users to navigate back to the previous page.
+
+* replace: The replace method is also used to navigate to a new route, but it replaces the current entry in the history stack with the new one. This means that when you use replace, the current route will be replaced by the new one, and the previous route will not be preserved in the history stack. It's often used when you want to prevent the user from navigating back to the previous page, such as after a form submission or when redirecting after authentication.
+
+
+
+
+
 
 
 
