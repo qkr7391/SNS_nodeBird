@@ -46,13 +46,13 @@ function logOutAPI(){
 
 function* logOut(){
     try{
-        // const result =  yield call(logOutAPI)
-        yield call(logOutAPI);
+        yield call(logOutAPI)
         yield put({
             type: LOG_OUT_SUCCESS,
             // data: result.data
         });
     } catch(err) {
+        console.log(err, "**********");
         yield put({
             type: LOG_OUT_FAILURE,
             error: err.response.data,

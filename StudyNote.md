@@ -3077,7 +3077,41 @@ useEffect(() => {
 
 * replace: The replace method is also used to navigate to a new route, but it replaces the current entry in the history stack with the new one. This means that when you use replace, the current route will be replaced by the new one, and the previous route will not be preserved in the history stack. It's often used when you want to prevent the user from navigating back to the previous page, such as after a form submission or when redirecting after authentication.
 
+---
+## Day 48 - Check router with middleware
 
+01. logout
+```javascript
+[sagas/user.js]
+function logOutAPI(){
+    return axios.post('/user/logout')
+}
+
+function* logOut(){
+    try{
+        yield call(logOutAPI)
+        yield put({
+            type: LOG_OUT_SUCCESS,
+            // data: result.data
+        });
+    } catch(err) {
+        yield put({
+            type: LOG_OUT_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+```
+
+```javascript
+[routes/user.js]
+router.post('/logout', isLoggedIn, (req, res) => {
+    req.logout();
+    req.session.destroy();
+    res.send('ok');
+})
+
+```
 
 
 

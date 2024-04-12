@@ -28,7 +28,7 @@ passportConfig();
 
 app.use(cors({
     origin: '*', // Allow every browser.
-    credentials: false,
+    credentials: true,
 }));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -59,6 +59,11 @@ app.get('/posts', (req, res) => {
 
 app.use('/post', postRouter);
 app.use('/user', userRouter);
+
+// // process error middleware
+// app.use((err, req, res, next) => {
+//
+// })
 app.listen(3065, () => {
     console.log('Server is listening on port 3065');
 });

@@ -1,6 +1,6 @@
 import { createWrapper } from 'next-redux-wrapper';
-import {applyMiddleware, createStore, compose} from 'redux';
-import {composeWithDevTools} from "redux-devtools-extension";
+import { applyMiddleware, createStore, compose } from 'redux';
+import { composeWithDevTools } from "redux-devtools-extension";
 import createSagaMiddleware from 'redux-saga';
 
 
@@ -25,7 +25,7 @@ const configureStore = () => {
 };
 
 const wrapper = createWrapper(configureStore, {
-	debug: process.env.NODE_ENV === "develpoment",
+	debug: process.env.NODE_ENV === "development",
 });
 
 export default wrapper;
