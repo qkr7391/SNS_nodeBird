@@ -3113,6 +3113,106 @@ router.post('/logout', isLoggedIn, (req, res) => {
 
 ```
 
+---
+
+## Day 49 - Upload post and comments
+
+When I post a post after logging in, it is posted as a dummy post.
+To fix this, use the
+->
+
+1. When onSubmit in PostForm.js is executed, addPost is executed.
+```javascript
+[PostForm.js]
+// Form submission handler
+const onSubmit = useCallback(()=> {
+    // Dispatching an action (addPost) with the current text state
+    dispatch(addPost(text));
+}, [text]);
+
+```
+
+2. Go to addPost and ADD_POST_REQUEST is executed with the data
+```javascript
+[reducers/post.js]
+export const addPost = (data) => ({
+    type: ADD_POST_REQUEST,
+    data,
+});
+
+```
+
+3. Here, the data goes to sagas/post.js and is resolved by addPost
+```javascript
+[sagas/post.js]
+function addPostAPI(data){
+    return axios.post('/post', { content : data }) // req.body.content
+}
+
+function* addPost(action){
+    try{
+        const result =  yield call(addPostAPI, action.data)
+        const id = shortId.generate();
+        yield put({
+            type: ADD_POST_SUCCESS,
+            data: {
+                id,
+                content: action.data,
+            }
+                ...
+
+```
+
+4. In [routes/post.js], we catch the data received via router.post with a try/catch, and if successful, we send the data back to [sagas/post.js].
+```javascript
+[routes/post.js]
+const { Post } = require('../models');
+
+//POST /post
+router.post('/', async (req, res, next) => {
+    try {
+        const post = await Post.create({
+            content: req.body.content,
+            UserID: req.user.id,
+        })
+        res.status(200).json(post);
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+```
+
+5. Save the data as result.data/result.data.id and go back to [reducers/post.js] to create a new post,
+```javascript
+[sagas/post.js]
+function* addPost(action){
+    try{
+        const result =  yield call(addPostAPI, action.data)
+        yield put({
+            type: ADD_POST_SUCCESS,
+            data: result.data,
+        });
+        yield put({
+            type: ADD_POST_TO_ME,
+            data: result.data.id,
+        })
+```
+
+6. ADD_POST_SUCCESS needs to be modified.
+```javascript
+[reducers/post.js]
+
+case ADD_POST_SUCCESS:
+    draft.mainPosts.unshift(action.data);
+    draft.addPostLoading = false;
+    draft.addPostDone = true;
+    break;
+```
+
+Comment part will be similar with this process.
+
+
 
 
 
