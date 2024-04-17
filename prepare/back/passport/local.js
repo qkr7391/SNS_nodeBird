@@ -14,14 +14,14 @@ module.exports = () => {
                 where: { email }
             });
             if(!user){
-                return done(null, false, {reason: 'The user is not exist!'});
+                return done(null, false, { reason: 'The user is not exist!' });
             }
 
             const result = await bcrypt.compare(password, user.password);
             if (result) {
                 return done(null, user);
             }
-            return done(null, false, {reason: 'The password is incorrect.'})
+            return done(null, false, { reason: 'The password is incorrect.' })
         } catch (error) {
             console.error(error);
             return done(error);

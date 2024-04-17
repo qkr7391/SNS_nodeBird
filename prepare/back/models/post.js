@@ -1,3 +1,6 @@
+const DataTypes = require('sequelize');
+const { Moder } = DataTypes;
+
 module.exports = (sequelize, DataTypes) => {
     const Post = sequelize.define('Post', {
         //already have id

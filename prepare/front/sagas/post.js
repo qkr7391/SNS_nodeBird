@@ -26,7 +26,7 @@ function addPostAPI(data){
 
 function* addPost(action){
     try{
-        const result =  yield call(addPostAPI, action.data)
+        const result =  yield call(addPostAPI, action.data);
         yield put({
             type: ADD_POST_SUCCESS,
             data: result.data,
@@ -131,6 +131,5 @@ export default function* postSaga(){
         fork(watchLoadPosts),
         fork(watchDeletePost),
         fork(watchAddComment)
-
     ])
 }

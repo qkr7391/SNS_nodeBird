@@ -1,6 +1,6 @@
 import shortId from 'shortid';
-import {produce }from 'immer';
-import {faker} from '@faker-js/faker';
+import { produce }from 'immer';
+import { faker} from '@faker-js/faker';
 faker.seed(123)
 
 export const initialState = {
@@ -132,6 +132,7 @@ const reducer = (state = initialState, action) => {
                 draft.mainPosts.unshift(action.data);
                 draft.addPostLoading = false;
                 draft.addPostDone = true;
+                draft.imagePaths = [];
                 break;
             case ADD_POST_FAILURE:
                 draft.addPostLoading = false;

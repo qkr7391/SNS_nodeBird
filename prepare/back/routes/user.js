@@ -23,7 +23,7 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
                 console.error(loginErr);
                 return next(loginErr);
             }
-            const fullUserwithoutPW = await User.findOne({
+            const fullUserWithoutPW = await User.findOne({
                 where: { id : user.id },
                 //attributes: ['id', 'nickname', 'email'],
                 attributes: {
@@ -39,7 +39,7 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
                     as: 'Followers',
                 }]
             })
-            return res.status(200).json(fullUserwithoutPW);
+            return res.status(200).json(fullUserWithoutPW);
         })
     })(req, res, next);
 });
@@ -72,10 +72,15 @@ router.post('/', isNotLoggedIn, async(req, res, next) => {
    }
 })
 
-router.post('/logout', isLoggedIn, (req, res) => {
-    req.logout();
-    req.session.destroy();
-    res.send('ok');
-})
+// router.post('/logout', isLoggedIn, (req, res) => {
+//     req.logout();
+//     req.session.destroy();
+//     res.send('ok');
+// })
 
+router.post('/logout', isLoggedIn, (req, res, next) => {
+    req.logout(() => {
+        res.send('ok');
+    })
+})
 module.exports = router;

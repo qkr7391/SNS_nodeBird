@@ -27,17 +27,20 @@ db.sequelize.sync()
 passportConfig();
 
 app.use(cors({
-    origin: '*', // Allow every browser.
+    // origin: '*', // Allow every browser.
+    origin: 'http://localhost:3060',
     credentials: true,
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(session({
     saveUninitialized: false,
     resave: false,
     secret: process.env.COOKIE_SECRET,
+    //secret: 'nodebirdsecret',
 }));
-app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -45,9 +48,9 @@ app.get('/', (req, res) => {
     res.send('hello express');
 })
 
-app.get('/api', (req, res) => {
-    res.send('Hello, api');
-})
+// app.get('/api', (req, res) => {
+//     res.send('Hello, api');
+// })
 
 app.get('/posts', (req, res) => {
     res.json([
