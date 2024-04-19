@@ -17,19 +17,22 @@ router.get('/', async (req, res, next) => {
                 },
                 include:[{
                     model: Post,
+                    attributes: ['id'],
                 }, {
                     model: User,
                     as: 'Followings',
+                    attributes: ['id'],
                 }, {
                     model: User,
                     as: 'Followers',
+                    attributes: ['id'],
                 }]
             })
 
-            res.status(200).json(fullUserWithoutPW);
+            res.status(201).json(fullUserWithoutPW);
         }
         else {
-            res.status(200).json(null);
+            res.status(201).json(null);
         }
 
     } catch(error) {
@@ -63,15 +66,18 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
                 },
                 include:[{
                     model: Post,
+                    attributes: ['id'],
                 }, {
                     model: User,
                     as: 'Followings',
+                    attributes: ['id'],
                 }, {
                     model: User,
                     as: 'Followers',
+                    attributes: ['id'],
                 }]
             })
-            return res.status(200).json(fullUserWithoutPW);
+            return res.status(201).json(fullUserWithoutPW);
         })
     })(req, res, next);
 });
@@ -103,12 +109,6 @@ router.post('/', isNotLoggedIn, async(req, res, next) => {
         next(error);
    }
 })
-
-// router.post('/logout', isLoggedIn, (req, res) => {
-//     req.logout();
-//     req.session.destroy();
-//     res.send('ok');
-// })
 
 router.post('/logout', isLoggedIn, (req, res, next) => {
     req.logout(() => {

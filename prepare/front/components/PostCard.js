@@ -11,11 +11,7 @@ import PostCardContent from "./PostCardContent";
 import { DELETE_POST_REQUEST } from "../reducers/post";
 import FollowButton from "./FollowButton";
 
-
-// ... rest of the code
-
-
-const PostCard = ({post}) => {
+const PostCard = ({ post }) => {
     const dispatch = useDispatch();
     const { deletePostLoading } = useSelector((state) => state.post);
 
