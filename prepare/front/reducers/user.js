@@ -1,4 +1,4 @@
-import {produce} from 'immer';
+import { produce } from 'immer';
 
 
 export const initialState = {
@@ -58,7 +58,7 @@ const dummyUser = (data) => ({
     ...data,
     nickname: 'Sammy',
     id: 1,
-    Posts:[{id:1}],
+    Posts:[{ id:1 }],
     Followings: [{nickname: 'ssm'}, {nickname: 'erasdr'}, {nickname: 'qwer12'}],
     Followers: [{nickname: 'ssm'}, {nickname: 'erasdr'}, {nickname: 'qwer12'}],
 })

@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import PropTypes from "prop-types";
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Card, Popover, Button, Avatar, List} from 'antd';
 // import { Card, Popover, Button, Avatar, List, Comment } from 'antd';
 import { EllipsisOutlined, HeartOutlined, MessageOutlined, RetweetOutlined, HeartTwoTone } from "@ant-design/icons";
@@ -8,15 +8,16 @@ import { EllipsisOutlined, HeartOutlined, MessageOutlined, RetweetOutlined, Hear
 import PostImages from "./PostImages";
 import CommentForm from "./CommentForm";
 import PostCardContent from "./PostCardContent";
-import {DELETE_POST_REQUEST} from "../reducers/post";
+import { DELETE_POST_REQUEST } from "../reducers/post";
 import FollowButton from "./FollowButton";
+
 
 // ... rest of the code
 
 
 const PostCard = ({post}) => {
     const dispatch = useDispatch();
-    const {deletePostLoading} = useSelector((state) => state.post);
+    const { deletePostLoading } = useSelector((state) => state.post);
 
     // State for managing like and comment form visibility
     const [liked, setLiked] = useState(false);
@@ -46,19 +47,19 @@ const PostCard = ({post}) => {
     //way4// const id = useSelector((state) => sate.user.self && state.user.self.id);
 
     return(
-     <div style={{marginBottom: 20}}>
+     <div style={{ marginBottom: 20 }}>
          <Card
-         cover={post.Images[0] && <PostImages images={post.Images} />} // Displaying post images if available
+         cover={ post.Images[0] && <PostImages images={ post.Images } /> } // Displaying post images if available
          actions={[
              <RetweetOutlined key='retweet'/>,
              liked
-                 ? <HeartTwoTone twoToneColor="#eb2f96" key='heart' onClick={onToggleLike}/>
-                 : <HeartOutlined key='heart' onClick={onToggleLike}/>,
-             <MessageOutlined key='comment' onClick={onToggleComment}/>,
+                 ? <HeartTwoTone twoToneColor="#eb2f96" key='heart' onClick={ onToggleLike }/>
+                 : <HeartOutlined key='heart' onClick={ onToggleLike }/>,
+             <MessageOutlined key='comment' onClick={ onToggleComment }/>,
              // Popover with more options (Edit, Delete, Report)
              <Popover key='more'
                       content ={(<Button.Group>
-                                  {id && post.User.id === id ?
+                                  { id && post.User.id === id ?
                                   (
                                       <>
                                       <Button>Edit</Button>

@@ -18,7 +18,7 @@ import {
     generateDummyPost,
     LOAD_POSTS_REQUEST,
 } from "../reducers/post";
-import {ADD_POST_TO_ME, DELETE_POST_OF_ME} from "../reducers/user";
+import { ADD_POST_TO_ME, DELETE_POST_OF_ME } from "../reducers/user";
 
 function addPostAPI(data){
     return axios.post('/post', { content : data })
@@ -54,7 +54,7 @@ function* loadPosts(action){
     try{
         // const result =  yield call(addPostAPI, action.data)
         yield delay(1000);
-        const id = shortId.generate();
+      //  const id = shortId.generate();
         yield put({
             type: LOAD_POSTS_SUCCESS,
             data: generateDummyPost(10),

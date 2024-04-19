@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.TEXT,
             allowNull: false,
         },
+
         //PostId -> RetweetId
     }, {
         charset: 'utf8mb4', // can use Korean && emoji

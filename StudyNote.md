@@ -3212,6 +3212,158 @@ case ADD_POST_SUCCESS:
 
 Comment part will be similar with this process.
 
+---
+## Day 50 - Share cookies with credentials
+
+* Even if logged in state, get an error saying "You need to Log In", and can't post.
+[401 Unauthorized error]
+* Why? -> Remember CORS ISSUE!
+
+* How browsers work
+- The browser and the backend server have different domains.
+- Different domains cause CallS issues.
+- So I solved the problem before by adding the access allow origin header with the Coles module.
+
+- Cookies also don't pass between different domains.
+- Cookies need to be delivered to the backend so we know who is making the request.
+- So, since the cookie is not being passed to the backend, we can't determine who is requesting the post, which is why we get the 401 unaothorized error with the login issue.
+
+Workaround
+1. proxy
+2. Utilize the Coles module (DO)
+
+```javascript
+[app.js]
+//access control allow origin, credentials
+app.use(cors({
+    origin: '*', // Allow every browser.
+    credentials: true, // Allow credentials
+}));
+
+```
+(axios)
+```javascript
+[sagas/post.js]
+function addPostAPI(data){
+    return axios.post('/post', { content : data }), {
+        withCredentials: true,
+    }
+}
+
+function loadPostsAPI(data){
+    return axios.get('/api/posts', data), {
+        withCredentials: true,
+    }
+}
+
+function deletePostAPI(data){
+    return axios.delete('/api/post', data), {
+        withCredentials: true,
+    }
+}
+
+function addCommentAPI(data){
+    //POST /comment or /post/1/comment <<meaningful
+    return axios.post(`/post/${data.postId}/comment`, data), {
+        withCredentials: true,
+    }
+}
+
+```
+
+-> Duplicate occurrences
+
+```javascript
+[sagas/index.js]
+
+axios.defaults.withCredentials = true;
+```
+
+-> Security Error occurrences
+```javascript
+[app.js]
+//access control allow origin, credentials
+app.use(cors({
+    // origin: '*', // Allow every browser.
+    origin: 'http://localhost:3060', // -> 
+    credentials: true, // Allow credentials
+}));
+
+```
+* The error is that because we're sending cookie information back and forth between the front and backend, which is more sensitive information, we need to be more security conscious.
+
+* Instead of authorizing all browsers, you should select specific browsers to increase security.
+
+//////// When registering a post, get an error that no images are available//////////
+[Unhandled Runtime Error
+TypeError: Cannot read properties of undefined (reading '0')
+
+Source
+components/PostCard.js (51:28) @ PostCard
+
+49 | <div style={{marginBottom: 20}}>
+50 |     <Card
+> 51 |     cover={post.Images[0] && <PostImages images={post.Images} />} // Displaying post images if available
+|                       ^
+52 |     actions={[
+53 |         <RetweetOutlined key='retweet'/>,
+54 |         liked
+> ]
+
+why and how?
+- when do the post, there's only content and UserID
+```javascript
+[routes/post.js]
+router.post('/', isLoggedIn, async (req, res, next) => {
+    try {
+        const post = await Post.create({
+            content: req.body.content,
+            UserID: req.user.id,
+        })
+        res.status(201).json(post);
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+[models/post.js]
+module.exports = (sequelize, DataTypes) => {
+   ...
+    Post.associate = (db) => {
+        db.Post.belongsTo(db.User);
+        db.Post.hasMany(db.Comment);
+        db.Post.hasMany(db.Image);
+        db.Post.belongsToMany(db.Hashtag, { through: 'PostHashtag' });
+        db.Post.belongsTo(db.Post, {as: 'Retweet'}); //retweet
+        db.Post.belongsToMany(db.User, {through: 'Like', as: 'Likers'}); //through -> change name of middle table
+    };
+...
+}
+```
+- Be sure to include relationships with other parts.
+
+```javascript
+[routes/post.js]
+
+router.post('/', isLoggedIn, async (req, res, next) => {
+    try {
+        const post = await Post.create({
+            content: req.body.content,
+            UserID: req.user.id,
+        })
+        const fullPost = await Post.findOne({
+            where : { id: post.id },
+            include: [{
+                model: Image,
+            }, {
+                model: Comment,
+            }, {
+                model: User,
+            },]
+        })
+
+```
 
 
 
