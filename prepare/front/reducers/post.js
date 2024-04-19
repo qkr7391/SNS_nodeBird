@@ -157,7 +157,6 @@ const reducer = (state = initialState, action) => {
                 draft.addCommentDone = false;
                 draft.addCommentError = null;
                 break;
-
             case ADD_COMMENT_SUCCESS:{
                 const post = draft.mainPosts.find((v) => v.id === action.data.PostId);
                 post.Comments.unshift(action.data.content);
@@ -177,12 +176,10 @@ const reducer = (state = initialState, action) => {
                 //     addCommentDone: true,
                 // };
             }
-
             case ADD_COMMENT_FAILURE:
                 draft.addCommentLoading = false;
                 draft.addCommentError = action.error;
                 break;
-
             default :
                 break;
         }

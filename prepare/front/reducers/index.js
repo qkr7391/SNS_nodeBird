@@ -23,7 +23,9 @@ const rootReducer = combineReducers({ // Corrected the syntax
 
          // Return the default state if the action type doesn't match
          default:
-             return state;
+             return {
+                 ...state
+             };
      }
  },
     user,

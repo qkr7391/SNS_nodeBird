@@ -20,6 +20,9 @@ export const initialState = {
     changeNicknameLoading: false, // trying to change nickname
     changeNicknameDone: false,
     changeNicknameError: null,
+    loadUserLoading: false, //trying load user infor
+    loadUserDone: false,
+    loadUserError: null,
     self: null,
     signUpData: {},
     loginData: {},
@@ -52,6 +55,10 @@ export const UNFOLLOW_FAILURE = 'UNFOLLOW_FAILURE';
 export const ADD_POST_TO_ME = 'ADD_POST_TO_ME';
 export const DELETE_POST_OF_ME= 'DELETE_POST_OF_ME'
 
+
+export const LOAD_USER_REQUEST = 'LOAD_USER_REQUEST';
+export const LOAD_USER_SUCCESS = 'LOAD_USER_SUCCESS';
+export const LOAD_USER_FAILURE = 'LOAD_USER_FAILURE';
 
 
 const dummyUser = (data) => ({
@@ -163,6 +170,20 @@ const reducer = (state = initialState, action) => {
             case CHANGE_NICKNAME_FAILURE:
                 draft.changeNicknameLoading = false;
                 draft.changeNicknameError = action.error;
+                break;
+            case LOAD_USER_REQUEST:
+                draft.loadUserLoading = true;
+                draft.loadUserDone = false;
+                draft.loadUserError = null;
+                break;
+            case LOAD_USER_SUCCESS:
+                draft.loadUserLoading = false;
+                draft.loadUserDone = true;
+                draft.self = action.data;
+                break;
+            case LOAD_USER_FAILURE:
+                draft.loadUserLoading = false;
+                draft.loadUserError = action.error;
                 break;
             case ADD_POST_TO_ME:
                 draft.self.Posts.unshift({id: action.data});

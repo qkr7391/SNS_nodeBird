@@ -6,6 +6,38 @@ const { User, Post } = require('../models');
 const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
 const router = express.Router();
 
+router.get('/', async (req, res, next) => {
+    try {
+        if(req.user) {
+            const fullUserWithoutPW = await User.findOne({
+                where: { id : req.user.id },
+                //attributes: ['id', 'nickname', 'email'],
+                attributes: {
+                    exclude: ['password']
+                },
+                include:[{
+                    model: Post,
+                }, {
+                    model: User,
+                    as: 'Followings',
+                }, {
+                    model: User,
+                    as: 'Followers',
+                }]
+            })
+
+            res.status(200).json(fullUserWithoutPW);
+        }
+        else {
+            res.status(200).json(null);
+        }
+
+    } catch(error) {
+        console.error(error);
+        next(error);
+    }
+});
+
 
 //POST /user/login
 router.post('/login', isNotLoggedIn, (req, res, next) => {

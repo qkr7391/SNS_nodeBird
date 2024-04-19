@@ -3365,9 +3365,143 @@ router.post('/', isLoggedIn, async (req, res, next) => {
 
 ```
 
+** got error
 
+---
 
+## Day 51 - Keep login status
 
+I'm experiencing an issue where I'm logged out after every refresh.
 
+If you check [inspect / application / cookies / http://localhose:3060], there is a cookie called connect.sid.
 
+The reason why you are still logged out after every refresh is because the cookie is not being passed to the server after every refresh.
 
+In fact, the browser does have a cookie, so as long as this cookie is passed to the server, the problem of unlogged in is solved.
+
+```javascript
+[routes/user.js]
+router.get('/', async (req, res, next) => {
+    try {
+        if(req.user) {
+            const user = await User.findOne({
+                where : { id: req.user.id }
+            });
+            res.status(200).json(user);
+        }
+        else {
+            res.status(200).json(null);
+        }
+
+    } catch(error) {
+        console.error(error);
+        next(error);
+    }
+})
+```
+
+```javascript
+[pages/index.js]
+import { LOAD_USER_REQUEST } from "../reducers/user";
+
+const Home = () =>{
+  ...
+    useEffect(() => {
+        dispatch({
+            type: LOAD_USER_REQUEST,
+        });
+```
+
+```javascript
+[routes/user.js]
+router.get('/', async (req, res, next) => {
+    try {
+        if(req.user) {
+            const fullUserWithoutPW = await User.findOne({
+                where: { id : req.user.id },
+                //attributes: ['id', 'nickname', 'email'],
+                attributes: {
+                    exclude: ['password']
+                },
+                include:[{
+                    model: Post,
+                }, {
+                    model: User,
+                    as: 'Followings',
+                }, {
+                    model: User,
+                    as: 'Followers',
+                }]
+            })
+
+            res.status(200).json(fullUserWithoutPW);
+        }
+        else {
+            res.status(200).json(null);
+        }
+
+    } catch(error) {
+        console.error(error);
+        next(error);
+    }
+})
+```
+
+```javascript
+[sagas/user.js]
+import { ...
+    LOAD_USER_SUCCESS,
+    LOAD_USER_REQUEST,
+    LOAD_USER_FAILURE,
+} from "../reducers/user";
+
+function loadUserAPI(data){
+    return axios.get('/user');
+}
+function* loadUser(action){
+    try{
+        const result =  yield call(loadUserAPI, action.data);
+        yield put({
+            type: LOAD_USER_SUCCESS,
+            data: result.data,
+        });
+    }
+    catch(err) {
+        console.error(err);
+        yield put({
+            type: LOAD_USER_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
+```
+
+```javascript
+[redueces/user.js]
+
+export const LOAD_USER_REQUEST = 'LOAD_USER_REQUEST';
+export const LOAD_USER_SUCCESS = 'LOAD_USER_SUCCESS';
+export const LOAD_USER_FAILURE = 'LOAD_USER_FAILURE';
+
+const reducer = (state = initialState, action) => {
+    return produce(state, (draft) => {
+        switch (action.type) {
+            ...
+            case LOAD_USER_REQUEST:
+                draft.loadUserLoading = true;
+                draft.loadUserDone = false;
+                draft.loadUserError = null;
+                break;
+            case LOAD_USER_SUCCESS:
+                draft.loadUserLoading = false;
+                draft.loadUserDone = true;
+                draft.self = action.data;
+                break;
+            case LOAD_USER_FAILURE:
+                draft.loadUserLoading = false;
+                draft.loadUserError = action.error;
+                break;
+                ...
+        }
+```
