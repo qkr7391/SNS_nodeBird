@@ -3505,3 +3505,53 @@ const reducer = (state = initialState, action) => {
                 ...
         }
 ```
+
+---
+
+## Day 52 - Importing posts
+
+The process of storing real data (not dummy data) and retrieving saved posts.
+
+1. set loadPost in [sagas/post.js]
+```javascript
+[sagas/post.js]
+function loadPostsAPI(data){
+    return axios.get('/posts', data)
+}
+function* loadPosts(action){
+    try{
+        const result =  yield call(loadPostsAPI, action.data)
+        yield put({
+            type: LOAD_POSTS_SUCCESS,
+            data: result.data,
+        });
+    } catch(err) {
+        yield put({
+            type: LOAD_POSTS_FAILURE,
+            data: err.response.data,
+        });
+    }}
+```
+
+2. Create the [routes/posts.js] file
+```javascript
+[routes/posts.js]
+const express = require('express');
+const router = express.Router();
+
+router.get('/', (req, res, next) => {
+
+})
+
+module.exports = router;
+
+```
+
+```javascript
+[app.js]
+const postsRouter = require('./routes/posts');
+...
+app.use('/posts', postsRouter);
+```
+
+

@@ -55,7 +55,7 @@ const PostCard = ({ post }) => {
              // Popover with more options (Edit, Delete, Report)
              <Popover key='more'
                       content ={(<Button.Group>
-                                  { id && post.User.id === id ?
+                                  { id && post.User &&  post.User.id === id ?
                                   (
                                       <>
                                       <Button>Edit</Button>
@@ -72,15 +72,15 @@ const PostCard = ({ post }) => {
              >
              {/* Meta information for the post card */}
             <Card.Meta
-                avatar={<Avatar>{post.User.nickname[0]}</Avatar>} // Displaying user avatar
-                title={post.User.nickname} // Displaying user nickname
+                avatar={post.User && <Avatar>{post.User.nickname[0]}</Avatar>} // Displaying user avatar
+                title={post.User && post.User.nickname} // Displaying user nickname
                 description={<PostCardContent postData={post.content}/> } // Displaying post content
             />
          </Card>
          {/* Displaying comment form if it's opened */}
          {commentFormOpened &&
              (<div>
-                <CommentForm post={post}/>
+                <CommentForm post={ post }/>
                  <List
                  header={`${post.Comments.length} comments`}
                  itemLayout="horizontal"
@@ -111,7 +111,7 @@ PostCard.propTypes = {
         id: PropTypes.number,
         User: PropTypes.object,
         content: PropTypes.string,
-        createdAt: PropTypes.object,
+        createdAt: PropTypes.string,
         Comments: PropTypes.arrayOf(PropTypes.object),
         Images: PropTypes.arrayOf(PropTypes.object),
 
