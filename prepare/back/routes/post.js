@@ -9,7 +9,7 @@ router.post('/', isLoggedIn, async (req, res, next) => {
     try {
             const post = await Post.create({
                 content: req.body.content,
-                UserID: req.user.id,
+                UserId: req.user.id,
         })
         const fullPost = await Post.findOne({
             where : { id: post.id },
