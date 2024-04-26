@@ -29,7 +29,6 @@ router.get('/', async (req, res, next) => {
                     attributes: ['id', 'nickname'],
                 },]
             },],
-
         });
         console.log(posts);
         res.status(200).json(posts);
