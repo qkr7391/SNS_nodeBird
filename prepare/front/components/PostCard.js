@@ -89,16 +89,16 @@ const PostCard = ({ post }) => {
                  renderItem={(item) => (
                      <List.Item>
                          {/*<li></li> -> <List.Item></List.Item>*/}
-                         {/*<List.Item.Meta //< Comment />-> <List.Item.Meta />*/}
-                         {/*    title={item.User.nickname} //author->title*/}
-                         {/*    avatar={<Avatar>{item.User.nickname[0]}</Avatar>}*/}
-                         {/*    description={item.content} //content->description*/}
-                         {/*/>*/}
-                         <List.Item.Meta
-                             title={item.User && item.User.nickname ? item.User.nickname : 'Unknown User'}
-                             avatar={item.User && item.User.nickname ? <Avatar>{item.User.nickname[0]}</Avatar> : null}
-                             description={item.content}
+                         <List.Item.Meta //< Comment />-> <List.Item.Meta />
+                             title={item.User?.nickname} //author->title
+                             avatar={<Avatar>{item.User?.nickname[0]}</Avatar>}
+                             description={item.content} //content->description
                          />
+                         {/*<List.Item.Meta*/}
+                         {/*    title={item.User && item.User.nickname ? item.User.nickname : 'Unknown User'}*/}
+                         {/*    avatar={item.User && item.User.nickname ? <Avatar>{item.User.nickname[0]}</Avatar> : null}*/}
+                         {/*    description={item.content}*/}
+                         {/*/>*/}
                      </List.Item>
                  )}
                  />
