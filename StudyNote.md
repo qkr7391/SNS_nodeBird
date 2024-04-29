@@ -3539,13 +3539,91 @@ function* loadPosts(action){
 const express = require('express');
 const router = express.Router();
 
-router.get('/', (req, res, next) => {
+router.get('/', async (req, res, next) => {
+    try{
+        const posts = await Post.findAll({
+            // where: { UserId: 1 },
+            // limit&offset : Offsets and limits get messed up when events of additions or deletions occur during the loading process.
+            limit: 10,
+            // offset: 0, // 1~10
+            // offset: 10, // 11~20
+            // offset: 100, // 101~110
+            order: [
+                ['createdAt', 'DESC'],
+                [Comment, 'createdAt', 'DESC']
+            ], // -From 'Newest posts'
+            include:[{
+                model: User,
+                attributes: ['id', 'nickname'],
+            },{
+                model: Image,
+            },{
+                model: Comment,
+                include: [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+                },]
+            },],
+        });
+        console.log(posts);
+        res.status(200).json(posts);
+    } catch(error) {
+        console.error(error);
+        next(error);
+    }
 
 })
 
 module.exports = router;
 
 ```
+
+3. arrange [sagas/post.js] and [reducers/post.js]
+```javascript
+[sagas/post.js]
+function loadPostsAPI(data){
+    return axios.get('/posts', data)
+}
+function* loadPosts(action){
+    try{
+        const result =  yield call(loadPostsAPI, action.data)
+        yield put({
+            type: LOAD_POSTS_SUCCESS,
+            data: result.data,
+        });
+    } catch(err) {
+        yield put({
+            type: LOAD_POSTS_FAILURE,
+            data: err.response.data,
+        });
+    }
+}
+function* watchLoadPosts(){
+    yield throttle(5000, LOAD_POSTS_REQUEST, loadPosts);
+    // yield takeLatest(LOAD_POSTS_REQUEST, loadPosts);
+}
+
+
+[reducers/post.js]
+
+case LOAD_POSTS_REQUEST:
+    draft.loadPostsLoading = true;
+    draft.loadPostsDone = false;
+    draft.loadPostsError = null;
+    break;
+case LOAD_POSTS_SUCCESS:
+    draft.mainPosts = action.data.concat(draft.mainPosts);
+    draft.loadPostsLoading = false;
+    draft.loadPostsDone = true;
+    draft.hasMorePosts = draft.mainPosts.length < 50;
+    break;
+case LOAD_POSTS_FAILURE:
+    draft.loadPostsLoading = false;
+    draft.loadPostsError = action.error;
+    break;
+```
+
+-> LOAD_POST_REQUEST on index will fetch the actual post.
 
 ```javascript
 [app.js]
@@ -3554,4 +3632,61 @@ const postsRouter = require('./routes/posts');
 app.use('/posts', postsRouter);
 ```
 
+* Comments
+```javascript
+[sagas/post.js]
+function addCommentAPI(data){
+    return axios.post(`/post/${data.postId}/comment`, data) //POST /comment or /post/1/comment <<meaningful
+}
+
+function* addComment(action){
+    try{
+        const result =  yield call(addCommentAPI, action.data)
+        yield put({
+            type: ADD_COMMENT_SUCCESS,
+            data: result.data,
+        });
+    } catch(err) {
+        console.error(err);
+        yield put({
+            type: ADD_COMMENT_FAILURE,
+            data: err.response.data,
+        });
+    }
+}
+
+function* watchAddComment(){
+    yield takeLatest(ADD_COMMENT_REQUEST, addComment);
+}
+
+
+[reducers/post.js]
+
+case ADD_COMMENT_REQUEST:
+    draft.addCommentLoading = true;
+    draft.addCommentDone = false;
+    draft.addCommentError = null;
+    break;
+case ADD_COMMENT_SUCCESS: {
+    const postIndex = draft.mainPosts.findIndex((v) => v.id === action.data.PostId);
+    if (postIndex !== -1) {
+        const post = draft.mainPosts[postIndex];
+        post.Comments.unshift(action.data); // action.data에는 댓글 객체가 전달되어야 함
+    }
+    draft.addCommentLoading = false;
+    draft.addCommentDone = true;
+    break;
+    }
+case ADD_COMMENT_FAILURE:
+    draft.addCommentLoading = false;
+    draft.addCommentError = action.error;
+    break;
+```
+
+
+
+
+---
+
+## Day 53 - 
 
