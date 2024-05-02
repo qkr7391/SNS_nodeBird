@@ -8,7 +8,7 @@ import { EllipsisOutlined, HeartOutlined, MessageOutlined, RetweetOutlined, Hear
 import PostImages from "./PostImages";
 import CommentForm from "./CommentForm";
 import PostCardContent from "./PostCardContent";
-import { DELETE_POST_REQUEST } from "../reducers/post";
+import {DELETE_POST_REQUEST, LIKE_POST_REQUEST, UNLIKE_POST_REQUEST} from "../reducers/post";
 import FollowButton from "./FollowButton";
 
 const PostCard = ({ post }) => {
@@ -16,12 +16,25 @@ const PostCard = ({ post }) => {
     const { deletePostLoading } = useSelector((state) => state.post);
 
     // State for managing like and comment form visibility
-    const [liked, setLiked] = useState(false);
+    //const [liked, setLiked] = useState(false);
     const [commentFormOpened, setCommentFormOpened] = useState(false);
 
     // Toggle like function
-    const onToggleLike = useCallback(()=>{
-        setLiked((prev)=> !prev);
+    const onLike = useCallback(()=>{
+        // setLiked((prev)=> !prev);
+        dispatch({
+            type: LIKE_POST_REQUEST,
+            data: post.id,
+        })
+    },[]);
+
+    // Toggle Unlike function
+    const onUnLike = useCallback(()=>{
+        // setLiked((prev)=> !prev);
+        dispatch({
+            type: UNLIKE_POST_REQUEST,
+            data: post.id,
+        })
     },[]);
 
     // Toggle comment form visibility function
@@ -42,6 +55,8 @@ const PostCard = ({ post }) => {
     const id = useSelector((state) => state.user.self?.id);
     //way4// const id = useSelector((state) => sate.user.self && state.user.self.id);
 
+    const liked = post.Likers.find((v) => v.id === id);
+
     return(
      <div style={{ marginBottom: 20 }}>
          <Card
@@ -49,8 +64,8 @@ const PostCard = ({ post }) => {
          actions={[
              <RetweetOutlined key='retweet'/>,
              liked
-                 ? <HeartTwoTone twoToneColor="#eb2f96" key='heart' onClick={ onToggleLike }/>
-                 : <HeartOutlined key='heart' onClick={ onToggleLike }/>,
+                 ? <HeartTwoTone twoToneColor="#eb2f96" key='heart' onClick={ onUnLike }/>
+                 : <HeartOutlined key='heart' onClick={ onLike }/>,
              <MessageOutlined key='comment' onClick={ onToggleComment }/>,
              // Popover with more options (Edit, Delete, Report)
              <Popover key='more'
@@ -136,6 +151,7 @@ PostCard.propTypes = {
             ])
         ),
         Images: PropTypes.arrayOf(PropTypes.object),
+        Likers: PropTypes.arrayOf(PropTypes.object),
     }).isRequired,
 };
 

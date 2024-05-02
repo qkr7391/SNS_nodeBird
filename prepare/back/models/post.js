@@ -16,12 +16,14 @@ module.exports = (sequelize, DataTypes) => {
         collate: 'utf8mb4_general_ci' // Korean, emoji save
     });
     Post.associate = (db) => {
-        db.Post.belongsTo(db.User);
-        db.Post.hasMany(db.Comment);
-        db.Post.hasMany(db.Image);
-        db.Post.belongsToMany(db.Hashtag, { through: 'PostHashtag' });
-        db.Post.belongsTo(db.Post, {as: 'Retweet'}); //retweet
-        db.Post.belongsToMany(db.User, {through: 'Like', as: 'Likers'}); //through -> change name of middle table
+        db.Post.belongsTo(db.User); // post.addUser, post.getUser, post.SetUser (from sequalizer)
+        db.Post.hasMany(db.Comment); // post.addComments, post.getComments (from sequalizer)
+        db.Post.hasMany(db.Image); // post.addImages, post.getImages (from sequalizer)
+        db.Post.belongsToMany(db.Hashtag, { through: 'PostHashtag' }); // post.addHashtags (from sequalizer)
+        db.Post.belongsTo(db.Post, {as: 'Retweet'}); //post.addRetweet (from sequalizer)
+        //retweet
+        db.Post.belongsToMany(db.User, {through: 'Like', as: 'Likers'}); // post.addLikers, post.removeLikers (from sequalizer)
+        //through -> change name of middle table
     };
     return Post;
 }

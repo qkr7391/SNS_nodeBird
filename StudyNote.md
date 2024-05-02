@@ -3683,10 +3683,308 @@ case ADD_COMMENT_FAILURE:
     break;
 ```
 
-
-
-
 ---
 
-## Day 53 - 
+## Day 53 - LIKE function implement
+
+1. [components/PostCard.js]
+```javascript
+[components/PostCard.js]
+// Toggle like function
+const onLike = useCallback(()=>{
+    // setLiked((prev)=> !prev);
+    dispatch({
+        type: LIKE_POST_REQUEST,
+        data: post.id,
+    })
+},[]);
+
+// Toggle Unlike function
+const onUnLike = useCallback(()=>{
+    // setLiked((prev)=> !prev);
+    dispatch({
+        type: UNLIKE_POST_REQUEST,
+        data: post.id,
+    })
+},[]);
+
+...
+
+<RetweetOutlined key='retweet'/>,
+    liked
+        ? <HeartTwoTone twoToneColor="#eb2f96" key='heart' onClick={ onUnLike }/>
+        : <HeartOutlined key='heart' onClick={ onLike }/>,
+    <MessageOutlined key='comment' onClick={ onToggleComment }/>,
+
+```
+
+2. [reducers/post.js]
+```javascript
+export const initialState = {
+ ...
+    likePostLoading: false,
+    likePostDone: false,
+    likePostError: null,
+    unlikePostLoading: false,
+    unlikePostDone: false,
+    unlikePostError: null,
+}
+export const LIKE_POST_REQUEST = 'LIKE_POST_REQUEST';
+export const LIKE_POST_SUCCESS = 'LIKE_POST_SUCCESS';
+export const LIKE_POST_FAILURE = 'LIKE_POST_FAILURE';
+
+export const UNLIKE_POST_REQUEST = 'UNLIKE_POST_REQUEST';
+export const UNLIKE_POST_SUCCESS = 'UNLIKE_POST_SUCCESS';
+export const UNLIKE_POST_FAILURE = 'UNLIKE_POST_FAILURE';
+
+const reducer = (state = initialState, action) => {
+    return produce(state, (draft) => {
+        switch (action.type){
+            case LIKE_POST_REQUEST:
+                draft.likePostLoading = true;
+                draft.likePostDone = false;
+                draft.likePostError = null;
+                break;
+            case LIKE_POST_SUCCESS:
+                draft.mainPosts.unshift(action.data);
+                draft.likePostLoading = false;
+                draft.likePostDone = true;
+                draft.imagePaths = [];
+                break;
+            case LIKE_POST_FAILURE:
+                draft.likePostLoading = false;
+                draft.likePostError = action.error;
+                break;
+            case UNLIKE_POST_REQUEST:
+                draft.unlikePostLoading = true;
+                draft.unlikePostDone = false;
+                draft.unlikePostError = null;
+                break;
+            case UNLIKE_POST_SUCCESS:
+                draft.mainPosts.unshift(action.data);
+                draft.unlikePostLoading = false;
+                draft.unlikePostDone = true;
+                draft.imagePaths = [];
+                break;
+            case UNLIKE_POST_FAILURE:
+                draft.unlikePostLoading = false;
+                draft.unlikePostError = action.error;
+                break;
+                ...
+```
+
+3. [sagas/post.js]
+```javascript
+[sagas/post.js]
+import {
+    ...
+    LIKE_POST_REQUEST,
+    UNLIKE_POST_REQUEST,
+    LIKE_POST_SUCCESS,
+    LIKE_POST_FAILURE,
+    UNLIKE_POST_SUCCESS,
+    UNLIKE_POST_FAILURE,
+} from "../reducers/post";
+
+function likePostAPI(data){
+    //${data} --> post.id
+    return axios.patch(`/post/${data}/like`)
+}
+
+function* likePost(action){
+    try{
+        const result =  yield call(likePostAPI, action.data);
+        yield put({
+            type: LIKE_POST_SUCCESS,
+            // content: result.data,
+            data: result.data,
+        });
+    } catch(err) {
+        yield put({
+            type: LIKE_POST_FAILURE,
+            data: err.response.data,
+        });
+    }
+}
+
+function* watchLikePost(){
+    yield takeLatest(LIKE_POST_REQUEST, likePost);
+}
+
+function unlikePostAPI(data){
+    //${data} --> post.id
+    //return axios.patch(`/post/${data}/unlike`)
+    return axios.delete(`/post/${data}/like`) //^^ same
+}
+
+function* unlikePost(action){
+    try{
+        const result =  yield call(unlikePostAPI, action.data);
+        yield put({
+            type: UNLIKE_POST_SUCCESS,
+            // content: result.data,
+            data: result.data,
+        });
+    } catch(err) {
+        yield put({
+            type: UNLIKE_POST_FAILURE,
+            data: err.response.data,
+        });
+    }
+}
+
+function* watchUnLikePost(){
+    yield takeLatest(UNLIKE_POST_REQUEST, unlikePost);
+}
+
+
+export default function* postSaga(){
+    yield all([
+            ...
+        fork(watchLikePost),
+        fork(watchUnLikePost),
+    ])
+}
+
+
+```
+
+4. backend -> [routes/post.js]
+```javascript
+[routes/post.js]
+
+//PATCH /post/1/like
+router.patch('/:postId/like', async (req, res, next) => {
+    try{
+        const post = await Post.findOne(
+            { where : { id : req.params.postId }});
+        if (!post) {
+            return res.status(403).send('Post does not exist.')
+        }
+        //sequalize
+        await post.addLikers(req.user.id);
+        res.json({ PostId: post.id,
+            UserId: req.user.id });
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+
+//DELETE /post/1/like
+router.delete('/:postId/like', async(req, res, next) => {
+    try{
+        const post = await Post.findOne(
+            { where : { id : req.params.postId }});
+        if (!post) {
+            return res.status(403).send('Post does not exist.')
+        }
+        //sequalize
+        await post.removeLikers(req.user.id);
+        res.json({ PostId: post.id,
+            UserId: req.user.id });
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+```
+
+5. [reducers/post.js]
+```javascript
+...
+case LIKE_POST_SUCCESS:{
+    // action.data <- has Post ID, User ID
+    const post = draft.mainPosts.find((v) => v.id === action.data.PostId);
+    post.Likers.push({ id: action.data.UserId });
+    draft.likePostLoading = false;
+    draft.likePostDone = true;
+    break;
+}
+...
+case UNLIKE_POST_SUCCESS: {
+    const postIndex = draft.mainPosts.findIndex((v) => v.id === action.data.PostId);
+    if (postIndex !== -1) {
+        const post = draft.mainPosts[postIndex];
+        post.Likers = post.Likers.filter((liker) => liker.id !== action.data.UserId);
+    }
+    draft.unlikePostLoading = false;
+    draft.unlikePostDone = true;
+    break;
+}
+```
+-->> ERROR !!!
+```dtd
+Unhandled Runtime Error
+ReferenceError: liked is not defined
+
+Source
+components/PostCard.js (64:13) @ liked
+
+  62 | actions={[
+  63 |     <RetweetOutlined key='retweet'/>,
+> 64 |     liked
+     |    ^
+  65 |         ? <HeartTwoTone twoToneColor="#eb2f96" key='heart' onClick={ onUnLike }/>
+  66 |         : <HeartOutlined key='heart' onClick={ onLike }/>,
+  67 |     <MessageOutlined key='comment' onClick={ onToggleComment }/>,
+```
+
+why? >> There's no liked
+
+```javascript
+[PostCard.js]
+    ...
+const liked = post.Likers.find((v) => v.id === id);
+    ...
+PostCard.propTypes = {
+    post: PropTypes.shape({
+        ...
+        Likers: PropTypes.arrayOf(PropTypes.object),
+    }).isRequired,
+};
+
+```
+
+6. [routes/post.js]
+```javascript
+[routes/post.js]
+    ...
+const fullPost = await Post.findOne({
+    where : { id: post.id },
+    include: [{
+        model: Image,
+    }, {
+        model: Comment,
+        include: [{
+            model: User, // comment writer
+            attributes: ['id', 'nickname'],
+        }]
+    }, {
+        model: User, // post writer
+        attributes: ['id', 'nickname'],
+    }, {
+        model: User, // Likers
+        as: 'Likers',
+        attributes: ['id'],
+    }]
+})
+
+```
+
+7. [routes/posts.js]
+```javascript
+[routes/posts.js]
+const posts = await Post.findAll({
+    ...
+        {
+        model: User, // Likers
+        as: 'Likers',
+        attributes: ['id'],
+    }],
+});
+```
+
+---
 

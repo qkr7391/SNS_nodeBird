@@ -27,8 +27,12 @@ router.get('/', async (req, res, next) => {
                 include: [{
                     model: User,
                     attributes: ['id', 'nickname'],
-                },]
-            },],
+                }],
+            }, {
+                model: User, // Likers
+                as: 'Likers',
+                attributes: ['id'],
+            }],
         });
         console.log(posts);
         res.status(200).json(posts);
