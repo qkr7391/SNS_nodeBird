@@ -115,4 +115,20 @@ router.post('/logout', isLoggedIn, (req, res, next) => {
         res.send('ok');
     })
 })
+
+//Change nickname
+router.patch('/nickname', isLoggedIn, async (req, res, next) => {
+    try {
+        await User.update({
+            nickname: req.body.nickname, // change nickname what I got from user
+        }, {
+            where: { id: req.user.id } //condition: my ID
+        });
+        res.status(200).json( { nickname: req.body.nickname });
+    } catch(error) {
+        console.error(error);
+        next(error);
+    }
+})
+
 module.exports = router;

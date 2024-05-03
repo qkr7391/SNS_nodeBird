@@ -61,14 +61,14 @@ export const LOAD_USER_SUCCESS = 'LOAD_USER_SUCCESS';
 export const LOAD_USER_FAILURE = 'LOAD_USER_FAILURE';
 
 
-const dummyUser = (data) => ({
-    ...data,
-    nickname: 'Sammy',
-    id: 1,
-    Posts:[{ id:1 }],
-    Followings: [{nickname: 'ssm'}, {nickname: 'erasdr'}, {nickname: 'qwer12'}],
-    Followers: [{nickname: 'ssm'}, {nickname: 'erasdr'}, {nickname: 'qwer12'}],
-})
+// const dummyUser = (data) => ({
+//     ...data,
+//     nickname: 'Sammy',
+//     id: 1,
+//     Posts:[{ id:1 }],
+//     Followings: [{nickname: 'ssm'}, {nickname: 'erasdr'}, {nickname: 'qwer12'}],
+//     Followers: [{nickname: 'ssm'}, {nickname: 'erasdr'}, {nickname: 'qwer12'}],
+// })
 
 //action creator
 export const loginRequestAction = (data) => {
@@ -164,10 +164,13 @@ const reducer = (state = initialState, action) => {
                 draft.changeNicknameError = null;
                 break;
             case CHANGE_NICKNAME_SUCCESS:
+                //Reflecting a changed nickname
+                draft.self.nickname = action.data.nickname;
                 draft.changeNicknameLoading = false;
                 draft.changeNicknameDone = true;
                 break;
             case CHANGE_NICKNAME_FAILURE:
+                draft.self.nickname = action.data.nickname;
                 draft.changeNicknameLoading = false;
                 draft.changeNicknameError = action.error;
                 break;

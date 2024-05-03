@@ -1,12 +1,13 @@
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import Head from "next/head";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from 'next/router';
 
 import AppLayout from "../components/AppLayout";
 import NicknameEditForm from "../components/NicknameEditForm";
 import FollowList from "../components/FollowList";
 // import {Router} from "next/router";
+
 
 const Profile = () => {
 	// const followerList = [
@@ -19,6 +20,17 @@ const Profile = () => {
 	// 	{ nickname: "Sarah" },
 	// 	{ nickname: "Ruby" },
 	// ];
+
+	const dispatch = useDispatch();
+
+	// useEffect(() => {
+	// 	dispatch({
+	// 		type: LOAD_FOLLOWERS_REQUEST,
+	// 	});
+	// 	dispatch({
+	// 		type: LOAD_FOLLOWINGS_REQUEST,
+	// 	});
+	// }, []);
 
 	const { self } = useSelector((state) => state.user);
 	const router = useRouter();

@@ -163,7 +163,7 @@ const reducer = (state = initialState, action) => {
             case DELETE_POST_SUCCESS:
                 draft.deletePostLoading = false;
                 draft.deletePostDone = true;
-                draft.mainPosts = draft.mainPosts.filter((v) => v.id !== action.data);
+                draft.mainPosts = draft.mainPosts.filter((v) => v.id !== action.data.PostId);
                 break;
             case DELETE_POST_FAILURE:
                 draft.deletePostLoading = false;

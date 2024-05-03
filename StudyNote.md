@@ -3987,4 +3987,227 @@ const posts = await Post.findAll({
 ```
 
 ---
+## Day 54 - Delete Post and Change Nickname
 
+* Delete Post
+1. [routes/post.js]
+```javascript
+
+//DELETE /post
+router.delete('/:postId', isLoggedIn, async(req, res, next) => {
+    try{
+        await Post.destroy({
+            where : {
+                id: req.params.postId,
+                UserId: req.user.id,
+            },
+        });
+        res.status(200).json({ PostId: req.params.postId });
+    } catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+```
+
+2. [reducers/user.js]
+```javascript
+export const initialState = { ...
+    deletePostLoading: false,
+    deletePostDone: false,
+    deletePostError: null,
+...}
+
+...
+export const DELETE_POST_REQUEST = 'DELETE_POST_REQUEST';
+export const DELETE_POST_SUCCESS = 'DELETE_POST_SUCCESS';
+export const DELETE_POST_FAILURE = 'DELETE_POST_FAILURE';
+...
+case DELETE_POST_REQUEST:
+    draft.deletePostLoading = true;
+    draft.deletePostDone = false;
+    draft.deletePostError = null;
+    break;
+case DELETE_POST_SUCCESS:
+    draft.deletePostLoading = false;
+    draft.deletePostDone = true;
+    draft.mainPosts = draft.mainPosts.filter((v) => v.id !== action.data.PostId);
+    break;
+case DELETE_POST_FAILURE:
+    draft.deletePostLoading = false;
+    draft.deletePostError = action.error;
+    break;
+```
+
+3. [sagas/post.js]
+```javascript
+function deletePostAPI(data){
+    return axios.delete(`/post/${data}`) // ${data} --> post.id (from PostCard.js)
+}
+function* deletePost(action){
+    try{
+        const result =  yield call(deletePostAPI, action.data)
+        yield put({
+            type: DELETE_POST_SUCCESS,
+            data: result.data,
+        });
+        yield put({
+            type: DELETE_POST_OF_ME,
+            data: action.data,
+        })
+    } catch(err) {
+        console.error(err);
+        yield put({
+            type: DELETE_POST_FAILURE,
+            data: err.response.data,
+        });
+    }
+}
+function* watchDeletePost(){
+    yield takeLatest(DELETE_POST_REQUEST, deletePost);
+}
+
+```
+
+- 1st try got error -> PostId problem number -> string
+
+```javascript
+[routes/post.js]
+
+//DELETE /post
+router.delete('/:postId', isLoggedIn, async(req, res, next) => {
+    ...
+        res.status(200).json({ PostId: parseInt(req.params.postId, 10) }); // string -> int
+  ...
+});
+
+```
+
+
+
+* Change Nickname
+1. [routes/user.js]
+```javascript
+
+//Change nickname
+router.patch('/nickname', isLoggedIn, async (req, res, next) => {
+    try {
+        await User.update({
+            nickname: req.body.nickname, // change nickname what I got from user
+        }, {
+            where: { id: req.user.id } //condition: my ID
+        });
+        res.status(200).json( { nickname: req.body.nickname });
+    } catch(error) {
+        console.error(error);
+        next(error);
+    }
+})
+```
+
+2. [reducers/user.js]
+```javascript
+export const initialState = { ...
+        changeNicknameLoading: false, // trying to change nickname
+    changeNicknameDone: false,
+    changeNicknameError: null,
+    ... }
+
+export const CHANGE_NICKNAME_REQUEST = 'CHANGE_NICKNAME_REQUEST';
+export const CHANGE_NICKNAME_SUCCESS = 'CHANGE_NICKNAME_SUCCESS';
+export const CHANGE_NICKNAME_FAILURE = 'CHANGE_NICKNAME_FAILURE';
+...
+case CHANGE_NICKNAME_REQUEST:
+    draft.changeNicknameLoading = true;
+    draft.changeNicknameDone = false;
+    draft.changeNicknameError = null;
+    break;
+case CHANGE_NICKNAME_SUCCESS:
+    draft.changeNicknameLoading = false;
+    draft.changeNicknameDone = true;
+    break;
+case CHANGE_NICKNAME_FAILURE:
+    draft.changeNicknameLoading = false;
+    draft.changeNicknameError = action.error;
+    break;
+    ...
+```
+
+3. [components/NicknameEditForm.js]
+```javascript
+import React, { useCallback, useMemo } from "react";
+import { Form, Input } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import { CHANGE_NICKNAME_REQUEST } from "../reducers/user";
+
+import useInput from '../hooks/useinput';
+
+
+const NicknameEditForm = () => {
+	const { self } = useSelector((state) => state.user);
+	const [nickname, onChangeNickname] = useInput(self?.nickname || '');
+	const dispatch = useDispatch();
+
+	const onSubmit = useCallback(() => {
+		dispatch({
+			type: CHANGE_NICKNAME_REQUEST,
+			data: nickname,
+		});
+	}, [nickname]);
+
+	const style = useMemo(() => ({
+		marginBottom: "20px",
+		border: "1px solid #d9d9d9",
+		padding: "20px",
+	}));
+	
+	return (
+		<Form
+			style={style}
+			onFinish={onSubmit}
+		>
+			<Input.Search
+				value={nickname}
+				onChange={onChangeNickname}
+				addonBefore="Nickname"
+				enterButton="edit" />
+		</Form>
+	);
+};
+
+export default NicknameEditForm;
+
+```
+
+
+
+4. [sagas/user.js]
+```javascript
+
+function changeNicknameAPI(data){
+    return axios.patch('/user/nickname', { nickname: data });
+}
+
+function* changeNickname(action){
+    try{
+        const result =  yield call(changeNicknameAPI, action.data);
+        yield put({
+            type: CHANGE_NICKNAME_SUCCESS,
+            data: result.data,
+        });
+    }
+    catch(err) {
+        console.error(err);
+        yield put({
+            type: CHANGE_NICKNAME_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
+function* watchChangeNickname(){
+    yield takeLatest(CHANGE_NICKNAME_REQUEST, changeNickname);
+}
+
+```
+- ERROR 01 : 
