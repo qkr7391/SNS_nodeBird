@@ -4210,4 +4210,286 @@ function* watchChangeNickname(){
 }
 
 ```
-- ERROR 01 : 
+- ERROR 01 : Loading issue: When I change my nickname and return to the home screen, I see a duplicate post with my old nickname and a post with my new nickname.
+
+---
+
+## Day 55 - Follow and Unfollow
+
+* Backend
+1.  [routes/user.js]
+```javascript
+//Follow
+//PATCH /user/1/follow
+router.patch('/:userId/follow', isLoggedIn, async (req, res, next) => {
+    try {
+        const user = await User.findOne({
+            where : { id: req.params.userId }
+        });
+        if (!user){
+            res.status(403).send('This User is not exist.');
+        }
+        await user.addFollowers(req.user.id);
+        res.status(200).json( { UserId: req.body.userId });
+    } catch(error) {
+        console.error(error);
+        next(error);
+    }
+})
+
+
+//UnFollow
+//DELETE /user/1/follow
+router.delete('/:userId/follow', isLoggedIn, async (req, res, next) => {
+    try {
+        const user = await User.findOne({
+            where : { id: req.params.userId }
+        });
+        if (!user){
+            res.status(403).send('This User is not exist.');
+        }
+        await user.removeFollowers(req.user.id);
+        res.status(200).json( { UserId: req.body.userId });
+    } catch(error) {
+        console.error(error);
+        next(error);
+    }
+})
+```
+
+
+* Frontend
+
+1. [reducers/user.js]
+```javascript
+case FOLLOW_REQUEST:
+    draft.followLoading = true;
+draft.followDone = false;
+draft.followError = null;
+break;
+case FOLLOW_SUCCESS:
+    draft.followLoading = false;
+    draft.followDone = true;
+    draft.self.Followings.push({ id: action.data.UserId }) ;
+    break;
+case FOLLOW_FAILURE:
+    draft.followLoading = false;
+    draft.followError = action.error;
+    break;
+case UNFOLLOW_REQUEST:
+    draft.unfollowLoading = true;
+    draft.unfollowDone = false;
+    draft.unfollowError = null;
+    break;
+case UNFOLLOW_SUCCESS:
+    draft.unfollowLoading = false;
+    draft.unfollowDone = true;
+    draft.self.Followings = draft.self.Followings.filter((v) => v.id !== action.data.UserId) ;
+    break;
+case UNFOLLOW_FAILURE:
+    draft.unfollowLoading = false;
+    draft.unfollowError = action.error;
+    break;
+```
+
+
+2. [sagas/user.js]
+```javascript
+function followAPI(data){
+    return axios.patch(`/user/${data}/follow`, data)
+}
+function* follow(action){
+    try{
+        const result =  yield call(followAPI, action.data)
+        yield put({
+            type: FOLLOW_SUCCESS,
+            // data: action.data,
+            data: result.data
+        });
+    } catch(err) {
+        yield put({
+            type: FOLLOW_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
+function unfollowAPI(data){
+    return axios.delete(`/user/${data}/follow`, data)
+}
+function* unfollow(action){
+    try{
+        const result =  yield call(unfollowAPI, action.data)
+        yield put({
+            type: UNFOLLOW_SUCCESS,
+            // data: action.data,
+            data: result.data
+        });
+    } catch(err) {
+        yield put({
+            type: UNFOLLOW_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+```
+
+* Call followers and followings list
+
+* Backend
+1. [routes/user.js]
+```javascript
+//Followers list
+//GET /user/followers
+router.get('/followers', isLoggedIn, async (req, res, next) => {
+    try {
+        const user = await User.findOne({
+            where : { id: req.user.id } //find myself
+        });
+        if (!user) {
+            return res.status(404).send('User not found.');
+        }
+        const followers = await user.getFollowers();
+        res.status(200).json(followers);
+    } catch(error) {
+        console.error(error);
+        next(error);
+    }
+})
+
+//Followings list
+//GET /user/followings
+router.get('/followingss', isLoggedIn, async (req, res, next) => {
+    try {
+        const user = await User.findOne({
+            where : { id: req.user.id } //find myself
+        });
+        if (!user) {
+            return res.status(404).send('User not found.');
+        }
+        const followings = await user.getFollowings(req.user.id);
+        res.status(200).json(followings);
+    } catch(error) {
+        console.error(error);
+        next(error);
+    }
+})
+```
+
+
+* Frontend
+1. [pages/profile.js]
+```javascript
+import {LOAD_FOLLOWERS_REQUEST, LOAD_FOLLOWINGS_REQUEST} from "../reducers/user";
+
+useEffect(()=>{
+    dispatch({
+        type: LOAD_FOLLOWERS_REQUEST,
+    });
+    dispatch({
+        type: LOAD_FOLLOWINGS_REQUEST,
+    });
+}, [])
+
+```
+
+2. [reducers/user.js] 
+```javascript
+case LOAD_FOLLOWERS_REQUEST:
+    draft.loadFollowersLoading = true;
+    draft.loadFollowersDone = false;
+    draft.loadFollowersError = null;
+    break;
+case LOAD_FOLLOWERS_SUCCESS:
+    draft.loadFollowersLoading = false;
+    draft.loadFollowersDone = true;
+    draft.self.Followers = action.data ;
+    break;
+case LOAD_FOLLOWERS_FAILURE:
+    draft.loadFollowersLoading = false;
+    draft.loadFollowersError = action.error;
+    break;
+case LOAD_FOLLOWINGS_REQUEST:
+    draft.loadFollowingsLoading = true;
+    draft.loadFollowingsDone = false;
+    draft.loadFollowingsError = null;
+    break;
+case LOAD_FOLLOWINGS_SUCCESS:
+    draft.loadFollowingsLoading = false;
+    draft.loadFollowingsDone = true;
+    draft.self.Followings = action.data;
+    break;
+case LOAD_FOLLOWINGS_FAILURE:
+    draft.loadFollowingsLoading = false;
+    draft.loadFollowingsError = action.error;
+    break;
+```
+
+3. [sagas/user.js]
+```javascript
+function loadFollowingsAPI(){
+    return axios.get('/user/followings');
+}
+
+function* loadFollowings(action){
+    try{
+        console.log("Fetching followings...");
+        const result = yield call(loadFollowingsAPI);
+        console.log("Followings data:", result.data);
+        yield put({
+            type: LOAD_FOLLOWINGS_SUCCESS,
+            data: result.data
+        });
+    } catch(err) {
+        yield put({
+            type: LOAD_FOLLOWINGS_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
+
+
+function loadUserAPI(data){
+    return axios.get('/user');
+}
+function* loadUser(action){
+    try{
+        const result =  yield call(loadUserAPI, action.data);
+        yield put({
+            type: LOAD_USER_SUCCESS,
+            data: result.data,
+        });
+    }
+    catch(err) {
+        console.error(err);
+        yield put({
+            type: LOAD_USER_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
+function changeNicknameAPI(data){
+    return axios.patch('/user/nickname', { nickname: data });
+}
+function* changeNickname(action){
+    try{
+        const result =  yield call(changeNicknameAPI, action.data);
+        yield put({
+            type: CHANGE_NICKNAME_SUCCESS,
+            data: result.data,
+        });
+    }
+    catch(err) {
+        console.error(err);
+        yield put({
+            type: CHANGE_NICKNAME_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+```
+
+
+** ERROR 01 : There's no information about nickname in 'Follow'. So nickname is not showing on the following list or follower list.

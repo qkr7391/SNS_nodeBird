@@ -17,18 +17,24 @@ const FollowList = ({ header, data }) => {
 			}
 			bordered
 			dataSource={data}
-			renderItem={(item) => (
-				<List.Item style={{ marginTop: 20 }}>
-					<Card actions={[<StopOutlined key="stop" />]}>
-						<Card.Meta description={item.nickname} />
-					</Card>
-				</List.Item>
-			)}
+			renderItem={(item) => {
+				console.log("Header:", header);
+				console.log("Data:", data);
+				console.log("Item:", item);
+				return (
+					<List.Item style={{ marginTop: 20 }}>
+						<Card actions={[<StopOutlined key="stop" />]}>
+							<Card.Meta description={item} />
+						</Card>
+					</List.Item>
+				);
+			}}
+
 		/>
 	);
 };
 
-FollowList.propsTypes = {
+FollowList.propTypes = {
 	header: PropTypes.string.isRequired,
 	data: PropTypes.array.isRequired,
 };

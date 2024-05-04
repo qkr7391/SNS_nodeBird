@@ -8,6 +8,12 @@ export const initialState = {
     unfollowLoading: false, //trying unfollow
     unfollowDone: false,
     unfollowError: null,
+    loadFollowersLoading: false, //trying follow
+    loadFollowersDone: false,
+    loadFollowersError: null,
+    loadFollowingsLoading: false, //trying follow
+    loadFollowingsDone: false,
+    loadFollowingsError: null,
     logInLoading: false, //trying login
     logInDone: false,
     logInError: null,
@@ -51,6 +57,15 @@ export const FOLLOW_FAILURE = 'FOLLOW_FAILURE';
 export const UNFOLLOW_REQUEST = 'UNFOLLOW_REQUEST';
 export const UNFOLLOW_SUCCESS = 'UNFOLLOW_SUCCESS';
 export const UNFOLLOW_FAILURE = 'UNFOLLOW_FAILURE';
+
+export const LOAD_FOLLOWERS_REQUEST = 'LOAD_FOLLOWERS_REQUEST';
+export const LOAD_FOLLOWERS_SUCCESS = 'LOAD_FOLLOWERS_SUCCESS';
+export const LOAD_FOLLOWERS_FAILURE = 'LOAD_FOLLOWERS_FAILURE';
+
+export const LOAD_FOLLOWINGS_REQUEST = 'LOAD_FOLLOWINGS_REQUEST';
+export const LOAD_FOLLOWINGS_SUCCESS = 'LOAD_FOLLOWINGS_SUCCESS';
+export const LOAD_FOLLOWINGS_FAILURE = 'LOAD_FOLLOWINGS_FAILURE';
+
 
 export const ADD_POST_TO_ME = 'ADD_POST_TO_ME';
 export const DELETE_POST_OF_ME= 'DELETE_POST_OF_ME'
@@ -96,7 +111,7 @@ const reducer = (state = initialState, action) => {
             case FOLLOW_SUCCESS:
                 draft.followLoading = false;
                 draft.followDone = true;
-                draft.self.Followings.push({ id: action.data }) ;
+                draft.self.Followings.push({ id: action.data.UserId }) ;
                 break;
             case FOLLOW_FAILURE:
                 draft.followLoading = false;
@@ -110,12 +125,54 @@ const reducer = (state = initialState, action) => {
             case UNFOLLOW_SUCCESS:
                 draft.unfollowLoading = false;
                 draft.unfollowDone = true;
-                draft.self.Followings = draft.self.Followings.filter((v) => v.id !== action.data) ;
+                draft.self.Followings = draft.self.Followings.filter((v) => v.id !== action.data.UserId) ;
                 break;
             case UNFOLLOW_FAILURE:
                 draft.unfollowLoading = false;
                 draft.unfollowError = action.error;
                 break;
+            case LOAD_FOLLOWERS_REQUEST:
+                return {
+                    ...state,
+                    loadFollowersLoading: true,
+                    loadFollowersDone: false,
+                    loadFollowersError: null
+                };
+            case LOAD_FOLLOWERS_SUCCESS:
+                console.log("Followers data:", action.data);
+                return {
+                    ...state,
+                    loadFollowersLoading: false,
+                    loadFollowersDone: true,
+                    Followers: action.data
+                };
+            case LOAD_FOLLOWERS_FAILURE:
+                return {
+                    ...state,
+                    loadFollowersLoading: false,
+                    loadFollowersError: action.error
+                };
+            case LOAD_FOLLOWINGS_REQUEST:
+                return {
+                    ...state,
+                    loadFollowingsLoading: true,
+                    loadFollowingsDone: false,
+                    loadFollowingsError: null
+                };
+            case LOAD_FOLLOWINGS_SUCCESS:
+                console.log("Followers data:", action.data);
+                return {
+                    ...state,
+                    loadFollowingsLoading: false,
+                    loadFollowingsDone: true,
+                    Followings: action.data
+                };
+            case LOAD_FOLLOWINGS_FAILURE:
+                return {
+                    ...state,
+                    loadFollowingsLoading: false,
+                    loadFollowingsError: action.error
+                };
             case LOG_IN_REQUEST:
                 draft.logInLoading = true;
                 draft.logInDone = false;
