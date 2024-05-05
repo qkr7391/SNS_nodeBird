@@ -4567,7 +4567,7 @@ const onClick = (id) => () => {
 };
 ```
 
-[reduecer/user.js]
+[reducers/user.js]
 ```javascript
 case REMOVE_FOLLOWER_REQUEST:
     draft.removefollowerLoading = true;
@@ -4631,4 +4631,159 @@ router.delete('/followers/:userId', isLoggedIn, async (req, res, next) => {
     }
 });
 ```
+
+---
+
+## Day 56 - multer for image uploading
+
+[components/PostForm.js]
+```javascript
+// Image upload button click handler
+const onClickImageUpload = useCallback(()=>{
+    // Programmatically clicking the hidden file input to trigger file selection
+    imageInput.current.click();
+}, [imageInput.current])
+return(
+    <Form style={{margin: '10px 0 20px'}} encType={"multipart.form-data"} onFinish={onSubmit}>
+
+```
+
+[app.js]
+```javascript
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+```
+
+>> I have Image upload set to upload multipart form data, but the backend is not set to receive multipart form.  So if you want to receive multi part form data on the backend, you need to install a middleware called multer.
+
+* npm i multer
+* [routes/post.js]
+```javascript
+const multer = require('multer');
+
+const upload = multer({
+    storage: multer.diskStorage({ // save images to desktop for practicing
+        destination(req, file, done){
+            done(null, 'uploads');
+        },
+        filename(req, file, done) { //image.png
+            const ext = path.extname(file.originalname); // (extract extension) (png)
+            const basename = path.basename(file.originalname, ext) // image;
+
+            done(null, basename + new Date().getTime()+ ext); // image12424t43643.png
+        },
+    }),
+    limits: { fileSize : 20 * 1024 * 1024} // 20MB
+
+});
+
+
+//POST /post/images
+router.post('/images', isLoggedIn, upload.array('image'), (req, res, next) => {
+    console.log(req.files);
+    res.json(req.files.map((v) => v.filename));
+});
+
+```
+
+* [PostForm.js]
+```javascript
+const onChangeImages = useCallback((e) => {
+    console.log('images', e.target.files);
+    const imageFormData = new FormData();
+    [].forEach.call(e.target.files, (f) => {
+        imageFormData.append('image', f);
+    });
+    dispatch({
+        type: UPLOAD_IMAGES_REQUEST,
+        data: imageFormData,
+    })
+}, []);
+ return(
+        <Form style={{margin: '10px 0 20px'}} encType={"multipart.form-data"} onFinish={onSubmit}>
+            <Input.TextArea
+                value={text}
+                onChange={onChangeText}
+                maxLength={140}
+                placeholder="What's New Today?"
+            />
+
+            <div>
+                <input type="file" name="image" multiple style={{ display: 'none' }} ref={imageInput} onChange={onChangeImages}/>
+                <Button onClick={onClickImageUpload}>Image Upload</Button>
+                <Button type="primary" style={{float:'right'}} htmlType="submit">Upload</Button>
+            </div>
+```
+
+[reducers/post.js]
+```javascript
+ case UPLOAD_IMAGES_REQUEST:
+    draft.uploadImagesLoading = true;
+    draft.uploadImagesDone = false;
+    draft.uploadImagesError = null;
+    break;
+case UPLOAD_IMAGES_SUCCESS:
+    draft.uploadImagesLoading = false;
+    draft.uploadImagesDone = true;
+    // draft.imagePaths = draft.imagePaths.concat(action.data);
+    draft.imagePaths = action.data;
+    break;
+case UPLOAD_IMAGES_FAILURE:
+    draft.uploadImagesLoading = false;
+    draft.uploadImagesError = action.error;
+    break;
+```
+
+[sagas/post.js]
+```javascript
+function uploadImagesAPI(data){
+    return axios.post('/post/images', data); //data -> form data
+}
+function* uploadImages(action){
+    try{
+        const result =  yield call(uploadImagesAPI, action.data)
+        yield put({
+            type: UPLOAD_IMAGES_SUCCESS,
+            data: result.data,
+        });
+    } catch(err) {
+        yield put({
+            type: UPLOAD_IMAGES_FAILURE,
+            data: err.response.data,
+        });
+    }
+}
+function* watchUploadImages(){
+    yield takeLatest(UPLOAD_IMAGES_REQUEST, uploadImages);
+}
+
+```
+
+* ERROR 01 - [nodemon] app crashed - waiting for file changes before starting...
+* ERROR 02 - [client.js:1 TypeError: Cannot read properties of undefined (reading 'data')
+  at uploadImages (post.js:118:32)
+  at uploadImages.throw (<anonymous>)
+  at next (redux-saga-core.esm.js:1125:1)
+  at currCb (redux-saga-core.esm.js:1250:1)
+  at eval (redux-saga-core.esm.js:395:1)
+  client.js:1 The above error occurred in task uploadImages
+  created by takeLatest(UPLOAD_IMAGES_REQUEST, uploadImages)
+  created by watchUploadImages
+  created by postSaga
+  created by rootSaga
+  Tasks cancelled due to error:
+  takeLatest(UPLOAD_IMAGES_REQUEST, uploadImages)
+  watchAddPost
+  watchLoadPosts
+  watchDeletePost
+  watchAddComment
+  watchLikePost
+  watchUnLikePost
+  userSaga
+  xhr.js:258
+  POST http://localhost:3065/post/images net::ERR_CONNECTION_REFUSED
+
+
+]
+
 

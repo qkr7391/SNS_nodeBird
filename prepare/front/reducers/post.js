@@ -7,6 +7,9 @@ export const initialState = {
     mainPosts: [],
     imagePaths:[],
     hasMorePosts : true,
+    uploadImagesLoading: false,
+    uploadImagesDone: false,
+    uploadImagesError: null,
     loadPostsLoading: false,
     loadPostsDone: false,
     loadPostsError: null,
@@ -25,6 +28,7 @@ export const initialState = {
     unlikePostLoading: false,
     unlikePostDone: false,
     unlikePostError: null,
+
 }
 
 // export const generateDummyPost = (number) => Array(number).fill().map((_, index) => ({
@@ -47,6 +51,9 @@ export const initialState = {
 
 //initialState.mainPosts = initialState.mainPosts.concat(generateDummyPost(10));
 
+export const UPLOAD_IMAGES_REQUEST = 'UPLOAD_IMAGES_REQUEST';
+export const UPLOAD_IMAGES_SUCCESS = 'UPLOAD_IMAGES_SUCCESS';
+export const UPLOAD_IMAGES_FAILURE = 'UPLOAD_IMAGES_FAILURE';
 export const LOAD_POSTS_REQUEST = 'LOAD_POSTS_REQUEST';
 export const LOAD_POSTS_SUCCESS = 'LOAD_POSTS_SUCCESS';
 export const LOAD_POSTS_FAILURE = 'LOAD_POSTS_FAILURE';
@@ -125,6 +132,21 @@ export const addComment = (data) => ({
 const reducer = (state = initialState, action) => {
     return produce(state, (draft) => {
         switch (action.type){
+            case UPLOAD_IMAGES_REQUEST:
+                draft.uploadImagesLoading = true;
+                draft.uploadImagesDone = false;
+                draft.uploadImagesError = null;
+                break;
+            case UPLOAD_IMAGES_SUCCESS:
+                draft.uploadImagesLoading = false;
+                draft.uploadImagesDone = true;
+                // draft.imagePaths = draft.imagePaths.concat(action.data);
+                draft.imagePaths = action.data;
+                break;
+            case UPLOAD_IMAGES_FAILURE:
+                draft.uploadImagesLoading = false;
+                draft.uploadImagesError = action.error;
+                break;
             case LOAD_POSTS_REQUEST:
                 draft.loadPostsLoading = true;
                 draft.loadPostsDone = false;
@@ -184,25 +206,6 @@ const reducer = (state = initialState, action) => {
                 draft.addCommentDone = true;
                 break;
             }
-            // case ADD_COMMENT_SUCCESS:{
-            //     const post = draft.mainPosts.find((v) => v.id === action.data.PostId);
-            //     post.Comments.unshift(action.data.content);
-            //     draft.addCommentLoading = false;
-            //     draft.addCommentDone = true;
-            //     break;
-            //     // //receive action.data.content, postId, userId
-            //     // const postIndex = state.mainPosts.findIndex((v)=>v.id === action.data.postId);
-            //     // const post ={ ...state.mainPosts[postIndex] } ;
-            //     // post.Comments = [dummyComment(action.data.content), ...post.Comments];
-            //     // const mainPosts = [...state.mainPosts];
-            //     // mainPosts[postIndex] = post;
-            //     // return {
-            //     //     ...state,
-            //     //     mainPosts,
-            //     //     addCommentLoading: false,
-            //     //     addCommentDone: true,
-            //     // };
-            // }
             case ADD_COMMENT_FAILURE:
                 draft.addCommentLoading = false;
                 draft.addCommentError = action.error;

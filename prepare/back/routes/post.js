@@ -1,8 +1,19 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const fs = require('fs');
 
 const { Post, Image, Comment, User, Hashtag } = require('../models');
 const { isLoggedIn } = require('./middlewares');
+
+
+try{
+    fs.accessSync('uploads');
+} catch(error) {
+    console.log('Create uploads folder');
+    fs.mkdirSync('uploads');
+}
+
 
 //POST /post
 router.post('/', isLoggedIn, async (req, res, next) => {
@@ -128,6 +139,30 @@ router.delete('/:postId/like', isLoggedIn, async(req, res, next) => {
         console.error(error);
         next(error);
     }
+});
+
+
+const upload = multer({
+    storage: multer.diskStorage({ // save images to desktop for practicing
+        destination(req, file, done){
+            done(null, 'uploads');
+        },
+        filename(req, file, done) { //image.png
+            const ext = path.extname(file.originalname); // (extract extension) (png)
+            const basename = path.basename(file.originalname, ext) // image;
+
+            done(null, basename + new Date().getTime()+ ext); // image12424t43643.png
+        },
+    }),
+    limits: { fileSize : 20 * 1024 * 1024} // 20MB
+
+});
+
+
+//POST /post/images
+router.post('/images', isLoggedIn, upload.array('image'), (req, res, next) => {
+    console.log(req.files);
+    res.json(req.files.map((v) => v.filename));
 });
 
 module.exports = router;
