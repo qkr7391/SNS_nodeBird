@@ -169,6 +169,24 @@ router.delete('/:userId/follow', isLoggedIn, async (req, res, next) => {
     }
 })
 
+//Remove Follower
+//DELETE /user/followers/1
+router.delete('/followers/:userId', isLoggedIn, async (req, res, next) => {
+    try {
+        const user = await User.findOne({
+            where: { id: req.params.userId } // find myself
+        });
+        if (!user) {
+            return res.status(404).send('User not found.');
+        }
+        await user.removeFollowings(req.user.id); // 변경된 부분: req.user.id -> req.params.userId
+        res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
+
 
 // Followers list
 router.get('/followers', isLoggedIn, async (req, res, next) => {

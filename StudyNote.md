@@ -4522,3 +4522,113 @@ return {
 
 * How To? : When I checked, I didn't see any nicknames inside Followings or Followers inside self, and Followings or Followers were created in the same place as self.
   So I manually put that data into self.Followings or self.Followers.
+
+
+* Unfollow - followings and followers
+
+1. Unfollow 
+[FollowList.js]
+```javascript
+const dispatch = useDispatch();
+const onClick = (id) => () => {
+    if (header === 'following') {
+        dispatch({
+            type: UNFOLLOW_REQUEST,
+            data: id,
+        });
+    }
+};
+return (
+    <List.Item style={{ marginTop: 20 }}>
+        <Card actions={[<StopOutlined key="stop" onClick={onClick(item.id)}/>]}>
+            <Card.Meta description={item.nickname} />
+        </Card>
+    </List.Item>
+);
+```
+
+2. remove followers
+```javascript
+[FollowList.js]
+const dispatch = useDispatch();
+const onClick = (id) => () => {
+    if (header === 'following') {
+        dispatch({
+            type: UNFOLLOW_REQUEST,
+            data: id,
+        });
+    }
+    if (header === 'follower') {
+        dispatch({
+            type: REMOVE_FOLLOWER_REQUEST,
+            data: id,
+        });
+    }
+};
+```
+
+[reduecer/user.js]
+```javascript
+case REMOVE_FOLLOWER_REQUEST:
+    draft.removefollowerLoading = true;
+    draft.removefollowerDone = false;
+    draft.removefollowerError = null;
+    break;
+case REMOVE_FOLLOWER_SUCCESS:
+    draft.removefollowerLoading = false;
+    draft.removefollowerDone = true;
+    draft.self.Follower = draft.self.Followers.filter((v) => v.id !== action.data.UserId) ;
+    break;
+case REMOVE_FOLLOWER_FAILURE:
+    draft.removefollowerLoading = false;
+    draft.removefollowerError = action.error;
+    break;
+```
+
+[sagas/user.js]
+```javascript
+function removefollowerAPI(data){
+    return axios.delete(`/user/followers/${data}`, data)
+}
+function* removeFollower(action){
+    try{
+        const result =  yield call(removefollowerAPI, action.data)
+        yield put({
+            type: REMOVE_FOLLOWER_SUCCESS,
+            data: result.data
+        });
+    } catch(err) {
+        yield put({
+            type: REMOVE_FOLLOWER_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
+function* watchRemoveFollower(){
+    yield takeLatest(REMOVE_FOLLOWER_REQUEST, removeFollower);
+}
+
+```
+
+[routes/user.js]
+```javascript
+//Remove Follower
+//DELETE /user/followers/1
+router.delete('/followers/:userId', isLoggedIn, async (req, res, next) => {
+    try {
+        const user = await User.findOne({
+            where: { id: req.params.userId } // find myself
+        });
+        if (!user) {
+            return res.status(404).send('User not found.');
+        }
+        await user.removeFollowings(req.user.id); // 변경된 부분: req.user.id -> req.params.userId
+        res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
+```
+

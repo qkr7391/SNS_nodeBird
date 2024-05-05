@@ -2,8 +2,27 @@ import React from "react";
 import PropTypes from "prop-types";
 import { List, Card, Button } from "antd";
 import { StopOutlined } from "@ant-design/icons";
+import { useDispatch } from "react-redux";
+import { UNFOLLOW_REQUEST, REMOVE_FOLLOWER_REQUEST } from "../reducers/user";
 
 const FollowList = ({ header, data }) => {
+	const dispatch = useDispatch();
+	const onClick = (id) => () => {
+		if (header === 'following') {
+			dispatch({
+				type: UNFOLLOW_REQUEST,
+				data: id,
+			});
+		}
+		if (header === 'follower') {
+			dispatch({
+				type: REMOVE_FOLLOWER_REQUEST,
+				data: id,
+			});
+		}
+
+	};
+
 	return (
 		<List
 			style={{ marginBottom: 20 }}
@@ -20,11 +39,9 @@ const FollowList = ({ header, data }) => {
 			renderItem={(item) => {
 				console.log("Data:", data);
 				console.log("Item:", item);
-				// Check if the item and its properties exist before accessing them
-				const nickname = item?.nickname || "No nickname";
 				return (
 					<List.Item style={{ marginTop: 20 }}>
-						<Card actions={[<StopOutlined key="stop" />]}>
+						<Card actions={[<StopOutlined key="stop" onClick={onClick(item.id)}/>]}>
 							<Card.Meta description={item.nickname} />
 						</Card>
 					</List.Item>

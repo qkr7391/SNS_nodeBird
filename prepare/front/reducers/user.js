@@ -8,10 +8,13 @@ export const initialState = {
     unfollowLoading: false, //trying unfollow
     unfollowDone: false,
     unfollowError: null,
-    loadFollowersLoading: false, //trying follow
+    removefollowerLoading: false, //trying remove followers
+    removefollowerDone: false,
+    removefollowerError: null,
+    loadFollowersLoading: false, //list followers
     loadFollowersDone: false,
     loadFollowersError: null,
-    loadFollowingsLoading: false, //trying follow
+    loadFollowingsLoading: false, //list followings
     loadFollowingsDone: false,
     loadFollowingsError: null,
     logInLoading: false, //trying login
@@ -57,6 +60,10 @@ export const FOLLOW_FAILURE = 'FOLLOW_FAILURE';
 export const UNFOLLOW_REQUEST = 'UNFOLLOW_REQUEST';
 export const UNFOLLOW_SUCCESS = 'UNFOLLOW_SUCCESS';
 export const UNFOLLOW_FAILURE = 'UNFOLLOW_FAILURE';
+
+export const REMOVE_FOLLOWER_REQUEST = 'REMOVE_FOLLOWER_REQUEST';
+export const REMOVE_FOLLOWER_SUCCESS = 'REMOVE_FOLLOWER_SUCCESS';
+export const REMOVE_FOLLOWER_FAILURE = 'REMOVE_FOLLOWER_FAILURE';
 
 export const LOAD_FOLLOWERS_REQUEST = 'LOAD_FOLLOWERS_REQUEST';
 export const LOAD_FOLLOWERS_SUCCESS = 'LOAD_FOLLOWERS_SUCCESS';
@@ -130,6 +137,20 @@ const reducer = (state = initialState, action) => {
             case UNFOLLOW_FAILURE:
                 draft.unfollowLoading = false;
                 draft.unfollowError = action.error;
+                break;
+            case REMOVE_FOLLOWER_REQUEST:
+                draft.removefollowerLoading = true;
+                draft.removefollowerDone = false;
+                draft.removefollowerError = null;
+                break;
+            case REMOVE_FOLLOWER_SUCCESS:
+                draft.removefollowerLoading = false;
+                draft.removefollowerDone = true;
+                draft.self.Followers = draft.self.Followers.filter((v) => v.id !== action.data.UserId) ;
+                break;
+            case REMOVE_FOLLOWER_FAILURE:
+                draft.removefollowerLoading = false;
+                draft.removefollowerError = action.error;
                 break;
             case LOAD_FOLLOWERS_REQUEST:
                 return {

@@ -25,6 +25,8 @@ const Profile = () => {
 	// ];
 
 	const dispatch = useDispatch();
+	const { self } = useSelector((state) => state.user)
+	const router = useRouter();
 
 	useEffect(() => {
 		dispatch({
@@ -34,9 +36,6 @@ const Profile = () => {
 			type: LOAD_FOLLOWINGS_REQUEST,
 		});
 	}, []);
-
-	const { self } = useSelector((state) => state.user)
-	const router = useRouter();
 
 	useEffect(() => {
 		if (!(self && self.id)) {
