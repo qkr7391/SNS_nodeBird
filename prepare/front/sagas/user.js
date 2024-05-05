@@ -141,7 +141,7 @@ function* loadFollowers(action){
         console.log("Followers data:", result.data);
         yield put({
             type: LOAD_FOLLOWERS_SUCCESS,
-            data: result.data
+            data: result.data,
         });
     } catch(err) {
         yield put({
@@ -162,7 +162,7 @@ function* loadFollowings(action){
         console.log("Followings data:", result.data);
         yield put({
             type: LOAD_FOLLOWINGS_SUCCESS,
-            data: result.data
+            data: result.data,
         });
     } catch(err) {
         yield put({

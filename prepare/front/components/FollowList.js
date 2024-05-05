@@ -18,13 +18,14 @@ const FollowList = ({ header, data }) => {
 			bordered
 			dataSource={data}
 			renderItem={(item) => {
-				console.log("Header:", header);
 				console.log("Data:", data);
 				console.log("Item:", item);
+				// Check if the item and its properties exist before accessing them
+				const nickname = item?.nickname || "No nickname";
 				return (
 					<List.Item style={{ marginTop: 20 }}>
 						<Card actions={[<StopOutlined key="stop" />]}>
-							<Card.Meta description={item} />
+							<Card.Meta description={item.nickname} />
 						</Card>
 					</List.Item>
 				);

@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import AppLayout from "../components/AppLayout";
 import NicknameEditForm from "../components/NicknameEditForm";
 import FollowList from "../components/FollowList";
-import {LOAD_FOLLOWERS_REQUEST, LOAD_FOLLOWINGS_REQUEST} from "../reducers/user";
+import { LOAD_FOLLOWERS_REQUEST, LOAD_FOLLOWINGS_REQUEST } from "../reducers/user";
 // import {Router} from "next/router";
 
 
@@ -35,7 +35,7 @@ const Profile = () => {
 		});
 	}, []);
 
-	const { self } = useSelector((state) => state.user);
+	const { self } = useSelector((state) => state.user)
 	const router = useRouter();
 
 	useEffect(() => {
@@ -44,9 +44,14 @@ const Profile = () => {
 		}
 	}, [self, router]);
 
+
 	if(!self){
 		return null;
 	}
+
+	console.log('self.Followings:', self.Followings);
+	console.log('self.Followers:', self.Followers);
+
 	return (
 		<>
 			<Head>

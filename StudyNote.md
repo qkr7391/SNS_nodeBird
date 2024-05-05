@@ -4491,5 +4491,34 @@ function* changeNickname(action){
 }
 ```
 
-
 ** ERROR 01 : There's no information about nickname in 'Follow'. So nickname is not showing on the following list or follower list.
+
+-> Solve
+[reducers/user.js]
+```javascript
+case LOAD_FOLLOWERS_SUCCESS:
+    console.log("Followers data:", action.data);
+return {
+    ...state,
+    loadFollowersLoading: false,
+    loadFollowersDone: true,
+    self: {
+        ...state.self,
+        Followers: action.data
+    }
+};
+case LOAD_FOLLOWINGS_SUCCESS:
+    console.log("Followers data:", action.data);
+return {
+    ...state,
+    loadFollowingsLoading: false,
+    loadFollowingsDone: true,
+    self: {
+        ...state.self,
+        Followings: action.data
+    }
+};
+```
+
+* How To? : When I checked, I didn't see any nicknames inside Followings or Followers inside self, and Followings or Followers were created in the same place as self.
+  So I manually put that data into self.Followings or self.Followers.

@@ -169,41 +169,6 @@ router.delete('/:userId/follow', isLoggedIn, async (req, res, next) => {
     }
 })
 
-// //Followers list
-// //GET /user/followers
-// router.get('/followers', isLoggedIn, async (req, res, next) => {
-//     try {
-//         const user = await User.findOne({
-//             where : { id: req.user.id } //find myself
-//         });
-//         if (!user) {
-//             return res.status(404).send('User not found.');
-//         }
-//         const followers = await user.getFollowers();
-//         res.status(200).json(followers);
-//     } catch(error) {
-//         console.error(error);
-//         next(error);
-//     }
-// })
-//
-// //Followings list
-// //GET /user/followings
-// router.get('/followings', isLoggedIn, async (req, res, next) => {
-//     try {
-//         const user = await User.findOne({
-//             where : { id: req.user.id } //find myself
-//         });
-//         if (!user) {
-//             return res.status(404).send('User not found.');
-//         }
-//         const followings = await user.getFollowings(req.user.id);
-//         res.status(200).json(followings);
-//     } catch(error) {
-//         console.error(error);
-//         next(error);
-//     }
-// })
 
 // Followers list
 router.get('/followers', isLoggedIn, async (req, res, next) => {
@@ -214,48 +179,13 @@ router.get('/followers', isLoggedIn, async (req, res, next) => {
         if (!user) {
             return res.status(404).send('User not found.');
         }
-        const followers = await user.getFollowers({
-            attributes: {
-                exclude: ['password'],
-                include: ['id', 'nickname'],
-            } // exclude password
-        });
-        console.log("routes/followers: ", followers);
-        res.status(200).json({ Followers: followers }); // Return followers as an object
+        const followers = await user.getFollowers();
+        res.status(200).json(followers ); // Return followers as an object
     } catch (error) {
         console.error(error);
         next(error);
     }
 });
-
-// // Followings list
-// router.get('/followings', isLoggedIn, async (req, res, next) => {
-//     try {
-//         const user = await User.findOne({
-//             where: { id: req.user.id } // Find myself
-//         });
-//         if (!user) {
-//             return res.status(404).send('User not found.');
-//         }
-//         const followings = await user.getFollowings({
-//             attributes: {
-//                 exclude: ['password'],
-//             },
-//             include: [{
-//                 model: User,
-//                 as: 'Followings',
-//                 attributes: ['id', 'nickname'],
-//             }],
-//         });
-//         console.log("routes Followings: ", followings.map(following => following.toJSON()));
-//
-//         res.status(200).json({ Followings: followings }); // Return followings as an object
-//     } catch (error) {
-//         console.error(error);
-//         next(error);
-//     }
-// });
-
 
 // Followings list
 router.get('/followings', isLoggedIn, async (req, res, next) => {
@@ -266,19 +196,9 @@ router.get('/followings', isLoggedIn, async (req, res, next) => {
         if (!user) {
             return res.status(404).send('User not found.');
         }
-        const followings = await user.getFollowings({
-            attributes: {
-                exclude: ['password'],
-            },
-            include: [{
-                model: User, // User 모델과 연결
-                as: 'Followings',
-                attributes: ['id', 'nickname'], // 팔로잉의 id와 닉네임 정보만 가져오기
-            }],
-        });
-        console.log("routes Followings: ", followings.map(following => following.toJSON()));
+        const followings = await user.getFollowings();
 
-        res.status(200).json({ Followings: followings }); // Return followings as an object
+        res.status(203).json(followings); // Return followings as an object
     } catch (error) {
         console.error(error);
         next(error);

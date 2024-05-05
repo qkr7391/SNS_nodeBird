@@ -144,7 +144,10 @@ const reducer = (state = initialState, action) => {
                     ...state,
                     loadFollowersLoading: false,
                     loadFollowersDone: true,
-                    Followers: action.data
+                    self: {
+                        ...state.self,
+                        Followers: action.data
+                    }
                 };
             case LOAD_FOLLOWERS_FAILURE:
                 return {
@@ -165,7 +168,10 @@ const reducer = (state = initialState, action) => {
                     ...state,
                     loadFollowingsLoading: false,
                     loadFollowingsDone: true,
-                    Followings: action.data
+                    self: {
+                        ...state.self,
+                        Followings: action.data
+                    }
                 };
             case LOAD_FOLLOWINGS_FAILURE:
                 return {
