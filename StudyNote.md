@@ -4761,3 +4761,30 @@ function* watchUploadImages(){
 
 * ERROR 01 - [nodemon] app crashed - waiting for file changes before starting...
 solve -> const path = require('path');
+
+---
+
+## Day 57 - express.static middleware
+
+* Can not see images because address is localhost:3060/image.jpg.
+* backend server address is localhost:3065
+* It should be localhost:3065/image.jpg
+
+1. Change root
+[PostForm.js]
+```javascript
+ <div>
+    {imagePaths.map((v) => (
+        <div key={v} style={{display:'inline-block'}}>
+            <img src={`http://localhost:3065/${v}`} style={{width:'200px'}} alt={v} />
+            <div>
+                <Button>Remove</Button>
+            </div>
+        </div>
+    ))}
+</div>
+```
+
+2. 
+
+
