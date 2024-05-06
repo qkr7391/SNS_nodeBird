@@ -4760,30 +4760,4 @@ function* watchUploadImages(){
 ```
 
 * ERROR 01 - [nodemon] app crashed - waiting for file changes before starting...
-* ERROR 02 - [client.js:1 TypeError: Cannot read properties of undefined (reading 'data')
-  at uploadImages (post.js:118:32)
-  at uploadImages.throw (<anonymous>)
-  at next (redux-saga-core.esm.js:1125:1)
-  at currCb (redux-saga-core.esm.js:1250:1)
-  at eval (redux-saga-core.esm.js:395:1)
-  client.js:1 The above error occurred in task uploadImages
-  created by takeLatest(UPLOAD_IMAGES_REQUEST, uploadImages)
-  created by watchUploadImages
-  created by postSaga
-  created by rootSaga
-  Tasks cancelled due to error:
-  takeLatest(UPLOAD_IMAGES_REQUEST, uploadImages)
-  watchAddPost
-  watchLoadPosts
-  watchDeletePost
-  watchAddComment
-  watchLikePost
-  watchUnLikePost
-  userSaga
-  xhr.js:258
-  POST http://localhost:3065/post/images net::ERR_CONNECTION_REFUSED
-
-
-]
-
-
+solve -> const path = require('path');
