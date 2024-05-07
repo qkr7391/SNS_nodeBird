@@ -13,10 +13,15 @@ const Home = () =>{
     const dispatch = useDispatch();
     // const { isLoggedIn } = useSelector((state) => state.user);
     const { self } = useSelector((state) => state.user);
-    const { hasMorePosts, mainPosts, loadPostsLoading } = useSelector((state) => state.post);
+    const { hasMorePosts, mainPosts, loadPostsLoading , retweetError } = useSelector((state) => state.post);
 
     //const mainPosts = userSelector((state) => state.post.mainPosts); ^same^
 
+    useEffect(() => {
+        if (retweetError) {
+            alert(retweetError);
+        }
+    }, [retweetError]);
 
     useEffect(() => {
         dispatch({

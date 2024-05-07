@@ -4929,12 +4929,232 @@ router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
         }
         ...
 ```
+---
+
+## Day 59 - Retweet
+
+1. Make a onClick event for 'retweet'
+[PostCard.js]
+```javascript
+ const onRetweeet = useCallback(()=>{
+    if (!id){
+        return alert('You need to login');
+    }
+    return dispatch({
+        type: RETWEET_REQUEST,
+        data: post.id,
+    })
+},[id])
+
+return (
+    <RetweetOutlined key='retweet' onClick={onRetweeet}/>,
+    )
+
+```
+
+[reducers/post.js]
+```javascript
+case RETWEET_REQUEST:
+    draft.retweetLoading = true;
+    draft.retweetDone = false;
+    draft.retweetError = null;
+    break;
+case RETWEET_SUCCESS:
+    draft.retweetLoading = false;
+    draft.retweetDone = true;
+    draft.mainPosts.unshift(action.data);
+    break;
+case RETWEET_FAILURE:
+    draft.retweetLoading = false;
+    draft.retweetError = action.error;
+    break;
+```
+
+[sagas/post.js]
+```javascript
+function retweetAPI(data){
+    return axios.post(`/post/${data}/retweet`)
+}
+
+function* retweet(action){
+    try{
+        const result =  yield call(retweetAPI, action.data);
+        yield put({
+            type: RETWEET_SUCCESS,
+            data: result.data,
+        });
+    } catch(err) {
+        yield put({
+            type: RETWEET_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
+function* watchRetweet(){
+    yield takeLatest(RETWEET_REQUEST, retweet);
+}
+```
+
+
+[routes/post.js]
+```javascript
+//POST /1/retweet
+router.post('/:postId/retweet', isLoggedIn, async (req, res, next) => { // POST /post/comment
+    try {
+        const post = await Post.findOne({
+            where: { id: req.params.postId },
+            include : [{
+                model: Post,
+                as: 'Retweet',
+            }],
+        });
+
+        if (!post){
+            return res.status(403).send('This post is not exist.')
+        }
+        if (req.user.id === post.UserId || (post.Retweet && post.Retweet.UserId === req.user.id)){
+            //Prevent 'Retweeting your own posts || retweeting posts that have been retweeted by others'.
+            return res.status(403).send('You can not retweet your own posts.');
+        }
+        const retweetTargetId = post.RetweetId || post.id;
+        const exPost = await Post.findOne({
+            where : {
+                UserId: req.user.id,
+                RetweetId: retweetTargetId,
+            },
+        });
+        if (exPost) {
+            return res.status(403).send('A post you\'ve already Retweeted.');
+        }
+        const retweet = await Post.create({
+            UserId: req.user.id,
+            RetweetId: retweetTargetId,
+            content: 'retweet',
+        })
+        const retweetWithPrevPost = await Post.findOne({
+            where : { id: retweet.id },
+            include: [{
+                model: Post,
+                as: 'Retweet',
+                include : [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+                }, {
+                    model : Image,
+                }, ],
+            }, {
+                model : User,
+                attributes: ['id', 'nickname'],
+            }, {
+                model : Comment,
+                include : [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+                }],
+            }],
+        })
+        res.status(201).json(retweetWithPrevPost);
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+```
+
+[PostCard.js]
+```javascript
+title={post.RetweetId ? `'${post.User.nickname}' Retweeted.` : null}
+extra={id && <FollowButton post={post} />}
+>
+{post.RetweetId && post.Retweet
+    ? (
+        <Card  cover={ post.Retweet.Images[0] && <PostImages images={ post.Retweet.Images } /> } // Displaying post images if available
+        >
+            <Card.Meta
+                avatar={post.Retweet.User && <Avatar>{post.Retweet.User.nickname[0]}</Avatar>} // Displaying user avatar
+                title={post.Retweet.User && post.Retweet.User.nickname} // Displaying user nickname
+                description={<PostCardContent postData={post.Retweet.content}/> } // Displaying post content
+            />
+
+        </Card>
+    )
+    : (
+        <Card.Meta
+            avatar={post.User && <Avatar>{post.User.nickname[0]}</Avatar>} // Displaying user avatar
+            title={post.User && post.User.nickname} // Displaying user nickname
+            description={<PostCardContent postData={post.content}/> } // Displaying post content
+        />
+    )}
+</Card>
+```
 
 
 
+```javascript
+[routes/posts.js]
+//GET / posts
+router.get('/', async (req, res, next) => {
+    try{
+        const posts = await Post.findAll({
+            // where: { UserId: 1 },
+            // limit&offset : Offsets and limits get messed up when events of additions or deletions occur during the loading process.
+            limit: 10,
+            // offset: 0, // 1~10
+            // offset: 10, // 11~20
+            // offset: 100, // 101~110
+            order: [
+                ['createdAt', 'DESC'],
+                [Comment, 'createdAt', 'DESC']
+            ], // -From 'Newest posts'
+            include:[{
+                model: User,
+                attributes: ['id', 'nickname'],
+            },{
+                model: Image,
+            },{
+                model: Comment,
+                include: [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+                }],
+            }, {
+                model: User, // Likers
+                as: 'Likers',
+                attributes: ['id'],
+            },  {
+                model: Post,
+                as: 'Retweet',
+                include : [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+                }, {
+                    model : Image,
+                }]
+            }]
+        });
+        console.log(posts);
+        res.status(200).json(posts);
+    } catch(error) {
+        console.error(error);
+        next(error);
+    }
 
+})
+```
 
+Retweeet Error Alert -> Retweet error on your own posts
+[pages/index.js]
+```javascript
+const { hasMorePosts, mainPosts, loadPostsLoading , retweetError } = useSelector((state) => state.post);
 
+useEffect(() => {
+    if (retweetError) {
+        alert(retweetError);
+    }
+}, [retweetError]);
+```
 
 
 

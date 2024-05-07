@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import PropTypes from "prop-types";
 import { useDispatch, useSelector } from 'react-redux';
 import { Card, Popover, Button, Avatar, List} from 'antd';
@@ -8,34 +8,47 @@ import { EllipsisOutlined, HeartOutlined, MessageOutlined, RetweetOutlined, Hear
 import PostImages from "./PostImages";
 import CommentForm from "./CommentForm";
 import PostCardContent from "./PostCardContent";
-import { DELETE_POST_REQUEST, LIKE_POST_REQUEST, UNLIKE_POST_REQUEST } from "../reducers/post";
+import { DELETE_POST_REQUEST, LIKE_POST_REQUEST, UNLIKE_POST_REQUEST, RETWEET_REQUEST } from "../reducers/post";
 import FollowButton from "./FollowButton";
 
 const PostCard = ({ post }) => {
     const dispatch = useDispatch();
-    const { deletePostLoading } = useSelector((state) => state.post);
+    const { deletePostLoading} = useSelector((state) => state.post);
 
     // State for managing like and comment form visibility
     //const [liked, setLiked] = useState(false);
     const [commentFormOpened, setCommentFormOpened] = useState(false);
 
+    // Get user ID from Redux state
+    //way1// const { self } = useSelector((state) => state.user.self?.id);
+    //way2// const id = self?.id; //optional chaining
+    const id = useSelector((state) => state.user.self?.id);
+    //way4// const id = useSelector((state) => sate.user.self && state.user.self.id);
+
+
     // Toggle like function
     const onLike = useCallback(()=>{
+        if (!id){
+            return alert('You need to login');
+        }
         // setLiked((prev)=> !prev);
-        dispatch({
+       return dispatch({
             type: LIKE_POST_REQUEST,
             data: post.id,
         })
-    },[]);
+    },[id]);
 
     // Toggle Unlike function
     const onUnLike = useCallback(()=>{
+        if (!id){
+            return alert('You need to login');
+        }
         // setLiked((prev)=> !prev);
-        dispatch({
+       return dispatch({
             type: UNLIKE_POST_REQUEST,
             data: post.id,
         })
-    },[]);
+    },[id]);
 
     // Toggle comment form visibility function
     const onToggleComment = useCallback(()=>{
@@ -43,17 +56,26 @@ const PostCard = ({ post }) => {
     }, []);
 
     const onDeletePost = useCallback(() => {
-        dispatch({
+        if (!id){
+            return alert('You need to login');
+        }
+        return dispatch({
             type: DELETE_POST_REQUEST,
             data: post.id,
         })
-    });
+    }, [id]);
 
-    // Get user ID from Redux state
-    //way1// const { self } = useSelector((state) => state.user.self?.id);
-    //way2// const id = self?.id; //optional chaining
-    const id = useSelector((state) => state.user.self?.id);
-    //way4// const id = useSelector((state) => sate.user.self && state.user.self.id);
+    const onRetweeet = useCallback(()=>{
+        if (!id){
+            return alert('You need to login');
+        }
+        return dispatch({
+            type: RETWEET_REQUEST,
+            data: post.id,
+        })
+    },[id])
+
+
 
     const liked = post.Likers.find((v) => v.id === id);
 
@@ -62,7 +84,7 @@ const PostCard = ({ post }) => {
          <Card
          cover={ post.Images[0] && <PostImages images={ post.Images } /> } // Displaying post images if available
          actions={[
-             <RetweetOutlined key='retweet'/>,
+             <RetweetOutlined key='retweet' onClick={onRetweeet}/>,
              liked
                  ? <HeartTwoTone twoToneColor="#eb2f96" key='heart' onClick={ onUnLike }/>
                  : <HeartOutlined key='heart' onClick={ onLike }/>,
@@ -83,14 +105,28 @@ const PostCard = ({ post }) => {
                  <EllipsisOutlined />
              </Popover>
          ]}
+         title={post.RetweetId ? `'${post.User.nickname}' Retweeted.` : null}
          extra={id && <FollowButton post={post} />}
              >
-             {/* Meta information for the post card */}
-            <Card.Meta
-                avatar={post.User && <Avatar>{post.User.nickname[0]}</Avatar>} // Displaying user avatar
-                title={post.User && post.User.nickname} // Displaying user nickname
-                description={<PostCardContent postData={post.content}/> } // Displaying post content
-            />
+             {post.RetweetId && post.Retweet
+             ? (
+                 <Card  cover={ post.Retweet.Images[0] && <PostImages images={ post.Retweet.Images } /> } // Displaying post images if available
+                 >
+                     <Card.Meta
+                     avatar={post.Retweet.User && <Avatar>{post.Retweet.User.nickname[0]}</Avatar>} // Displaying user avatar
+                     title={post.Retweet.User && post.Retweet.User.nickname} // Displaying user nickname
+                     description={<PostCardContent postData={post.Retweet.content}/> } // Displaying post content
+                 />
+
+                 </Card>
+                 )
+             : (
+                 <Card.Meta
+                     avatar={post.User && <Avatar>{post.User.nickname[0]}</Avatar>} // Displaying user avatar
+                     title={post.User && post.User.nickname} // Displaying user nickname
+                     description={<PostCardContent postData={post.content}/> } // Displaying post content
+                 />
+             )}
          </Card>
          {/* Displaying comment form if it's opened */}
          {commentFormOpened &&
@@ -126,18 +162,6 @@ const PostCard = ({ post }) => {
     )
 };
 
-// PostCard.propTypes = {
-//     post : PropTypes.shape({
-//         id: PropTypes.number,
-//         User: PropTypes.object,
-//         content: PropTypes.string,
-//         createdAt: PropTypes.string,
-//         Comments: PropTypes.arrayOf(PropTypes.object),
-//         Images: PropTypes.arrayOf(PropTypes.object),
-//
-//     }).isRequired,
-// }
-
 PostCard.propTypes = {
     post: PropTypes.shape({
         id: PropTypes.number,
@@ -152,6 +176,8 @@ PostCard.propTypes = {
         ),
         Images: PropTypes.arrayOf(PropTypes.object),
         Likers: PropTypes.arrayOf(PropTypes.object),
+        RetweetId: PropTypes.number,
+        Retweet: PropTypes.objectOf(PropTypes.any),
     }).isRequired,
 };
 

@@ -185,6 +185,66 @@ router.delete('/:postId/like', isLoggedIn, async(req, res, next) => {
     }
 });
 
+//POST /1/retweet
+router.post('/:postId/retweet', isLoggedIn, async (req, res, next) => { // POST /post/comment
+    try {
+        const post = await Post.findOne({
+            where: { id: req.params.postId },
+            include : [{
+                model: Post,
+                as: 'Retweet',
+            }],
+        });
 
+        if (!post){
+            return res.status(403).send('This post is not exist.')
+        }
+        if (req.user.id === post.UserId || (post.Retweet && post.Retweet.UserId === req.user.id)){
+            //Prevent 'Retweeting your own posts || retweeting posts that have been retweeted by others'.
+            return res.status(403).send('You can not retweet your own posts.');
+        }
+        const retweetTargetId = post.RetweetId || post.id;
+        const exPost = await Post.findOne({
+            where : {
+                UserId: req.user.id,
+                RetweetId: retweetTargetId,
+            },
+        });
+        if (exPost) {
+            return res.status(403).send('A post you\'ve already Retweeted.');
+        }
+        const retweet = await Post.create({
+            UserId: req.user.id,
+            RetweetId: retweetTargetId,
+            content: 'retweet',
+        })
+        const retweetWithPrevPost = await Post.findOne({
+            where : { id: retweet.id },
+            include: [{
+                model: Post,
+                as: 'Retweet',
+                include : [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+                }, {
+                    model : Image,
+                }]
+            },  {
+                model : User,
+                attributes: ['id', 'nickname'],
+            }, {
+                model : Comment,
+                include : [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+               }],
+            }],
+        })
+        res.status(201).json(retweetWithPrevPost);
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
 
 module.exports = router;
