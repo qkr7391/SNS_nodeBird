@@ -36,10 +36,19 @@ const upload = multer({
 //POST /post
 router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
     try {
-            const post = await Post.create({
-                content: req.body.content,
-                UserId: req.user.id,
-            });
+        const hashtags = req.body.content.match(/#[^\s#]+/ug);
+        const post = await Post.create({
+            content: req.body.content,
+            UserId: req.user.id,
+        });
+        if(hashtags) {
+            const result = await Promise.all(hashtags.map((tag) =>
+                Hashtag.findOrCreate({
+                    where: { content: tag.slice(1).toLowerCase() },
+                })
+            ));
+            await post.addHashtags(result.map((v) => v[0]));
+        }
             if (req.body.image) {
                 if(Array.isArray(req.body.image)) { // more than two images [imageA.png, imageB.png]
                   const images = await Promise.all(req.body.image.map((image) => Image.create({ src: image })));

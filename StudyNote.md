@@ -4903,6 +4903,36 @@ router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
 
 ```
 
+---
+
+## Day 58 - Hashtag
+
+To list a hashtag, use the
+1. we need to make it possible to extract only its contents with a regular expression.
+2. use findOrCreate() to avoid duplicate registrations.
+
+[routes/post.js]
+```javascript
+//POST /post
+router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
+    try {
+        const hashtags = req.body.content.match(/#[^\s#]+/g);
+        const post = await Post.create({
+            content: req.body.content,
+            UserId: req.user.id,
+        });
+        if(hashtags) {
+            const result = await Promise.all (hashtags.map((tag) => Hashtag.findOrCreate({
+                where : { content: tag.slice(1).toLowerCase() },
+            }))); // [[node, true], [React, true]] ...
+            await post.addHashtags(result.map((v) => v[0]));
+        }
+        ...
+```
+
+
+
+
 
 
 
