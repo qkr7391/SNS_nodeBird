@@ -4770,7 +4770,7 @@ solve -> const path = require('path');
 * backend server address is localhost:3065
 * It should be localhost:3065/image.jpg
 
-1. Change root
+1. Change route
 [PostForm.js]
 ```javascript
  <div>
@@ -4785,6 +4785,128 @@ solve -> const path = require('path');
 </div>
 ```
 
-2. 
+2. Need to modify app.js so that we can serve the Uploads folder to the front.
+[app.js]
+```javascript
+const path = require('path');
+app.use('/', express.static(path.join(__dirname, 'uploads')));
+```
+
+* Remove Image
+1. Create onClick event
+[PostForm.js]
+```javascript
+    const onRemoveImage = useCallback((index) => {
+    dispatch({
+        type: REMOVE_IMAGE,
+        data: index,
+    })
+})
+    ...
+return (
+    ...
+    <div>
+        {imagePaths.map((v, i) => (
+            <div key={v} style={{display:'inline-block'}}>
+                <img src={`http://localhost:3065/${v}`} style={{width:'200px'}} alt={v} />
+                <div>
+                    <Button onClick={onRemoveImage(i)}>Remove</Button>
+                </div>
+            </div>
+        ))}
+    </div>
+        ...
+)
+```
+
+2. Create reducer 'REMOVE_IMAGE'
+[reducers/post.js]
+```javascript
+case REMOVE_IMAGE:
+    draft.imagePaths = draft.imagePaths.filter((v,i) => i !== action.data);
+    break;
+```
+
+3. complement onSubmit function for submit image paths
+   [PostForm.js]
+```javascript   
+// Form submission handler
+    const onSubmit = useCallback(()=> {
+    if(!text || !text.trim()) {
+        return alert('Please post anything!');
+    }
+    // Dispatching an action (addPost) with the current text state
+    const formData = new FormData();
+    imagePaths.forEach((p) => {
+        formData.append('image',p);
+    });
+    formData.append('content', text);
+    return dispatch({
+        type: ADD_POST_REQUEST,
+        data : formData,
+    });
+}, [text, imagePaths]);
+```
+4. check [sagas/post.js]
+```javascript
+function addPostAPI(data){
+    return axios.post('/post', data)
+    // formdata should get as data, not { content : data };
+}
+```
+
+5. insert middleware [upload.none()] and condition state for post has image(s).
+[routes/post.js]
+```javascript
+//POST /post
+router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
+    try {
+        const post = await Post.create({
+            content: req.body.content,
+            UserId: req.user.id,
+        });
+        if (req.body.image) {
+            if(Array.isArray(req.body.image)) { // more than two images [imageA.png, imageB.png]
+                const images = await Promise.all(req.body.image.map((image) => Image.create({ src: image })));
+                await post.addImages(images);
+            }
+            else { // one image - image: image.png
+                const image = await Image.create({ src : req.body.image });
+                await post.addImages(image);
+            }
+        }
+        const fullPost = await Post.findOne({
+            where : { id: post.id },
+            include: [{
+                model: Image,
+            }, {
+                model: Comment,
+                include: [{
+                    model: User, // comment writer
+                    attributes: ['id', 'nickname'],
+                }]
+            }, {
+                model: User, // post writer
+                attributes: ['id', 'nickname'],
+            }, {
+                model: User, // Likers
+                as: 'Likers',
+                attributes: ['id'],
+            }]
+        })
+        res.status(201).json(fullPost);
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+```
+
+
+
+
+
+
 
 

@@ -79,7 +79,7 @@ export const UNLIKE_POST_REQUEST = 'UNLIKE_POST_REQUEST';
 export const UNLIKE_POST_SUCCESS = 'UNLIKE_POST_SUCCESS';
 export const UNLIKE_POST_FAILURE = 'UNLIKE_POST_FAILURE';
 
-
+export const REMOVE_IMAGE = 'REMOVE_IMAGE';
 
 export const addPost = (data) => ({
     type: ADD_POST_REQUEST,
@@ -246,6 +246,10 @@ const reducer = (state = initialState, action) => {
                 draft.unlikePostLoading = false;
                 draft.unlikePostError = action.error;
                 break;
+            case REMOVE_IMAGE:
+                draft.imagePaths = draft.imagePaths.filter((v, i) => i !== action.data);
+                break;
+
             default :
                 break;
         }

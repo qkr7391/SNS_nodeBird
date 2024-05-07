@@ -16,32 +16,58 @@ try{
     fs.mkdirSync('uploads');
 }
 
+const upload = multer({
+    storage: multer.diskStorage({ // save images to desktop for practicing
+        destination(req, file, done){
+            done(null, 'uploads');
+        },
+        filename(req, file, done) { //image.png
+            const ext = path.extname(file.originalname); // (extract extension) (png)
+            const basename = path.basename(file.originalname, ext) // image;
+
+            done(null, basename + '_' + new Date().getTime()+ ext); // image12424t43643.png
+        },
+    }),
+    limits: { fileSize : 20 * 1024 * 1024} // 20MB
+
+});
+
 
 //POST /post
-router.post('/', isLoggedIn, async (req, res, next) => {
+router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
     try {
             const post = await Post.create({
                 content: req.body.content,
                 UserId: req.user.id,
-        })
-        const fullPost = await Post.findOne({
-            where : { id: post.id },
-            include: [{
-                model: Image,
-            }, {
-                model: Comment,
+            });
+            if (req.body.image) {
+                if(Array.isArray(req.body.image)) { // more than two images [imageA.png, imageB.png]
+                  const images = await Promise.all(req.body.image.map((image) => Image.create({ src: image })));
+                  await post.addImages(images);
+                }
+                else { // one image - image: image.png
+                    const image = await Image.create({ src : req.body.image });
+                    await post.addImages(image);
+                }
+            }
+            const fullPost = await Post.findOne({
+                where : { id: post.id },
                 include: [{
-                    model: User, // comment writer
+                    model: Image,
+                }, {
+                    model: Comment,
+                    include: [{
+                        model: User, // comment writer
+                        attributes: ['id', 'nickname'],
+                    }]
+                }, {
+                    model: User, // post writer
                     attributes: ['id', 'nickname'],
+                }, {
+                    model: User, // Likers
+                    as: 'Likers',
+                    attributes: ['id'],
                 }]
-            }, {
-                model: User, // post writer
-                attributes: ['id', 'nickname'],
-            }, {
-                model: User, // Likers
-                as: 'Likers',
-                attributes: ['id'],
-            }]
         })
         res.status(201).json(fullPost);
     }catch(error){
@@ -49,6 +75,13 @@ router.post('/', isLoggedIn, async (req, res, next) => {
         next(error);
     }
 });
+
+//POST /post/images
+router.post('/images', isLoggedIn, upload.array('image'), (req, res, next) => {
+    console.log(req.files);
+    res.json(req.files.map((v) => v.filename));
+});
+
 
 //DELETE /post
 router.delete('/:postId', isLoggedIn, async(req, res, next) => {
@@ -144,27 +177,5 @@ router.delete('/:postId/like', isLoggedIn, async(req, res, next) => {
 });
 
 
-const upload = multer({
-    storage: multer.diskStorage({ // save images to desktop for practicing
-        destination(req, file, done){
-            done(null, 'uploads');
-        },
-        filename(req, file, done) { //image.png
-            const ext = path.extname(file.originalname); // (extract extension) (png)
-            const basename = path.basename(file.originalname, ext) // image;
-
-            done(null, basename + new Date().getTime()+ ext); // image12424t43643.png
-        },
-    }),
-    limits: { fileSize : 20 * 1024 * 1024} // 20MB
-
-});
-
-
-//POST /post/images
-router.post('/images', isLoggedIn, upload.array('image'), (req, res, next) => {
-    console.log(req.files);
-    res.json(req.files.map((v) => v.filename));
-});
 
 module.exports = router;

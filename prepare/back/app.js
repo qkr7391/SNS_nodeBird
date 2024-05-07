@@ -3,6 +3,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 const app = express()
+const path = require('path');
 const postRouter = require('./routes/post');
 const postsRouter = require('./routes/posts');
 const userRouter = require('./routes/user');
@@ -28,6 +29,7 @@ db.sequelize.sync()
 
 passportConfig();
 app.use(morgan('dev'));
+app.use('/', express.static(path.join(__dirname, 'uploads')));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cors({

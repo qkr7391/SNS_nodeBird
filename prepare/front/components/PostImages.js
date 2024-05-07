@@ -17,7 +17,7 @@ const [showImagesZoom, setShowImagesZoom] = useState(false);
     if (images.length === 1) {
         return(
             <>
-            <img role="presentation" src={images[0].src} alt={images[0].src} onClick={onZoom} />
+            <img role="presentation" src={`http://localhost:3065/${images[0].src}`} alt={images[0].src} onClick={onZoom} />
                 {showImagesZoom && <ImagesZoom images={images} onClose={onClose} />}
 
             </>
@@ -26,8 +26,8 @@ const [showImagesZoom, setShowImagesZoom] = useState(false);
     if (images.length === 2) {
         return(
             <>
-                <img role="presentation" style={{width: '50%', display: 'inline-block'}} src={images[0].src} alt={images[0].src} onClick={onZoom} />
-                <img role="presentation" style={{width: '50%', display: 'inline-block'}} src={images[1].src} alt={images[1].src} onClick={onZoom} />
+                <img role="presentation" style={{width: '50%', display: 'inline-block'}} src={`http://localhost:3065/${images[0].src}`} alt={images[0].src} onClick={onZoom} />
+                <img role="presentation" style={{width: '50%', display: 'inline-block'}} src={`http://localhost:3065/${images[1].src}`} alt={images[1].src} onClick={onZoom} />
                 {showImagesZoom && <ImagesZoom images={images} onClose={onClose} />}
             </>
         )
@@ -39,7 +39,7 @@ const [showImagesZoom, setShowImagesZoom] = useState(false);
             <img
                 role="presentation"
                 style={{ width: '50%', display: 'inline-block' }}
-                src={images[0].src}
+                src={`http://localhost:3065/${images[0].src}`}
                 alt={images[0].src}
                 onClick={onZoom}
             />
