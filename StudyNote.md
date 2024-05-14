@@ -5157,6 +5157,102 @@ useEffect(() => {
 ```
 
 
+---
 
+## Day 60 - QueryString and lastId methods
+
+- make a lastId
+[pages/index.js]
+```javascript
+useEffect(() => {
+    const lastId = mainPosts[mainPosts.length - 1]?.id;
+    dispatch({
+        type: LOAD_USER_REQUEST,
+        lastId,
+    });
+
+    dispatch({
+        type: LOAD_POSTS_REQUEST,
+    });
+}, []);
+
+useEffect(()=> {
+    function onScroll() {
+        if (
+            window.scrollY + document.documentElement.clientHeight >
+            document.documentElement.scrollHeight - 300 &&
+            hasMorePosts &&
+            !loadPostsLoading &&
+            mainPosts.length > 0 // Ensure mainPosts is not empty before accessing its last element
+        ) {
+            const lastId = mainPosts[mainPosts.length - 1]?.id;
+            dispatch({
+                type: LOAD_POSTS_REQUEST,
+                lastId,
+            });
+        }
+    }
+
+    window.addEventListener('scroll', onScroll);
+
+    return () => {
+        window.removeEventListener('scroll', onScroll);
+    };
+}, [hasMorePosts, loadPostsLoading, mainPosts, dispatch]);
+
+```
+
+- get lastId
+[sagas/post.js]
+```javascript
+function loadPostsAPI(lastId){
+    return axios.get(`/posts?lastId=${lastId || 0}`)
+    // return axios.get(`/posts?lastId=${lastId}&limit=10&offset=10`, data)
+}
+function* loadPosts(action){
+    try{
+        const result =  yield call(loadPostsAPI, action.lastId)
+        yield put({
+            type: LOAD_POSTS_SUCCESS,
+            data: result.data,
+        });
+    } catch(err) {
+        yield put({
+            type: LOAD_POSTS_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+```
+
+- Sticking newly loaded data to the bottom after scrolling
+[reducers/post.js]
+```javascript
+case LOAD_POSTS_SUCCESS:
+    draft.mainPosts = draft.mainPosts.concat(action.data);
+    draft.loadPostsLoading = false;
+    draft.loadPostsDone = true;
+    draft.hasMorePosts = draft.mainPosts.length < 50;
+    break;
+```
+
+- Creating a lastId condition with a where clause, limiting the number of posts
+[routes/posts.js]
+```javascript
+router.get('/', async (req, res, next) => {
+    try{
+        const where = {};
+        if (parseInt(req.query.lastId, 10)) {
+            where.id = {
+                [Op.lt] : parseInt(req.query.lastId, 10)
+                // get 10 ids which is smaller than lastId
+            }
+        }
+        const posts = await Post.findAll({
+            where,
+            // limit&offset : Offsets and limits get messed up when events of additions or deletions occur during the loading process.
+            limit: 10,
+// offset: 0, 
+```
 
 

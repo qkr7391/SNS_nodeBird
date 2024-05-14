@@ -24,8 +24,10 @@ const Home = () =>{
     }, [retweetError]);
 
     useEffect(() => {
+        const lastId = mainPosts[mainPosts.length - 1]?.id;
         dispatch({
             type: LOAD_USER_REQUEST,
+            lastId,
         });
 
         dispatch({
