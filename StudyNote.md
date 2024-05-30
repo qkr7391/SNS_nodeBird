@@ -5254,5 +5254,138 @@ router.get('/', async (req, res, next) => {
             limit: 10,
 // offset: 0, 
 ```
+---
 
+## Day 61 - Preparing serverside rendering
+
+* Server-Side Rendering (SSR)
+Server-Side Rendering (SSR) is the process where the server renders the web page and sends the fully rendered HTML to the client (browser).
+
+Advantages:
+- SEO Friendly: Search engines can easily crawl the fully rendered page, improving SEO.
+- Fast Initial Load: The initial page load is fast, providing content to users quickly.
+- Works Without JavaScript: The content is accessible even if JavaScript is disabled on the client side.
+
+Disadvantages:
+- Increased Server Load: The server has to render the page for every request, which increases server load.
+- Complexity for Interactivity: Implementing dynamic updates and interactivity on the client side can be more complex.
+
+Examples:
+- Traditional web applications (e.g., PHP, Django, Ruby on Rails)
+- JavaScript frameworks that support SSR (e.g., Next.js)
+
+* Client-Side Rendering (CSR)
+Client-Side Rendering (CSR) is the process where the server sends a minimal HTML and the JavaScript that will render the rest of the page on the client side.
+
+Advantages:
+- Reduced Server Load: The initial HTML is minimal, and most rendering is done on the client side, reducing server load.
+- Rich Interactivity: Allows for more complex and interactive user experiences by dynamically updating the page on the client side.
+- Fast Page Transitions: Once the JavaScript is loaded, subsequent page transitions can be very fast.
+
+Disadvantages:
+- SEO Challenges: Search engines may have difficulty indexing content that requires JavaScript to be executed.
+- Initial Load Speed: Initial load can be slower as the browser has to load and execute JavaScript files.
+- Issues with JS Disabled: If JavaScript is disabled, the content may not be accessible.
+
+Examples:
+- Single Page Applications (SPA) (e.g., React, Vue.js, Angular)
+
+[pages/index.js]
+```javascript
+const Home = () =>{
+    const dispatch = useDispatch();
+    // const { isLoggedIn } = useSelector((state) => state.user);
+    const { self } = useSelector((state) => state.user);
+    const { hasMorePosts, mainPosts, loadPostsLoading , retweetError } = useSelector((state) => state.post);
+
+    //const mainPosts = userSelector((state) => state.post.mainPosts); ^same^
+
+    useEffect(() => {
+        if (retweetError) {
+            alert(retweetError);
+        }
+    }, [retweetError]);
+
+    useEffect(() => {
+        const lastId = mainPosts[mainPosts.length - 1]?.id;
+        dispatch({
+            type: LOAD_USER_REQUEST,
+            lastId,
+        });
+
+        dispatch({
+            type: LOAD_POSTS_REQUEST,
+        });
+    }, []);
+```
+-> After the screen loads, we're getting user information and post information through the useEffect.
+-> Data gaps occurred
+
+* In version 9, we added three new features: Static Prop Fetch, Static Route Fetch, and Server-Side Prop Fetch, which are used to fetch data and generate static or dynamic pages.
+
+
+```javascript
+// Automatically run first
+export const getServerSideProps = wrapper.getServerSideProps((context) => {
+
+})
+```
+
+[pages/index.js]
+```javascript
+export const getServerSideProps = wrapper.getServerSideProps((store) => async (context) => {
+    store.dispatch({
+        type: LOAD_USER_REQUEST,
+    });
+    store.dispatch({
+        type: LOAD_POSTS_REQUEST,
+    });
+    store.dispatch(END);
+    // Wait for all the actions to be executed
+    await store.sagaTask.toPromise();
+
+});
+
+```
+
+[reducers/index.js]
+```javascript
+const rootReducer = combineReducers({ // Corrected the syntax
+    index: (state = {}, action) => {
+        switch (action.type) {
+            case HYDRATE:
+                console.log('HYDRATE', action);
+                return { ...state, ...action.payload};
+
+            // Return the default state if the action type doesn't match
+            default:
+                return {
+                    ...state
+                };
+        }
+    },
+    user,
+    post,
+})
+
+->>
+
+// Combine all reducers
+const combinedReducer = combineReducers({
+    user,
+    post,
+});
+
+// Reducer => it receives the previous state and action, returning a new state based on them
+const rootReducer = (state, action) => {
+    switch (action.type) {
+        case HYDRATE:
+            console.log('HYDRATE', action);
+            return { ...state, ...action.payload }; // Merging the payload with the current state
+        default:
+            return combinedReducer(state, action);
+    }
+};
+
+```
 
