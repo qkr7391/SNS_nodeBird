@@ -5445,3 +5445,156 @@ export const getServerSideProps = wrapper.getServerSideProps((store) => async (c
 });
 ```
 
+---
+
+## Day 63 - Using 'getStaticProps'
+
+1. Make a New file that is named 'about.js' in pages
+[pages/about.js]
+```javascript
+import React from 'react';
+import { useSelector } from 'react-redux';
+import Head from 'next/head';
+import { END } from 'redux-saga';
+
+import { Avatar, Card } from 'antd';
+import AppLayout from "../components/AppLayout";
+import wrapper from "../store/configureStore";
+import { LOAD_USER_REQUEST } from "../reducers/user";
+
+const About = () => {
+    //Only when server-side rendering is enabled will the information be populated and displayed, otherwise null will be displayed.
+    const { userInfo } = useSelector((state) => state.user);
+
+    return (
+        <AppLayout>
+            <Haed>
+                <title>Sammy Park | NodeBird</title>
+            </Haed>
+            {userInfor
+            ? (
+                <Card
+                    actions={[
+                    <div key="twit">
+                        Twit
+                        <br />
+                        {userInfo.Posts}
+                    </div>,
+                    <div key="following">
+                        Following
+                        <br />
+                        {userInfo.Followings}
+                    </div>,
+                    <div key="follower">
+                        Follower
+                        <br />
+                        {userInfo.Followers}
+                    </div>,
+                ]}
+                    >
+                <Card.Meta
+                   avatar={<Avatar>{useInfo.nickname}</Avatar>}
+                   title={useInfo.nickname}
+                   description="NodeBird User"
+                />
+                </Card>
+                )
+                : null }
+        </AppLayout>
+    );
+
+}
+
+export default About;
+```
+//Only when server-side rendering is enabled will the information be populated and displayed, otherwise null will be displayed.
+
+2. [about.js]
+```javascript
+export const getStaticProps = wrapper.getStaticProps((store) => async (context) => {
+    store.dispatch({
+        type: LOAD_USER_REQUEST,
+        data: 1,
+    });
+    store.dispatch(END);
+    await store.sagaTask.toPromise();
+
+    return { props: {} }; // Return an empty props object to satisfy Next.js requirements
+});
+```
+
+3. [routes/user.js]
+```javascript
+//GET /user/1
+router.get('/:userId', async (req, res, next) => {
+    try {
+        const fullUserWithoutPW = await User.findOne({
+            where: { id : req.params.userId },
+            //attributes: ['id', 'nickname', 'email'],
+            attributes: {
+                exclude: ['password']
+            },
+            include:[{
+                model: Post,
+                attributes: ['id'],
+            }, {
+                model: User,
+                as: 'Followings',
+                attributes: ['id'],
+            }, {
+                model: User,
+                as: 'Followers',
+                attributes: ['id'],
+            }]
+        })
+        if(fullUserWithoutPW){
+            //Prevent privacy exposure/breach
+            const data = fullUserWithoutPW.toJSON();
+            data.Posts = data.Posts.length;
+            data.Followers = data.Followers.length;
+            data.Followings = data.Followings.length;
+            res.status(200).json(data);
+        }
+        else {
+            res.status(404).json('User does not exist.');
+        }
+    } catch(error) {
+        console.error(error);
+        next(error);
+    }
+});
+
+```
+
+* getStaticProps and getServerSideProps are two Next.js functions used for data fetching and pre-rendering, but they serve different purposes and have different behavior:
+
+* getStaticProps
+- Static Generation: Used for pre-rendering static pages at build time.
+- Runs at Build Time: The data fetching occurs at build time and not at request time.
+- Good for Static Content: Ideal for pages with static content or data that doesn't change frequently.
+- Can Fetch External Data: Can fetch data from any data source, including APIs, databases, or file systems.
+- Benefits: Provides faster page loads and better performance since the page is pre-rendered and cached.
+
+* getServerSideProps
+- Server-Side Rendering (SSR): Used for pre-rendering pages on each request.
+- Runs at Request Time: The data fetching occurs on each request, ensuring the data is always fresh.
+- Dynamic Content: Suitable for pages with dynamic content or data that changes frequently.
+- Fetches Data Server-Side: Fetches data from external sources or APIs directly on the server.
+- Benefits: Provides up-to-date data and supports dynamic content generation, but can be slower due to server-side rendering overhead. 
+
+Choosing Between Them
+
+Use getStaticProps When:
+- You have content that doesn't change frequently.
+- You want to pre-render and cache pages for better performance.
+- You need to fetch data from external sources at build time.
+
+Use getServerSideProps When:
+- You have dynamic content or data that changes frequently.
+- You need to fetch data from external sources on each request.
+- You want to ensure that the data is always up-to-date.
+
+
+* getStaticProps is suitable for static content and provides better performance through pre-rendering and caching, while getServerSideProps is useful for dynamic content and ensures up-to-date data by fetching it on each request. Choose the appropriate function based on your specific requirements for data freshness, performance, and content dynamics.
+
+Adding getServerSideProps to 'profile.js', 'signup.js'

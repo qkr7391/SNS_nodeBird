@@ -36,8 +36,7 @@ export const initialState = {
     loadMyInfoDone: false,
     loadMyInfoError: null,
     self: null,
-    signUpData: {},
-    loginData: {},
+    userInfo: null,
 }
 
 export const LOG_IN_REQUEST = 'LOG_IN_REQUEST';
@@ -273,7 +272,7 @@ const reducer = (state = initialState, action) => {
             case LOAD_USER_SUCCESS:
                 draft.loadUserLoading = false;
                 draft.loadUserDone = true;
-                draft.self = action.data;
+                draft.userInfo = action.data;
                 break;
             case LOAD_USER_FAILURE:
                 draft.loadUserLoading = false;
