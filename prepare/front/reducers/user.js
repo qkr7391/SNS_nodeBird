@@ -32,6 +32,9 @@ export const initialState = {
     loadUserLoading: false, //trying load user infor
     loadUserDone: false,
     loadUserError: null,
+    loadMyInfoLoading: false, //trying load user infor
+    loadMyInfoDone: false,
+    loadMyInfoError: null,
     self: null,
     signUpData: {},
     loginData: {},
@@ -81,6 +84,10 @@ export const DELETE_POST_OF_ME= 'DELETE_POST_OF_ME'
 export const LOAD_USER_REQUEST = 'LOAD_USER_REQUEST';
 export const LOAD_USER_SUCCESS = 'LOAD_USER_SUCCESS';
 export const LOAD_USER_FAILURE = 'LOAD_USER_FAILURE';
+
+export const LOAD_MY_INFO_REQUEST = 'LOAD_MY_INFO_REQUEST';
+export const LOAD_MY_INFO_SUCCESS = 'LOAD_MY_INFO_SUCCESS';
+export const LOAD_MY_INFO_FAILURE = 'LOAD_MY_INFO_FAILURE';
 
 
 // const dummyUser = (data) => ({
@@ -271,6 +278,20 @@ const reducer = (state = initialState, action) => {
             case LOAD_USER_FAILURE:
                 draft.loadUserLoading = false;
                 draft.loadUserError = action.error;
+                break;
+            case LOAD_MY_INFO_REQUEST:
+                draft.loadMyInfoLoading = true;
+                draft.loadMyInfoDone = false;
+                draft.loadMyInfoError = null;
+                break;
+            case LOAD_MY_INFO_SUCCESS:
+                draft.loadMyInfoLoading = false;
+                draft.loadMyInfoDone = true;
+                draft.self = action.data;
+                break;
+            case LOAD_MY_INFO_FAILURE:
+                draft.loadMyInfoLoading = false;
+                draft.loadMyInfoError = action.error;
                 break;
             case ADD_POST_TO_ME:
                 draft.self.Posts.unshift({id: action.data});

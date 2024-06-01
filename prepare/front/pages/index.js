@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { LOAD_POSTS_REQUEST } from "../reducers/post";
-import { LOAD_USER_REQUEST } from "../reducers/user";
+import { LOAD_MY_INFO_REQUEST, LOAD_USER_REQUEST } from "../reducers/user";
 import { END } from 'redux-saga';
+import axios from 'axios';
 
 
 import AppLayout from "../components/AppLayout";
@@ -58,8 +59,16 @@ const Home = () =>{
 };
 
 export const getServerSideProps = wrapper.getServerSideProps((store) => async (context) => {
+    const cookie = context.req ? context.req.headers.cookie : '';
+    axios.defaults.headers.Cookie = '';
+
+    if (context.req && cookie) {
+        axios.defaults.headers.Cookie = cookie;
+    }
+
+
     store.dispatch({
-        type: LOAD_USER_REQUEST,
+        type: LOAD_MY_INFO_REQUEST,
     });
     store.dispatch({
         type: LOAD_POSTS_REQUEST,

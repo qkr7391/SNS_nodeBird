@@ -5341,6 +5341,7 @@ export const getServerSideProps = wrapper.getServerSideProps((store) => async (c
         type: LOAD_POSTS_REQUEST,
     });
     store.dispatch(END);
+    
     // Wait for all the actions to be executed
     await store.sagaTask.toPromise();
 
@@ -5387,5 +5388,60 @@ const rootReducer = (state, action) => {
     }
 };
 
+```
+
+---
+
+## Day 62 - SSR Cookie sharing
+
+* If cookies are not passed from the frontend to the server, the login information is not entered and the login is canceled on every refresh.
+
+* To prevent this, I wrote a code that sends the cookie to the backend, and it works like this
+[pages/index.js]
+```javascript
+export const getServerSideProps = wrapper.getServerSideProps((store) => async (context) => {
+    const cookie = context.req ? context.req.headers.cookie : '';
+    axios.defaults.headers.Cookie = '';
+    
+    store.dispatch({
+        type: LOAD_MY_INFO_REQUEST,
+    });
+    store.dispatch({
+        type: LOAD_POSTS_REQUEST,
+    });
+
+    store.dispatch(END);
+
+    // Wait for all the actions to be executed
+    await store.sagaTask.toPromise();
+
+});
+```
+
+* However, this creates another problem: the cookie information is still shared with all servers.
+* To prevent this, We need the following code
+[pages/index.js]
+```javascript
+export const getServerSideProps = wrapper.getServerSideProps((store) => async (context) => {
+    const cookie = context.req ? context.req.headers.cookie : '';
+    axios.defaults.headers.Cookie = '';
+
+    if (context.req && cookie) {
+        axios.defaults.headers.Cookie = cookie;
+    }
+    
+    store.dispatch({
+        type: LOAD_MY_INFO_REQUEST,
+    });
+    store.dispatch({
+        type: LOAD_POSTS_REQUEST,
+    });
+
+    store.dispatch(END);
+
+    // Wait for all the actions to be executed
+    await store.sagaTask.toPromise();
+
+});
 ```
 
