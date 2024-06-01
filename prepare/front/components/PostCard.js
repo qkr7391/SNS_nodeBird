@@ -13,7 +13,7 @@ import FollowButton from "./FollowButton";
 
 const PostCard = ({ post }) => {
     const dispatch = useDispatch();
-    const { deletePostLoading} = useSelector((state) => state.post);
+    const { deletePostLoading } = useSelector((state) => state.post);
 
     // State for managing like and comment form visibility
     //const [liked, setLiked] = useState(false);
@@ -75,14 +75,14 @@ const PostCard = ({ post }) => {
         })
     },[id])
 
-
-
     const liked = post.Likers.find((v) => v.id === id);
 
     return(
      <div style={{ marginBottom: 20 }}>
          <Card
-         cover={ post.Images[0] && <PostImages images={ post.Images } /> } // Displaying post images if available
+             cover={post.Images && post.Images.length > 0 && <PostImages images={post.Images} />}
+
+            // cover={ post.Images[0] && <PostImages images={ post.Images } /> } // Displaying post images if available
          actions={[
              <RetweetOutlined key='retweet' onClick={onRetweeet}/>,
              liked

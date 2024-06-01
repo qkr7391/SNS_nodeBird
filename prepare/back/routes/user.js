@@ -42,6 +42,45 @@ router.get('/', async (req, res, next) => {
     }
 });
 
+//GET /user/1
+router.get('/:userId', async (req, res, next) => {
+    try {
+            const fullUserWithoutPW = await User.findOne({
+                where: { id : req.params.userId },
+                //attributes: ['id', 'nickname', 'email'],
+                attributes: {
+                    exclude: ['password']
+                },
+                include:[{
+                    model: Post,
+                    attributes: ['id'],
+                }, {
+                    model: User,
+                    as: 'Followings',
+                    attributes: ['id'],
+                }, {
+                    model: User,
+                    as: 'Followers',
+                    attributes: ['id'],
+                }]
+            })
+        if(fullUserWithoutPW){
+            //Prevent privacy exposure/breach
+            const data = fullUserWithoutPW.toJSON();
+            data.Posts = data.Posts.length;
+            data.Followers = data.Followers.length;
+            data.Followings = data.Followings.length;
+            res.status(200).json(data);
+        }
+        else {
+            res.status(404).json('User does not exist.');
+        }
+    } catch(error) {
+        console.error(error);
+        next(error);
+    }
+});
+
 
 //POST /user/login
 router.post('/login', isNotLoggedIn, (req, res, next) => {

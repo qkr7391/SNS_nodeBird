@@ -198,7 +198,6 @@ function* loadFollowings(action){
 }
 
 
-
 function loadUserAPI(data){
     return axios.get(`/user/${data}`);
 }

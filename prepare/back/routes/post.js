@@ -85,24 +85,53 @@ router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
     }
 });
 
+
 //POST /post/images
 router.post('/images', isLoggedIn, upload.array('image'), (req, res, next) => {
     console.log(req.files);
     res.json(req.files.map((v) => v.filename));
 });
 
-
-//DELETE /post
-router.delete('/:postId', isLoggedIn, async(req, res, next) => {
-    try{
-        await Post.destroy({
-            where : {
-                id: req.params.postId,
-                UserId: req.user.id,
-            },
+//GET /post/1
+router.get('/:postId', async (req, res, next) => { // POST /post/comment
+    try {
+        const post = await Post.findOne({
+            where: { id: req.params.postId },
         });
-        res.status(200).json({ PostId: parseInt(req.params.postId, 10) });
-    } catch(error){
+
+        if (!post){
+            return res.status(404).send('This post is not exist.')
+        }
+
+        const fullPost = await Post.findOne({
+            where: { id: post.id },
+            include: [{
+                model: Post,
+                as: 'Retweet',
+                include: [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+                }, {
+                    model: Image,
+                }]
+            }, {
+                model: User,
+                attributes: ['id', 'nickname'],
+            }, {
+                model: User, // Likers
+                as: 'Likers',
+                attributes: ['id', 'nickname'],
+            }, {
+                model: Comment,
+                include: [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+                }],
+            }],
+        });
+        console.log('Full post:', fullPost);
+        res.status(200).json(fullPost);
+    }catch(error){
         console.error(error);
         next(error);
     }
@@ -246,5 +275,24 @@ router.post('/:postId/retweet', isLoggedIn, async (req, res, next) => { // POST 
         next(error);
     }
 });
+
+
+//DELETE /post
+router.delete('/:postId', isLoggedIn, async(req, res, next) => {
+    try{
+        await Post.destroy({
+            where : {
+                id: req.params.postId,
+                UserId: req.user.id,
+            },
+        });
+        res.status(200).json({ PostId: parseInt(req.params.postId, 10) });
+    } catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+
 
 module.exports = router;
