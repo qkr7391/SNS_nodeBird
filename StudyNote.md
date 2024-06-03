@@ -5647,7 +5647,7 @@ case LOAD_POST_REQUEST:
     draft.loadPostError = null;
     break;
 case LOAD_POST_SUCCESS:
-        draft.singlePost = action.data;
+    draft.singlePost = action.data;
     draft.loadPostLoading = false;
     draft.loadPostDone = true;
     break;
@@ -5689,5 +5689,104 @@ function loadPostsAPI(lastId){
 
 ```javascript
 [routes/post.js]
+//GET /post/1
+router.get('/:postId', async (req, res, next) => { // POST /post/comment
+    try {
+        const post = await Post.findOne({
+            where: { id: req.params.postId },
+        });
 
+        if (!post){
+            return res.status(404).send('This post is not exist.')
+        }
+
+        const fullPost = await Post.findOne({
+            where: { id: post.id },
+            include: [{
+                model: Post,
+                as: 'Retweet',
+                include: [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+                }, {
+                    model: Image,
+                }],
+            }, {
+                model: User,
+                attributes: ['id', 'nickname'],
+            }, {
+                model: User, // Likers
+                as: 'Likers',
+                attributes: ['id', 'nickname'],
+            }, {
+                model: Comment,
+                include: [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+                }],
+            }, {
+                model: Image, // Include images
+            }],
+        });
+
+        res.status(200).json(fullPost);
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+```
+
+```javascript
+[id.js]
+
+//post.[id].js -> post/1 ...
+import { useRouter } from "next/router";
+import wrapper from "../../store/configureStore";
+import axios from "axios";
+import { LOAD_MY_INFO_REQUEST } from "../../reducers/user";
+import { LOAD_POST_REQUEST } from "../../reducers/post";
+import { END } from "redux-saga";
+import AppLayout from "../../components/AppLayout";
+import PostCard from "../../components/PostCard";
+import { useSelector } from "react-redux";
+
+
+const Post = () => {
+    const router = useRouter();
+    const { id } = router.query;
+    const { singlePost } = useSelector((state) => state.post);
+
+    return (
+        <AppLayout>
+            <PostCard post={singlePost} />
+        </AppLayout>
+    );
+};
+
+export const getServerSideProps = wrapper.getServerSideProps((store) => async (context) => {
+    const cookie = context.req ? context.req.headers.cookie : '';
+    axios.defaults.headers.Cookie = '';
+
+    if (context.req && cookie) {
+        axios.defaults.headers.Cookie = cookie;
+    }
+
+    store.dispatch({
+        type: LOAD_MY_INFO_REQUEST,
+    });
+    store.dispatch({
+        type: LOAD_POST_REQUEST,
+        data: context.params.id,
+    });
+
+    store.dispatch(END);
+
+    // Wait for all the actions to be executed
+    await store.sagaTask.toPromise();
+
+});
+
+export default Post;
 ```

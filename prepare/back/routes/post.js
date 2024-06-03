@@ -113,7 +113,7 @@ router.get('/:postId', async (req, res, next) => { // POST /post/comment
                     attributes: ['id', 'nickname'],
                 }, {
                     model: Image,
-                }]
+                }],
             }, {
                 model: User,
                 attributes: ['id', 'nickname'],
@@ -127,9 +127,11 @@ router.get('/:postId', async (req, res, next) => { // POST /post/comment
                     model: User,
                     attributes: ['id', 'nickname'],
                 }],
+            }, {
+                model: Image, // Include images
             }],
         });
-        console.log('Full post:', fullPost);
+
         res.status(200).json(fullPost);
     }catch(error){
         console.error(error);

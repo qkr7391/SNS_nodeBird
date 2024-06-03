@@ -184,7 +184,6 @@ const reducer = (state = initialState, action) => {
                 draft.singlePost = action.data;
                 draft.loadPostLoading = false;
                 draft.loadPostDone = true;
-                console.log('************singlePost:', draft.singlePost);
                 break;
             case LOAD_POST_FAILURE:
                 draft.loadPostLoading = false;
