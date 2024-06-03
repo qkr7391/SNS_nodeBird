@@ -12,6 +12,7 @@ const NodeBird = ({ Component }) => {
 			<Head>
 				<meta charSet="utf-8" />
 				<title> NodeBird </title>
+				<link rel="shortcut icon" href="/favicon.png" />
 			</Head>
 			<Component />
 		</>
@@ -21,4 +22,5 @@ const NodeBird = ({ Component }) => {
 NodeBird.propTypes = {
 	Component: PropTypes.elementType.isRequired,
 };
+
 export default wrapper.withRedux(NodeBird);

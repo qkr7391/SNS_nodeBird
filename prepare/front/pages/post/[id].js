@@ -1,4 +1,4 @@
-//post.[id].js -> post/1 ...
+// pages/post/[id].js
 import { useRouter } from "next/router";
 import wrapper from "../../store/configureStore";
 import axios from "axios";
@@ -10,29 +10,31 @@ import PostCard from "../../components/PostCard";
 import { useSelector } from "react-redux";
 import Head from "next/head";
 
-
 const Post = () => {
     const router = useRouter();
     const { id } = router.query;
     const { singlePost } = useSelector((state) => state.post);
 
     if (!singlePost) {
-        return null; // or show a loading spinner
+        return null; // 또는 로딩 스피너를 표시
     }
-    console.log(singlePost);
 
     const coverImage = singlePost.Images && singlePost.Images.length > 0
         ? singlePost.Images[0].src
-        : 'https://nodebird.com/favicon.ico';
+        : 'http://localhost:3060/favicon.png';
 
     return (
         <AppLayout>
             <Head>
                 <title>{singlePost.User.nickname}'s post</title>
+                <meta name="description" content={singlePost.content} />
                 <meta name="og:title" content={`${singlePost.User.nickname}'s post`} />
                 <meta name="og:description" content={singlePost.content} />
                 <meta name="og:image" content={coverImage} />
-                <meta name="og:url" content={`https://nodebird.com/post/${id}`} />
+                <meta name="og:url" content={`http://localhost:3060/post/${id}`} />
+                <link rel="icon" type="image/png" href="/favicon.png" />
+
+                {/*<link rel="icon" href="http://localhost:3060/favicon.ico" />*/}
             </Head>
             <PostCard post={singlePost} />
         </AppLayout>
@@ -60,6 +62,9 @@ export const getServerSideProps = wrapper.getServerSideProps((store) => async (c
     // Wait for all the actions to be executed
     await store.sagaTask.toPromise();
 
+    return {
+        props: {},
+    };
 });
 
 export default Post;
