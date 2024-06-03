@@ -5445,6 +5445,352 @@ export const getServerSideProps = wrapper.getServerSideProps((store) => async (c
 });
 ```
 
+---
+
+## Day 63 - Using 'getStaticProps'
+
+1. Make a New file that is named 'about.js' in pages
+   [pages/about.js]
+```javascript
+import React from 'react';
+import { useSelector } from 'react-redux';
+import Head from 'next/head';
+import { END } from 'redux-saga';
+
+import { Avatar, Card } from 'antd';
+import AppLayout from "../components/AppLayout";
+import wrapper from "../store/configureStore";
+import { LOAD_USER_REQUEST } from "../reducers/user";
+
+const About = () => {
+    //Only when server-side rendering is enabled will the information be populated and displayed, otherwise null will be displayed.
+    const { userInfo } = useSelector((state) => state.user);
+
+    return (
+        <AppLayout>
+            <Haed>
+                <title>Sammy Park | NodeBird</title>
+            </Haed>
+            {userInfor
+            ? (
+                <Card
+                    actions={[
+                    <div key="twit">
+                        Twit
+                        <br />
+                        {userInfo.Posts}
+                    </div>,
+                    <div key="following">
+                        Following
+                        <br />
+                        {userInfo.Followings}
+                    </div>,
+                    <div key="follower">
+                        Follower
+                        <br />
+                        {userInfo.Followers}
+                    </div>,
+                ]}
+                    >
+                <Card.Meta
+                   avatar={<Avatar>{useInfo.nickname}</Avatar>}
+                   title={useInfo.nickname}
+                   description="NodeBird User"
+                />
+                </Card>
+                )
+                : null }
+        </AppLayout>
+    );
+
+}
+
+export default About;
+```
+//Only when server-side rendering is enabled will the information be populated and displayed, otherwise null will be displayed.
+
+2. [about.js]
+```javascript
+export const getStaticProps = wrapper.getStaticProps((store) => async (context) => {
+    store.dispatch({
+        type: LOAD_USER_REQUEST,
+        data: 1,
+    });
+    store.dispatch(END);
+    await store.sagaTask.toPromise();
+
+    return { props: {} }; // Return an empty props object to satisfy Next.js requirements
+});
+```
+
+3. [routes/user.js]
+```javascript
+//GET /user/1
+router.get('/:userId', async (req, res, next) => {
+    try {
+        const fullUserWithoutPW = await User.findOne({
+            where: { id : req.params.userId },
+            //attributes: ['id', 'nickname', 'email'],
+            attributes: {
+                exclude: ['password']
+            },
+            include:[{
+                model: Post,
+                attributes: ['id'],
+            }, {
+                model: User,
+                as: 'Followings',
+                attributes: ['id'],
+            }, {
+                model: User,
+                as: 'Followers',
+                attributes: ['id'],
+            }]
+        })
+        if(fullUserWithoutPW){
+            //Prevent privacy exposure/breach
+            const data = fullUserWithoutPW.toJSON();
+            data.Posts = data.Posts.length;
+            data.Followers = data.Followers.length;
+            data.Followings = data.Followings.length;
+            res.status(200).json(data);
+        }
+        else {
+            res.status(404).json('User does not exist.');
+        }
+    } catch(error) {
+        console.error(error);
+        next(error);
+    }
+});
+
+```
+
+* getStaticProps and getServerSideProps are two Next.js functions used for data fetching and pre-rendering, but they serve different purposes and have different behavior:
+
+* getStaticProps
+- Static Generation: Used for pre-rendering static pages at build time.
+- Runs at Build Time: The data fetching occurs at build time and not at request time.
+- Good for Static Content: Ideal for pages with static content or data that doesn't change frequently.
+- Can Fetch External Data: Can fetch data from any data source, including APIs, databases, or file systems.
+- Benefits: Provides faster page loads and better performance since the page is pre-rendered and cached.
+
+* getServerSideProps
+- Server-Side Rendering (SSR): Used for pre-rendering pages on each request.
+- Runs at Request Time: The data fetching occurs on each request, ensuring the data is always fresh.
+- Dynamic Content: Suitable for pages with dynamic content or data that changes frequently.
+- Fetches Data Server-Side: Fetches data from external sources or APIs directly on the server.
+- Benefits: Provides up-to-date data and supports dynamic content generation, but can be slower due to server-side rendering overhead.
+
+Choosing Between Them
+
+Use getStaticProps When:
+- You have content that doesn't change frequently.
+- You want to pre-render and cache pages for better performance.
+- You need to fetch data from external sources at build time.
+
+Use getServerSideProps When:
+- You have dynamic content or data that changes frequently.
+- You need to fetch data from external sources on each request.
+- You want to ensure that the data is always up-to-date.
+
+
+* getStaticProps is suitable for static content and provides better performance through pre-rendering and caching, while getServerSideProps is useful for dynamic content and ensures up-to-date data by fetching it on each request. Choose the appropriate function based on your specific requirements for data freshness, performance, and content dynamics.
+
+Adding getServerSideProps to 'profile.js', 'signup.js'
+
+
+---
+
+## Day 64 - Dynamic routing
+
+When you want to share a post, you need the address of the post.
+
+To handle dynamic URL paths in the form of post/1, post/2 ... etc. for each post, Next.js allows you to use dynamic routing.
+
+* Dynamic routing refers to the method of handling URL paths that change dynamically, allowing the application to render different content based on the variable parts of the URL. This is useful for scenarios like blog posts, user profiles, product pages, etc., where the content is identified by an ID or slug in the URL.
+* Concept of Dynamic Routing
+    - Static Routes: These are predefined paths in your application, such as /about or /contact.
+    - Dynamic Routes: These paths include variables that change, such as /posts/1 or /posts/2, where 1 and 2 are dynamic parts of the URL.
+* Why Dynamic Routing?
+    - Flexible URL Structure: You can handle a variety of pages with the same URL pattern, regardless of the number of users or content.
+    - SEO Optimization: Unique URLs for each page improve search engine optimization.
+    - Ease of Management: Using the same template to render different data simplifies code maintenance.
+*
+
+1. Create [pages/post/[id].js] file
+```javascript
+[pages/post/[id].js]
+//post.[id].js -> post/1 ...
+import { useRouter} from "next/router";
+
+    const Post = () => {
+    const router = useRouter();
+    const { id } = router.query;
+
+    return (
+        <div>Posting number {id}</div>
+    );
+};
+
+export default Post;
+```
+2. Can check URL 'post/1'
+   ![Screenshot 2024-06-02 at 5.43.21 PM.png](..%2F..%2FScreenshot%202024-06-02%20at%205.43.21%E2%80%AFPM.png)
+
+3. Make LOAD_POST_REQUEST, LOAD_POST_SUCCESS, LOAD_POST_FAILURE [reduces/post.js, sagas/post.js, routes/post.js]
+```javascript
+[reducers/post.js]
+case LOAD_POST_REQUEST:
+    draft.loadPostLoading = true;
+    draft.loadPostDone = false;
+    draft.loadPostError = null;
+    break;
+case LOAD_POST_SUCCESS:
+    draft.singlePost = action.data;
+    draft.loadPostLoading = false;
+    draft.loadPostDone = true;
+    break;
+case LOAD_POST_FAILURE:
+    draft.loadPostLoading = false;
+    draft.loadPostError = action.error;
+    break;
+```
+
+```javascript
+[sagas/post.js]
+function loadPostAPI(data){
+    return axios.get(`/posts/${data}`)
+}
+function* loadPost(action){
+    try{
+        const result =  yield call(loadPostAPI, action.data)
+        yield put({
+            type: LOAD_POST_SUCCESS,
+            data: result.data,
+        });
+    } catch(err) {
+        yield put({
+            type: LOAD_POST_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+function* watchLoadPost(){
+    yield takeLatest(LOAD_POST_REQUEST, loadPost);
+    // yield takeLatest(LOAD_POSTS_REQUEST, loadPosts);
+}
+
+function loadPostsAPI(lastId){
+    return axios.get(`/posts?lastId=${lastId || 0}`)
+    // return axios.get(`/posts?lastId=${lastId}&limit=10&offset=10`, data)
+}
+```
+
+```javascript
+[routes/post.js]
+//GET /post/1
+router.get('/:postId', async (req, res, next) => { // POST /post/comment
+    try {
+        const post = await Post.findOne({
+            where: { id: req.params.postId },
+        });
+
+        if (!post){
+            return res.status(404).send('This post is not exist.')
+        }
+
+        const fullPost = await Post.findOne({
+            where: { id: post.id },
+            include: [{
+                model: Post,
+                as: 'Retweet',
+                include: [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+                }, {
+                    model: Image,
+                }],
+            }, {
+                model: User,
+                attributes: ['id', 'nickname'],
+            }, {
+                model: User, // Likers
+                as: 'Likers',
+                attributes: ['id', 'nickname'],
+            }, {
+                model: Comment,
+                include: [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+                }],
+            }, {
+                model: Image, // Include images
+            }],
+        });
+
+        res.status(200).json(fullPost);
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+```
+
+```javascript
+[id.js]
+
+//post.[id].js -> post/1 ...
+import { useRouter } from "next/router";
+import wrapper from "../../store/configureStore";
+import axios from "axios";
+import { LOAD_MY_INFO_REQUEST } from "../../reducers/user";
+import { LOAD_POST_REQUEST } from "../../reducers/post";
+import { END } from "redux-saga";
+import AppLayout from "../../components/AppLayout";
+import PostCard from "../../components/PostCard";
+import { useSelector } from "react-redux";
+
+
+const Post = () => {
+    const router = useRouter();
+    const { id } = router.query;
+    const { singlePost } = useSelector((state) => state.post);
+
+    return (
+        <AppLayout>
+            <PostCard post={singlePost} />
+        </AppLayout>
+    );
+};
+
+export const getServerSideProps = wrapper.getServerSideProps((store) => async (context) => {
+    const cookie = context.req ? context.req.headers.cookie : '';
+    axios.defaults.headers.Cookie = '';
+
+    if (context.req && cookie) {
+        axios.defaults.headers.Cookie = cookie;
+    }
+
+    store.dispatch({
+        type: LOAD_MY_INFO_REQUEST,
+    });
+    store.dispatch({
+        type: LOAD_POST_REQUEST,
+        data: context.params.id,
+    });
+
+    store.dispatch(END);
+
+    // Wait for all the actions to be executed
+    await store.sagaTask.toPromise();
+
+});
+
+export default Post;
+```
+
 * favicon.ico / favicon.png
 1. front/public/favicon.ico or front/public/favicon.png 
 ```javascript
