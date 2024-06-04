@@ -5923,4 +5923,387 @@ export default class MyDocument extends Document {
 ---
 ## Day 66 - User posting, Hashtag posting
 
+* When you want to see information about all of a user's posts, 
+
+[pages/user/[id].js]
+```javascript
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Avatar, Card } from 'antd';
+import { END } from 'redux-saga';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+
+import axios from 'axios';
+import { LOAD_USER_POSTS_REQUEST } from '../../reducers/post';
+import { LOAD_MY_INFO_REQUEST, LOAD_USER_REQUEST } from '../../reducers/user';
+import PostCard from '../../components/PostCard';
+import wrapper from '../../store/configureStore';
+import AppLayout from '../../components/AppLayout';
+
+const User = () => {
+    const dispatch = useDispatch();
+    const router = useRouter();
+    const { id } = router.query;
+    const { mainPosts, hasMorePosts, loadPostsLoading } = useSelector((state) => state.post);
+    const { userInfo, me } = useSelector((state) => state.user);
+
+    useEffect(() => {
+        const onScroll = () => {
+            if (window.pageYOffset + document.documentElement.clientHeight > document.documentElement.scrollHeight - 300) {
+                if (hasMorePosts && !loadPostsLoading) {
+                    dispatch({
+                        type: LOAD_USER_POSTS_REQUEST,
+                        lastId: mainPosts[mainPosts.length - 1] && mainPosts[mainPosts.length - 1].id,
+                        data: id,
+                    });
+                }
+            }
+        };
+        window.addEventListener('scroll', onScroll);
+        return () => {
+            window.removeEventListener('scroll', onScroll);
+        };
+    }, [mainPosts.length, hasMorePosts, id, loadPostsLoading]);
+
+    return (
+        <AppLayout>
+            {userInfo && (
+                <Head>
+                    <title>
+                        {userInfo.nickname}
+                        님의 글
+                    </title>
+                    <meta name="description" content={`${userInfo.nickname}님의 게시글`} />
+                    <meta property="og:title" content={`${userInfo.nickname}님의 게시글`} />
+                    <meta property="og:description" content={`${userInfo.nickname}님의 게시글`} />
+                    <meta property="og:image" content="https://nodebird.com/favicon.ico" />
+                    <meta property="og:url" content={`https://nodebird.com/user/${id}`} />
+                </Head>
+            )}
+            {userInfo && (userInfo.id !== me?.id)
+                ? (
+                    <Card
+                        style={{ marginBottom: 20 }}
+                        actions={[
+                            <div key="twit">
+                                짹짹
+                                <br />
+                                {userInfo.Posts}
+                            </div>,
+                            <div key="following">
+                                팔로잉
+                                <br />
+                                {userInfo.Followings}
+                            </div>,
+                            <div key="follower">
+                                팔로워
+                                <br />
+                                {userInfo.Followers}
+                            </div>,
+                        ]}
+                    >
+                        <Card.Meta
+                            avatar={<Avatar>{userInfo.nickname[0]}</Avatar>}
+                            title={userInfo.nickname}
+                        />
+                    </Card>
+                )
+                : null}
+            {mainPosts.map((c) => (
+                <PostCard key={c.id} post={c} />
+            ))}
+        </AppLayout>
+    );
+};
+export const getServerSideProps = wrapper.getServerSideProps((store) => async (context) => {
+    const cookie = context.req ? context.req.headers.cookie : '';
+    axios.defaults.headers.Cookie = '';
+
+    if (context.req && cookie) {
+        axios.defaults.headers.Cookie = cookie;
+    }
+
+   store.dispatch({
+        type: LOAD_USER_POSTS_REQUEST,
+        data: context.params.id,
+    });
+   store.dispatch({
+        type: LOAD_MY_INFO_REQUEST,
+    });
+   store.dispatch({
+        type: LOAD_USER_REQUEST,
+        data: context.params.id,
+    });
+
+    store.dispatch(END);
+
+    // Wait for all the actions to be executed
+    await store.sagaTask.toPromise();
+
+    return {
+        props: {},
+    };
+});
+
+export default User;
+```
+
+```javascript
+[reducers/post.js]
+case LOAD_USER_POSTS_REQUEST:
+    case LOAD_HASHTAG_POSTS_REQUEST:
+    case LOAD_POSTS_REQUEST:
+    draft.loadPostsLoading = true;
+    draft.loadPostsDone = false;
+    draft.loadPostsError = null;
+break;
+case LOAD_USER_POSTS_SUCCESS:
+    case LOAD_HASHTAG_POSTS_SUCCESS:
+    case LOAD_POSTS_SUCCESS:
+    draft.loadPostsLoading = false;
+    draft.loadPostsDone = true;
+    draft.mainPosts = draft.mainPosts.concat(action.data);
+    draft.hasMorePosts = action.data.length === 10;
+break;
+case LOAD_USER_POSTS_FAILURE:
+    case LOAD_HASHTAG_POSTS_FAILURE:
+    case LOAD_POSTS_FAILURE:
+    draft.loadPostsLoading = false;
+    draft.loadPostsError = action.error;    
+break;
+```
+
+```javascript
+[sagas/post.js]
+
+function loadUserPostsAPI(data, lastId) {
+    return axios.get(`/user/${data}/posts?lastId=${lastId || 0}`);
+}
+
+function* loadUserPosts(action) {
+    try {
+        const result = yield call(loadUserPostsAPI, action.data, action.lastId);
+        yield put({
+            type: LOAD_USER_POSTS_SUCCESS,
+            data: result.data,
+        });
+    } catch (err) {
+        console.error(err);
+        yield put({
+            type: LOAD_USER_POSTS_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
+function* watchLoadHashtagPosts() {
+    yield throttle(5000, LOAD_HASHTAG_POSTS_REQUEST, loadHashtagPosts);
+}
+
+
+function loadHashtagPostsAPI(data, lastId) {
+    return axios.get(`/hashtag/${encodeURIComponent(data)}?lastId=${lastId || 0}`);
+}
+
+function* loadHashtagPosts(action) {
+    try {
+        console.log('loadHashtag console');
+        const result = yield call(loadHashtagPostsAPI, action.data, action.lastId);
+        yield put({
+            type: LOAD_HASHTAG_POSTS_SUCCESS,
+            data: result.data,
+        });
+    } catch (err) {
+        console.error(err);
+        yield put({
+            type: LOAD_HASHTAG_POSTS_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+function* watchLoadUserPosts() {
+    yield throttle(5000, LOAD_USER_POSTS_REQUEST, loadUserPosts);
+}
+
+```
+
+```javascript
+[routes/user.js]
+
+router.get('/:userId/posts', async (req, res, next) => { // GET /user/1/posts
+    try {
+        const where = { UserId: req.params.userId };
+        if (parseInt(req.query.lastId, 10)) { // 초기 로딩이 아닐 때
+            where.id = { [Op.lt]: parseInt(req.query.lastId, 10)}
+        } // 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1
+        const posts = await Post.findAll({
+            where,
+            limit: 10,
+            order: [['createdAt', 'DESC']],
+            include: [{
+                model: User,
+                attributes: ['id', 'nickname'],
+            }, {
+                model: Image,
+            }, {
+                model: Comment,
+                include: [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+                    order: [['createdAt', 'DESC']],
+                }],
+            }, {
+                model: User, // 좋아요 누른 사람
+                as: 'Likers',
+                attributes: ['id'],
+            }, {
+                model: Post,
+                as: 'Retweet',
+                include: [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+                }, {
+                    model: Image,
+                }]
+            }],
+        });
+        res.status(200).json(posts);
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
+
+```
+
+```javascript
+[routes/hashtag.js]
+const express = require('express');
+const { Op } = require('sequelize');
+
+const { Post, Hashtag, Image, Comment, User } = require('../models');
+
+const router = express.Router();
+
+//GET /hashtag/node
+router.get('/:hashtag', async (req, res, next) => { // GET /hashtag/노드
+    try {
+        const where = {};
+        if (parseInt(req.query.lastId, 10)) { // 초기 로딩이 아닐 때
+            where.id = { [Op.lt]: parseInt(req.query.lastId, 10)}
+        } // 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1
+        const posts = await Post.findAll({
+            where,
+            limit: 10,
+            order: [['createdAt', 'DESC']],
+            include: [{
+                model: Hashtag,
+                where: { content: decodeURIComponent(req.params.hashtag) },
+            }, {
+                model: User,
+                attributes: ['id', 'nickname'],
+            }, {
+                model: Image,
+            }, {
+                model: Comment,
+                include: [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+                    order: [['createdAt', 'DESC']],
+                }],
+            }, {
+                model: User, // 좋아요 누른 사람
+                as: 'Likers',
+                attributes: ['id'],
+            }, {
+                model: Post,
+                as: 'Retweet',
+                include: [{
+                    model: User,
+                    attributes: ['id', 'nickname'],
+                }, {
+                    model: Image,
+                }]
+            }],
+        });
+        res.status(200).json(posts);
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
+
+module.exports = router;
+```
+
+* When you want to see posts about a hashtag
+```javascript
+[pages/hashtag/[tag].js]
+// hashtag/[tag].js
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useRouter } from 'next/router';
+import { END } from 'redux-saga';
+
+import axios from 'axios';
+import { LOAD_HASHTAG_POSTS_REQUEST } from '../../reducers/post';
+import PostCard from '../../components/PostCard';
+import wrapper from '../../store/configureStore';
+import { LOAD_MY_INFO_REQUEST } from '../../reducers/user';
+import AppLayout from '../../components/AppLayout';
+
+const Hashtag = () => {
+    const dispatch = useDispatch();
+    const router = useRouter();
+    const { tag } = router.query;
+    const { mainPosts, hasMorePosts, loadPostsLoading } = useSelector((state) => state.post);
+
+    useEffect(() => {
+        const onScroll = () => {
+            if (window.pageYOffset + document.documentElement.clientHeight > document.documentElement.scrollHeight - 300) {
+                if (hasMorePosts && !loadPostsLoading) {
+                    dispatch({
+                        type: LOAD_HASHTAG_POSTS_REQUEST,
+                        lastId: mainPosts[mainPosts.length - 1] && mainPosts[mainPosts.length - 1].id,
+                        data: tag,
+                    });
+                }
+            }
+        };
+        window.addEventListener('scroll', onScroll);
+        return () => {
+            window.removeEventListener('scroll', onScroll);
+        };
+    }, [mainPosts.length, hasMorePosts, tag, loadPostsLoading]);
+
+    return (
+        <AppLayout>
+            {mainPosts.map((c) => (
+                <PostCard key={c.id} post={c} />
+            ))}
+        </AppLayout>
+    );
+};
+
+export const getServerSideProps = wrapper.getServerSideProps(async (context) => {
+    const cookie = context.req ? context.req.headers.cookie : '';
+    console.log(context);
+    axios.defaults.headers.Cookie = '';
+    if (context.req && cookie) {
+        axios.defaults.headers.Cookie = cookie;
+    }
+    context.store.dispatch({
+        type: LOAD_MY_INFO_REQUEST,
+    });
+    context.store.dispatch({
+        type: LOAD_HASHTAG_POSTS_REQUEST,
+        data: context.params.tag,
+    });
+    context.store.dispatch(END);
+    await context.store.sagaTask.toPromise();
+});
+
+export default Hashtag;
+```
 
