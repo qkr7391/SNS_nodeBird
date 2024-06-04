@@ -6306,4 +6306,43 @@ export const getServerSideProps = wrapper.getServerSideProps(async (context) => 
 
 export default Hashtag;
 ```
+---
+## Day 67 - getStaticPaths
+
+getStaticPaths is a function used in Next.js for dynamic routes. It allows you to specify which paths should be statically generated at build time. This is particularly useful for pages that have dynamic segments (e.g., blog posts, user profiles) where you want to pre-render certain pages based on dynamic data.
+
+Key Concepts
+- Dynamic Routes:
+In Next.js, you can create dynamic routes using the bracket notation in the file name (e.g., [id].js, [slug].js).
+getStaticPaths works with these dynamic routes to determine which specific pages to generate.
+
+- Static Generation:
+Static generation is a method where HTML pages are generated at build time.
+getStaticPaths tells Next.js which dynamic paths to generate during the build.
+
+```javascript
+[example: pages/user/[id].js]
+...
+export async function getStaticPaths(){
+    //solve more post
+    const result = await axios.get('/post/list')
+    
+    //only possible for /post/1,2,3
+    return{
+        paths:[
+            { params: { id: '1' }},
+            { params: { id: '2' }},
+            { params: { id: '3' }},
+        ],
+        fallback: false,
+    }
+}
+
+export const getStaticProps = wrapper.getStaticProps((store) => async (context) => {
+   ...
+export default User;
+```
+
+* BUT, Unless you have a finite number of posts, this is not ideal as it will limit the number of passes you can have.
+* It is not recommended for use when the number of passes is small enough to justify making the passes HTML.
 
