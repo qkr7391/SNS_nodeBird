@@ -5,12 +5,15 @@ import { Card, Popover, Button, Avatar, List} from 'antd';
 // import { Card, Popover, Button, Avatar, List, Comment } from 'antd';
 import { EllipsisOutlined, HeartOutlined, MessageOutlined, RetweetOutlined, HeartTwoTone } from "@ant-design/icons";
 import Link from 'next/link';
+import moment from 'moment';
 
 import PostImages from "./PostImages";
 import CommentForm from "./CommentForm";
 import PostCardContent from "./PostCardContent";
 import { DELETE_POST_REQUEST, LIKE_POST_REQUEST, UNLIKE_POST_REQUEST, RETWEET_REQUEST } from "../reducers/post";
 import FollowButton from "./FollowButton";
+
+// moment.locale('ko');
 
 const PostCard = ({ post }) => {
     const dispatch = useDispatch();
@@ -113,6 +116,7 @@ const PostCard = ({ post }) => {
              ? (
                  <Card  cover={ post.Retweet.Images[0] && <PostImages images={ post.Retweet.Images } /> } // Displaying post images if available
                  >
+                     <div style={{float: 'right', color: '#999', fontSize: '10px'}}>{moment(post.createdAt).format('YYYY.MM.DD')}</div>
                      <Card.Meta
                      // avatar={post.Retweet.User && <Avatar>{post.Retweet.User.nickname[0]}</Avatar>} // Displaying user avatar
                          avatar={
@@ -127,6 +131,8 @@ const PostCard = ({ post }) => {
                  </Card>
                  )
              : (
+                 <>
+                     <div style={{float: 'right', color: '#999', fontSize: '10px' }}>{moment(post.createdAt).format('YYYY.MM.DD')}</div>
                  <Card.Meta
                      // avatar={post.User && <Avatar>{post.User.nickname[0]}</Avatar>} // Displaying user avatar
                      avatar={
@@ -137,6 +143,7 @@ const PostCard = ({ post }) => {
                      title={post.User && post.User.nickname} // Displaying user nickname
                      description={<PostCardContent postData={post.content}/> } // Displaying post content
                  />
+                 </>
              )}
          </Card>
          {/* Displaying comment form if it's opened */}

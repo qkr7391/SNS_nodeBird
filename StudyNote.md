@@ -6539,6 +6539,39 @@ avatar={
 </Link>
 }
 ```
+---
+## Day 70 - 'Moment' and Next build
+
+- Let's add 'Date' library to Card
+
+1. npm i moment
+2. [components/PostCard.js]
+```javascript
+import moment from 'moment';
+
+<div style={{float: 'right', color: '#999', fontSize: '10px'}}>{moment(post.createdAt).format('YYYY.MM.DD')}</div>
+
+```
+
+*  In software development, a "build" typically refers to the process of converting source code files into a standalone, executable version of the software.
+- npm run build
+- "build": "next build"
+
+you can see some data on the terminal
+```dtd
+Route (pages)                              Size     First Load JS
+┌ λ /                                      1.5 kB          355 kB
+├   /_app                                  0 B             127 kB
+├ ○ /404                                   1.45 kB         128 kB
+├ ● /about                                 1.86 kB         278 kB
+├ λ /hashtag/[tag]                         578 B           354 kB
+├ λ /post/[id]                             578 B           354 kB
+├ λ /profile                               7.82 kB         323 kB
+├ λ /signup                                5.42 kB         281 kB
+└ λ /user/[id]                             906 B           355 kB
+...
+```
+
 
 
 
