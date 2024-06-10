@@ -1,9 +1,10 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useState } from 'react';
 import PropTypes from "prop-types";
 import { useDispatch, useSelector } from 'react-redux';
 import { Card, Popover, Button, Avatar, List} from 'antd';
 // import { Card, Popover, Button, Avatar, List, Comment } from 'antd';
 import { EllipsisOutlined, HeartOutlined, MessageOutlined, RetweetOutlined, HeartTwoTone } from "@ant-design/icons";
+import Link from 'next/link';
 
 import PostImages from "./PostImages";
 import CommentForm from "./CommentForm";
@@ -113,7 +114,12 @@ const PostCard = ({ post }) => {
                  <Card  cover={ post.Retweet.Images[0] && <PostImages images={ post.Retweet.Images } /> } // Displaying post images if available
                  >
                      <Card.Meta
-                     avatar={post.Retweet.User && <Avatar>{post.Retweet.User.nickname[0]}</Avatar>} // Displaying user avatar
+                     // avatar={post.Retweet.User && <Avatar>{post.Retweet.User.nickname[0]}</Avatar>} // Displaying user avatar
+                         avatar={
+                             <Link href={`/user/${post.Retweet.User.id}`} prefetch={false} passHref>
+                                 <Avatar src={post.Retweet.User.avatar}>{post.Retweet.User.nickname[0]}</Avatar>
+                             </Link>
+                         }
                      title={post.Retweet.User && post.Retweet.User.nickname} // Displaying user nickname
                      description={<PostCardContent postData={post.Retweet.content}/> } // Displaying post content
                  />
@@ -122,7 +128,12 @@ const PostCard = ({ post }) => {
                  )
              : (
                  <Card.Meta
-                     avatar={post.User && <Avatar>{post.User.nickname[0]}</Avatar>} // Displaying user avatar
+                     // avatar={post.User && <Avatar>{post.User.nickname[0]}</Avatar>} // Displaying user avatar
+                     avatar={
+                         <Link href={`/user/${post.User.id}`} prefetch={false} passHref>
+                             <Avatar src={post.User.avatar}>{post.User.nickname[0]}</Avatar>
+                         </Link>
+                     }
                      title={post.User && post.User.nickname} // Displaying user nickname
                      description={<PostCardContent postData={post.content}/> } // Displaying post content
                  />
@@ -142,7 +153,11 @@ const PostCard = ({ post }) => {
                          {/*<li></li> -> <List.Item></List.Item>*/}
                          <List.Item.Meta //< Comment />-> <List.Item.Meta />
                              title={item.User?.nickname} //author->title
-                             avatar={<Avatar>{item.User?.nickname[0]}</Avatar>}
+                             avatar={
+                                 <Link href={`/user/${post.User.id}`} prefetch={false} passHref>
+                                     <Avatar src={post.User.avatar}>{post.User.nickname[0]}</Avatar>
+                                 </Link>
+                             }
                              description={item.content} //content->description
                          />
                          {/*<List.Item.Meta*/}

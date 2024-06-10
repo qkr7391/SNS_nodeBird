@@ -42,12 +42,11 @@ const User = () => {
             {userInfo && (
                 <Head>
                     <title>
-                        {userInfo.nickname}
-                        님의 글
+                        {userInfo.nickname}'s post
                     </title>
-                    <meta name="description" content={`${userInfo.nickname}님의 게시글`} />
-                    <meta property="og:title" content={`${userInfo.nickname}님의 게시글`} />
-                    <meta property="og:description" content={`${userInfo.nickname}님의 게시글`} />
+                    <meta name="description" content={`${userInfo.nickname}'s post'`} />
+                    <meta property="og:title" content={`${userInfo.nickname}'s post'`} />
+                    <meta property="og:description" content={`${userInfo.nickname}'s post'`} />
                     <meta property="og:image" content="https://nodebird.com/favicon.ico" />
                     <meta property="og:url" content={`https://nodebird.com/user/${id}`} />
                 </Head>
@@ -58,17 +57,17 @@ const User = () => {
                         style={{ marginBottom: 20 }}
                         actions={[
                             <div key="twit">
-                                짹짹
+                                twit
                                 <br />
                                 {userInfo.Posts}
                             </div>,
                             <div key="following">
-                                팔로잉
+                                following
                                 <br />
                                 {userInfo.Followings}
                             </div>,
                             <div key="follower">
-                                팔로워
+                                follower
                                 <br />
                                 {userInfo.Followers}
                             </div>,

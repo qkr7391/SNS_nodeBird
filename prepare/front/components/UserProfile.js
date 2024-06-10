@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { useDispatch, useSelector } from "react-redux";
 
 import { LOG_OUT_REQUEST } from '../reducers/user'
+import Link from "next/link";
 
 const ButtonWrapper = styled.div`
  margin-top: 20px;
@@ -30,14 +31,22 @@ const UserProfile = () => {
 
         <CardWrapper
             actions={[
-                self.Posts && <div key="twit">Twit<br/>{self.Posts.length}</div>,
-                self.Followings && <div key="followings">Followings<br/>{self.Followings.length}</div>,
-                self.Followers && <div key="followers">Followers<br/>{self.Followers.length}</div>
+                self.Posts && <div key="twit"><Link href={`/user/${self.id}`}>Twit<br/>{self.Posts.length}</Link></div>,
+                // self.Posts && <div key="twit">Twit<br/>{self.Posts.length}</div>,
+                self.Followings && <div key="followings"><Link href={'/profile'}>Followings<br/>{self.Followings.length}</Link></div>,
+                // self.Followings && <div key="followings">Followings<br/>{self.Followings.length}</div>,
+                self.Followers && <div key="followers"><Link href={'/profile'}>Followers<br/>{self.Followers.length}</Link></div>
+                // self.Followers && <div key="followers">Followers<br/>{self.Followers.length}</div>
             ]}
         >
 
            <Card.Meta
-               avatar={<Avatar>{self.nickname}</Avatar>}
+               // avatar={<Avatar>{self.nickname}</Avatar>}
+               avatar={
+                   <Link href={`/user/${self.id}`} prefetch={false} passHref>
+                       <Avatar src={self.avatar}>{self.nickname[0]}</Avatar>
+                   </Link>
+               }
                title={self.nickname}
                />
 

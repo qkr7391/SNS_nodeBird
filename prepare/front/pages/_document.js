@@ -24,6 +24,7 @@ export default class MyDocument extends Document {
 
         } catch (error) {
             console.error(error);
+            return { html: '' }; // Return an empty object
         } finally {
             sheet.seal();
         }

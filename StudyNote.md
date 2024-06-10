@@ -6472,6 +6472,77 @@ router.get('/followings', isLoggedIn, async (req, res, next) => {
 }
 ```
 
+---
+## Day 69 - Search Hashtag
+
+- Refining the ability to list only posts with a hashtag in the search bar
+
+[AppLayout.js]
+```javascript
+
+import { Menu, Input, Row, Col } from 'antd';
+import Router from "next/router";
+const { Search } = Input; // Import the Search component from Ant Design
+
+import useInput from "../hooks/useinput";
+
+const AppLayout = ({children}) =>{
+    const [searchInput, onChangeSearchInput] = useInput('');
+   
+    const onSearch = useCallback(() => {
+        Router.push(`/hashtag/${searchInput}`);
+    }, [searchInput]);
+
+    return(
+        <div>
+            <Global />
+            <Menu mode="horizontal">
+                <Menu.Item>
+                    <Search
+                        enterButton
+                        value={searchInput}
+                        onChange={onChangeSearchInput}
+                        onSearch={onSearch}
+                    />
+                </Menu.Item>
+            </Menu>
+        </div>
+    );}
+
+AppLayout.propTypes = {
+children: PropTypes.node.isRequired,
+};
+
+export default AppLayout;
+```
+
+-  Clicking an avatar will display a collection of posts by that author
+
+[PostCard.js]
+```javascript
+
+avatar={
+<Link href={`/user/${post.Retweet.User.id}`} prefetch={false} passHref>
+    <Avatar src={post.Retweet.User.avatar}>{post.Retweet.User.nickname[0]}</Avatar>
+</Link>
+}
+
+avatar={
+<Link href={`/user/${post.User.id}`} prefetch={false} passHref>
+    <Avatar src={post.User.avatar}>{post.User.nickname[0]}</Avatar>
+</Link>
+}
+
+avatar={
+<Link href={`/user/${post.User.id}`} prefetch={false} passHref>
+    <Avatar src={post.User.avatar}>{post.User.nickname[0]}</Avatar>
+</Link>
+}
+```
+
+
+
+
 
 
 
