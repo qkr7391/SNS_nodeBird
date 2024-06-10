@@ -6346,3 +6346,132 @@ export default User;
 * BUT, Unless you have a finite number of posts, this is not ideal as it will limit the number of passes you can have.
 * It is not recommended for use when the number of passes is small enough to justify making the passes HTML.
 
+---
+## Day 68 - Using swr
+
+There are too many reducers, actions ...
+SO, Let's make things a little simpler by using a library that can do simple things like load requests.
+
+1. npm i swr
+- SWR (Stale-While-Revalidate) is a React Hooks library developed by Vercel for data fetching. It provides an efficient and powerful way to fetch data, cache it, and keep it up-to-date in your applications. SWR aims to make data fetching declarative and easier, while optimizing the user experience by balancing speed and data consistency.
+
+2. [pages/profile.js]
+```javascript
+import useSWR from 'swr';
+const fetcher = (url) => axios.get(url, { withCredentials: true }).then((result) => result.data);
+
+const Profile = () => {
+    ...
+    const { data: followersData, error: followerError } = useSWR(`http://localhost:3065/user/followers`, fetcher);
+    const { data: followingsData, error: followingError } = useSWR(`http://localhost:3065/user/followings`, fetcher);
+
+    // useEffect(() => {
+    // 	dispatch({
+    // 		type: LOAD_FOLLOWERS_REQUEST,
+    // 	});
+    // 	dispatch({
+    // 		type: LOAD_FOLLOWINGS_REQUEST,
+    // 	});
+    // }, []);
+
+    useEffect(() => {
+        if (!(self && self.id)) {
+            router.push('/');
+        }
+    }, [self, router]);
+
+    if (followerError || followingError) {
+        console.error(followerError || followingError);
+        return 'Error loading following/followers.';
+    }
+
+}
+
+<AppLayout>
+    <NicknameEditForm />
+    <FollowList header="following" data={ followingsData } />
+    <FollowList header="follower" data={ followersData } />
+</AppLayout>
+
+```
+
+3. [routes/user.js]
+```javascript
+router.get('/followers', isLoggedIn, async (req, res, next) => {
+...
+    const followers = await user.getFollowers({
+        limit: 3,
+    });
+...
+}
+
+router.get('/followings', isLoggedIn, async (req, res, next) => {
+...
+    const followings = await user.getFollowings({
+        limit: 3,
+    });
+...
+}
+```
+
+Load multiples of 3 via the 'More' button
+
+1. [pages/profile.js]
+```javascript
+	const [followersLimit, setFollowersLimit] = useState(3);
+const [followingsLimit, setFollowingsLimit] = useState(3);
+
+const { data: followersData, error: followerError } = useSWR(`http://localhost:3065/user/followers?limit=${followersLimit}`, fetcher);
+const { data: followingsData, error: followingError } = useSWR(`http://localhost:3065/user/followings?limit=${followingsLimit}`, fetcher);
+
+
+const loadMoreFollowings = useCallback(() => {
+    setFollowingsLimit((prev) => prev + 3);
+}, []);
+
+const loadMoreFollowers = useCallback(() => {
+    setFollowersLimit((prev) => prev + 3);
+}, []);
+
+```
+
+2. [components/FollowList.js]
+```javascript
+const FollowList = ({ header, data, onClickMore, loading }) => {
+
+    loadMore={
+    <div style={{ textAlign: "center", margin: "10px 0" }}>
+        <Button onClick={onClickMore} loading={loading}>more</Button>
+    </div>
+}
+
+    FollowList.propTypes = {
+        header: PropTypes.string.isRequired,
+        data: PropTypes.array.isRequired,
+        onClickMore: PropTypes.func.isRequired,
+        loading: PropTypes.bool.isRequired,
+    };
+```
+
+3. [routes/user.js]
+```javascript
+router.get('/followers', isLoggedIn, async (req, res, next) => {
+...
+    const followers = await user.getFollowers({
+        limit: parseInt(req.query.limit, 10),
+    });
+...
+}
+
+router.get('/followings', isLoggedIn, async (req, res, next) => {
+...
+    const followers = await user.getFollowers({
+        limit: parseInt(req.query.limit, 10),
+    });
+...
+}
+```
+
+
+
+

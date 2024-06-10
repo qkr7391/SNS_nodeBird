@@ -43,6 +43,46 @@ router.get('/', async (req, res, next) => {
     }
 });
 
+// Followers list
+router.get('/followers', isLoggedIn, async (req, res, next) => {
+    try {
+        const user = await User.findOne({
+            where: { id: req.user.id } // Find myself
+        });
+        if (!user) {
+            return res.status(404).send('User not found.');
+        }
+        const followers = await user.getFollowers({
+            limit: parseInt(req.query.limit, 10),
+        });
+        res.status(200).json(followers ); // Return followers as an object
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
+
+// Followings list
+router.get('/followings', isLoggedIn, async (req, res, next) => {
+    try {
+        const user = await User.findOne({
+            where: { id: req.user.id } // Find myself
+        });
+        if (!user) {
+            return res.status(404).send('User not found.');
+        }
+        const followings = await user.getFollowings({
+            limit: parseInt(req.query.limit, 10),
+        });
+
+        res.status(203).json(followings); // Return followings as an object
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
+
+
 //GET /user/1
 router.get('/:userId', async (req, res, next) => {
     try {
@@ -274,40 +314,6 @@ router.delete('/followers/:userId', isLoggedIn, async (req, res, next) => {
 });
 
 
-// Followers list
-router.get('/followers', isLoggedIn, async (req, res, next) => {
-    try {
-        const user = await User.findOne({
-            where: { id: req.user.id } // Find myself
-        });
-        if (!user) {
-            return res.status(404).send('User not found.');
-        }
-        const followers = await user.getFollowers();
-        res.status(200).json(followers ); // Return followers as an object
-    } catch (error) {
-        console.error(error);
-        next(error);
-    }
-});
-
-// Followings list
-router.get('/followings', isLoggedIn, async (req, res, next) => {
-    try {
-        const user = await User.findOne({
-            where: { id: req.user.id } // Find myself
-        });
-        if (!user) {
-            return res.status(404).send('User not found.');
-        }
-        const followings = await user.getFollowings();
-
-        res.status(203).json(followings); // Return followings as an object
-    } catch (error) {
-        console.error(error);
-        next(error);
-    }
-});
 
 
 
