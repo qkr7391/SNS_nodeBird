@@ -6572,10 +6572,147 @@ Route (pages)                              Size     First Load JS
 ...
 ```
 
+---
+## Day 71 - Custom webpack & bundle-analyzer
+
+* Custom Webpack?
+* Webpack is a powerful and popular module bundler for JavaScript applications. It takes modules with dependencies and generates static assets representing those modules. A custom Webpack configuration allows developers to tailor the build process to fit the specific needs of their project. This customization can include defining how different types of files are processed, optimizing performance, and more.
+
+1. [front/next.config.js]
+```javascript
+//1. Importing the Compression Plugin
+const CompressPlugin = require('compression-webpack-plugin');
+
+//2. Exporting the Webpack Configuration
+module.exports = {
+    webpack(config, { webpack }) {
+        //3. Checking the Environment
+        const prod = process.env.NODE_ENV === 'production';
+        //4. Creating a Plugins Array
+        const plugins = [...config.plugins];
+        //5. Adding the Compression Plugin in Production
+        if(prod) {
+            plugins.push(new CompressPlugin());
+        }
+        //6. Returning the Modified Configuration
+        return {
+            ...config,
+            mode: prod ? 'production' : 'development',
+            devtool: prod ? 'hidden-source-map' : 'eval',
+            plugins,
+
+        };
+    },
+};
+```
+
+1. The compression-webpack-plugin is a plugin that compresses assets using gzip compression. It helps reduce the size of JavaScript, CSS, and other assets, which can improve load times for users. 
+ 
+2. This module.exports syntax is used to export the configuration object.
+   The webpack function is a custom function that takes the default Webpack config object and a context object containing the webpack module.
+
+3. This line checks if the current environment is production by examining the NODE_ENV environment variable. It sets the prod constant to true if NODE_ENV is 'production'.
+
+4. This line creates a new array, plugins, by copying the existing plugins from the default Webpack configuration. The spread operator (...) is used to copy the elements.
+
+5. If the build is for production (prod is true), the compression-webpack-plugin is added to the plugins array. This ensures that assets are compressed when building for production.
+
+6. The modified Webpack configuration is returned. It includes:
+   - Mode: Set to 'production' if prod is true, otherwise 'development'. This controls built-in optimizations for each mode.
+   - Devtool: Set to 'hidden-source-map' in production for better debugging without exposing source maps to the public, and 'eval' in development for faster builds and more detailed source maps.
+   - Plugins: The updated plugins array, which includes the compression-webpack-plugin in production.
+
+* Purpose: This configuration customizes the Webpack build process to optimize it for production by compressing assets, setting the appropriate build mode, and configuring source maps.
+  
+* Production Build:
+  - Adds compression-webpack-plugin to compress assets.
+  - Sets mode to 'production' for optimizations.
+  - Uses hidden-source-map for source maps.
+  
+* Development Build:
+  - Sets mode to 'development' for better development experience.
+  - Uses eval for source maps to speed up build time and provide more detailed debugging information.
+
+*** The official Next documentation confirms that compression is now one of Next's configuration options, so the code is modified.
+```javascript
+//2. Exporting the Webpack Configuration
+module.exports = {
+    compress: true,
+    webpack(config, { webpack }) {
+        //3. Checking the Environment
+        const prod = process.env.NODE_ENV === 'production';
+        //4. Creating a Plugins Array
+        const plugins = [...config.plugins];
+        //6. Returning the Modified Configuration
+        return {
+            ...config,
+            mode: prod ? 'production' : 'development',
+            devtool: prod ? 'hidden-source-map' : 'eval',
+            plugins,
+
+        };
+    },
+};
+```
 
 
+* Bundle Analyzer: When you build your project with ANALYZE=true, the bundle analyzer will generate an interactive treemap visualization of your bundle content. This helps you understand the size of the various modules in your bundle and can assist in optimizing your build.
+* Environment Variable: By using the enabled property with an environment variable, you can easily toggle the bundle analyzer on or off without changing your code.
+
+```javascript
+//1. Import the Bundle Analyzer
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+    enabled: process.env.ANALYZE === 'true',
+});
+//Export the Configuration
+module.exports = withBundleAnalyzer({
+    // Your Next.js configuration options go here
+}
+```
+1. This line imports the @next/bundle-analyzer package and configures it.
+   The enabled property is set based on the environment variable ANALYZE. If process.env.ANALYZE is equal to 'true', the bundle analyzer will be enabled.
+2. This line exports the Next.js configuration enhanced with the bundle analyzer.
+   The withBundleAnalyzer function wraps your existing Next.js configuration, adding bundle analysis capabilities.
 
 
+install - npm install @next/bundle-analyzer
+Setting the Environment Variable - 
+"scripts": {
+"dev": "next -p 3060",
+"build": "ANALYZE=true NODE_ENV=production next build"
+},
 
 
+The reason the environment variable setting syntax works on Linux and macOS but not on Windows is due to differences in how these operating systems handle environment variables in the command line.
+
+Linux/macOS vs. Windows
+
+Linux/macOS: Use the VAR=value syntax before the command to set environment variables.
+```javascript
+"scripts": {
+"dev": "next -p 3060",
+"build": "ANALYZE=true NODE_ENV=production next build"
+}
+```
+
+
+Windows: The set command must be used to set environment variables.
+```javascript
+"scripts": {
+"dev": "next -p 3060",
+"build": "set ANALYZE=true&& set NODE_ENV=production&& next build"
+}
+```
+
+Notice that on Windows, the set command is used and && is used to separate commands.
+
+or
+
+1. npm i cross-env
+2. ```javascript
+"scripts": {
+"dev": "next -p 3060",
+"build": "cross-env ANALYZE=true&& set NODE_ENV=production&& next build"
+}
+```
 
